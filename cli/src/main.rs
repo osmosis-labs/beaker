@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use cw::CW;
+use protostar_cw::CW;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]

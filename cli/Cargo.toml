@@ -8,4 +8,4 @@ version = "0.1.0"
 [dependencies]
 anyhow = "1.0.57"
 clap = {version = "3.1.15", features = ["derive"]}
-cw = {path = "../cw"}
+protostar-cw = {path = "../cw"}
