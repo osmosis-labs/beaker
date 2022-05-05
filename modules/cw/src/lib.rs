@@ -1,24 +1,19 @@
-use anyhow::Context;
 use anyhow::Result;
-use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
 use clap::Subcommand;
-
-use std::env;
-use std::fs;
+use protostar_helper_template::Template;
 use std::path::Path;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 #[derive(Subcommand, Debug)]
 pub enum CW {
-    /// Generate CosmWasm contract from boilerplate
+    /// generate CosmWasm contract from boilerplate
     New {
-        /// Contract name
+        /// contract name
         name: String,
-        /// Path to store generated contract
+        /// path to store generated contract
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
-        /// Template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
+        /// template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
         #[clap(short, long)]
         version: Option<String>,
     },
@@ -36,39 +31,15 @@ impl CW {
     }
 
     fn new(name: &String, version: &Option<String>, target_dir: &Option<PathBuf>) -> Result<()> {
+        let repo = "InterWasm/cw-template";
         let version = version.as_ref().map(|v| v.as_str()).unwrap_or(&"main");
         let target_dir = target_dir
             .as_ref()
             .map(|p| p.as_path())
             .unwrap_or(&Path::new("contracts"));
 
-        let target_dir_display = target_dir.display();
-        let current_dir = env::current_dir().with_context(|| "Unable to get current directory.")?;
-        fs::create_dir_all(target_dir)
-            .with_context(|| format!("Unable to create directory: {target_dir_display}"))?;
-        env::set_current_dir(Path::new(target_dir)).with_context(|| {
-            format!("Unable to set current directory to {target_dir_display}`.")
-        })?;
-
-        let CargoGen::Generate(args) = CargoGen::from_iter(
-            vec![
-                "cargo",
-                "generate",
-                "InterWasm/cw-template", // TODO: extract to config
-                "--branch",
-                version,
-                "--name",
-                name,
-            ]
-            .iter(),
-        );
-
-        cargo_generate(args)
-        .with_context(|| format!("Unable to generate contract `{name}` with template branch `{version}` to `{target_dir_display}`."))?;
-
-        env::set_current_dir(current_dir.as_path()).with_context(|| {
-            format!("Unable to set current directory back to current directory after changed to `{target_dir_display}`.")
-        })
+        let cw_template = Template::new(name, repo, version, target_dir);
+        cw_template.generate()
     }
 }
 
