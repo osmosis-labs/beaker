@@ -4,14 +4,14 @@ use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
 use std::{env, fs, path::Path};
 use structopt::StructOpt;
 
+#[derive(Clone)]
 pub struct Template<'a> {
     /// name of the generated directory
     name: &'a str,
     /// git repo to be used as a template
     repo: &'a str,
-    /// git branch to be used as a template
+    subfolder: Option<&'a str>,
     branch: &'a str,
-    /// target directory as base for code generation
     target_dir: &'a Path,
 }
 
@@ -27,8 +27,17 @@ impl Template<'_> {
             name,
             branch,
             target_dir,
+            subfolder: None,
         }
     }
+
+    pub fn with_subfolder<'a>(self: &'a Self, subfolder: &'a str) -> Template<'a> {
+        Template {
+            subfolder: Some(subfolder),
+            ..self.to_owned()
+        }
+    }
+
     pub fn generate(self: &Self) -> Result<()> {
         let target_dir_display = self.target_dir.display();
         let current_dir = env::current_dir().with_context(|| "Unable to get current directory.")?;
@@ -38,18 +47,24 @@ impl Template<'_> {
             format!("Unable to set current directory to {target_dir_display}`.")
         })?;
 
-        let CargoGen::Generate(args) = CargoGen::from_iter(
-            vec![
-                "cargo",
-                "generate",
-                &self.repo,
-                "--branch",
-                &self.branch,
-                "--name",
-                &self.name,
-            ]
-            .iter(),
-        );
+        let argv = vec![
+            "cargo",
+            "generate",
+            "--name",
+            &self.name,
+            "--git",
+            &self.repo,
+            "--branch",
+            &self.branch,
+        ];
+
+        let argv = if let Some(subfolder) = self.subfolder {
+            [argv, vec!["--", subfolder]].concat()
+        } else {
+            argv
+        };
+
+        let CargoGen::Generate(args) = CargoGen::from_iter(argv.iter());
 
         let name = self.name;
         let repo = self.repo;
