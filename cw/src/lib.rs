@@ -12,56 +12,62 @@ use structopt::StructOpt;
 #[derive(Subcommand, Debug)]
 pub enum CW {
     /// Generate CosmWasm contract from boilerplate
-    Gen {
+    New {
         /// Contract name
         name: String,
+        /// Path to store generated contract
+        #[clap(short, long)]
+        target_dir: Option<PathBuf>,
         /// Template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
         #[clap(short, long)]
         version: Option<String>,
-        /// Path to store generated contract
-        #[clap(short, long)]
-        path: Option<PathBuf>,
     },
 }
 
 impl CW {
     pub fn execute(self: &Self) -> Result<()> {
         match self {
-            CW::Gen {
+            CW::New {
                 name,
+                target_dir,
                 version,
-                path,
-            } => CW::gen(name, version, path),
+            } => CW::new(name, version, target_dir),
         }
     }
 
-    fn gen(name: &String, version: &Option<String>, path: &Option<PathBuf>) -> Result<()> {
-        let default_path: &Path = Path::new("contracts"); // TODO: extract to config
-        let target_dir = path.as_ref().map(|p| p.as_path()).unwrap_or(&default_path);
-        let current_dir = env::current_dir()?;
+    fn new(name: &String, version: &Option<String>, target_dir: &Option<PathBuf>) -> Result<()> {
+        let version = version.as_ref().map(|v| v.as_str()).unwrap_or(&"main");
+        let target_dir = target_dir
+            .as_ref()
+            .map(|p| p.as_path())
+            .unwrap_or(&Path::new("contracts"));
 
-        fs::create_dir_all(target_dir)?;
-        env::set_current_dir(Path::new(target_dir))?;
+        let target_dir_display = target_dir.display();
+        let current_dir = env::current_dir().with_context(|| "Unable to get current directory.")?;
+        fs::create_dir_all(target_dir)
+            .with_context(|| format!("Unable to create directory: {target_dir_display}"))?;
+        env::set_current_dir(Path::new(target_dir)).with_context(|| {
+            format!("Unable to set current directory to {target_dir_display}`.")
+        })?;
 
         let CargoGen::Generate(args) = CargoGen::from_iter(
             vec![
                 "cargo",
                 "generate",
-                "--git",
-                "https://github.com/CosmWasm/cw-template.git", // TODO: extract to config
+                "InterWasm/cw-template", // TODO: extract to config
                 "--branch",
-                version.as_ref().map(|v| v.as_str()).unwrap_or(&"main"),
+                version,
                 "--name",
                 name,
             ]
             .iter(),
         );
 
-        cargo_generate(args)?;
+        cargo_generate(args)
+        .with_context(|| format!("Unable to generate contract `{name}` with template branch `{version}` to `{target_dir_display}`."))?;
 
-        let target_dir_display = target_dir.display();
         env::set_current_dir(current_dir.as_path()).with_context(|| {
-            format!("Could not change directory back to current directory after changed to `{target_dir_display}`")
+            format!("Unable to set current directory back to current directory after changed to `{target_dir_display}`.")
         })
     }
 }
@@ -87,11 +93,11 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::gen(&"counter-1".to_string(), &None, &None).unwrap();
+        CW::new(&"counter-1".to_string(), &None, &None).unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
 
-        CW::gen(&"counter-2".to_string(), &None, &None).unwrap();
+        CW::new(&"counter-2".to_string(), &None, &None).unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
 
@@ -110,12 +116,12 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::gen(&"counter-1".to_string(), &Some("0.16".to_string()), &None).unwrap();
+        CW::new(&"counter-1".to_string(), &Some("0.16".to_string()), &None).unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
-        CW::gen(&"counter-2".to_string(), &Some("0.16".to_string()), &None).unwrap();
+        CW::new(&"counter-2".to_string(), &Some("0.16".to_string()), &None).unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-2/Cargo.toml"), "0.16");
@@ -135,7 +141,7 @@ mod tests {
         temp.child("custom-path/counter-2")
             .assert(predicate::path::missing());
 
-        CW::gen(
+        CW::new(
             &"counter-1".to_string(),
             &None,
             &Some(PathBuf::from_str("custom-path").unwrap()),
@@ -144,7 +150,7 @@ mod tests {
         temp.child("custom-path/counter-1")
             .assert(predicate::path::exists());
 
-        CW::gen(
+        CW::new(
             &"counter-2".to_string(),
             &None,
             &Some(PathBuf::from_str("custom-path").unwrap()),

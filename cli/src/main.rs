@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use protostar_cw::CW;
@@ -6,6 +8,7 @@ use protostar_cw::CW;
 #[clap(author, version, about, long_about = None)]
 #[clap(propagate_version = true)]
 struct Cli {
+    config: Option<PathBuf>,
     #[clap(subcommand)]
     command: Commands,
 }
