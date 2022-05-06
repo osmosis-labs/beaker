@@ -4,16 +4,16 @@ use protostar_helper_template::Template;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub struct Workspace {
+pub struct Project {
     repo: String,
     subfolder: String,
 }
 
-impl Default for Workspace {
+impl Default for Project {
     fn default() -> Self {
         Self {
             repo: "iboss-ptk/protostar-sdk".to_string(),
-            subfolder: "templates/workspace".to_string(),
+            subfolder: "templates/project".to_string(),
         }
     }
 }
@@ -53,9 +53,9 @@ impl Cmd {
     }
 }
 
-impl Workspace {
+impl Project {
     pub fn new(repo: String, subfolder: String) -> Self {
-        Workspace { repo, subfolder }
+        Project { repo, subfolder }
     }
     pub fn execute(self: &Self, cmd: Cmd) -> Result<()> {
         match cmd {
@@ -78,14 +78,14 @@ mod tests {
 
     #[test]
     #[serial]
-    fn generate_workspace_with_default_path() {
+    fn generate_project_with_default_path() {
         let temp = assert_fs::TempDir::new().unwrap();
         env::set_current_dir(temp.to_path_buf()).unwrap();
 
         temp.child("cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        Workspace::default()
+        Project::default()
             .execute(Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: None,
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn generate_workspace_with_custom_path() {
+    fn generate_project_with_custom_path() {
         let temp = assert_fs::TempDir::new().unwrap();
         env::set_current_dir(temp.to_path_buf()).unwrap();
 
@@ -110,7 +110,7 @@ mod tests {
         temp.child("custom-path/cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        Workspace::default()
+        Project::default()
             .execute(Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
