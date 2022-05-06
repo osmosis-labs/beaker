@@ -2,10 +2,11 @@ use anyhow::Result;
 use clap::Subcommand;
 use protostar_helper_template::Template;
 use serde::Deserialize;
+use serde::Serialize;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct CW {
     pub contract_dir: String,
     pub template_repo: String,

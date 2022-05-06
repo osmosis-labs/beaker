@@ -2,10 +2,11 @@ use anyhow::Result;
 use clap::Subcommand;
 use protostar_helper_template::Template;
 use serde::Deserialize;
+use serde::Serialize;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Project {
     // TODO: add config file name
     pub repo: String,

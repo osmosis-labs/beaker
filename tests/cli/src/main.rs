@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 use config::Config;
 use protostar_cw::CW;
 use protostar_project::Project;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -30,7 +30,7 @@ pub enum Commands {
     },
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct App {
     cw: CW,
     project: Project,
@@ -38,13 +38,8 @@ pub struct App {
 
 impl App {
     pub fn with_config(file_name: &str) -> Result<App> {
-        let conf = Config::builder();
-
-        let conf = conf
-            .set_default("project.repo", Self::default().project.repo)?
-            .set_default("project.subfolder", Self::default().project.subfolder)?
-            .set_default("cw.contract_dir", Self::default().cw.contract_dir)?
-            .set_default("cw.template_repo", Self::default().cw.template_repo)?
+        let conf = Config::builder()
+            .add_source(Config::try_from(&Self::default())?)
             .add_source(config::File::with_name(file_name))
             .build()?;
 
