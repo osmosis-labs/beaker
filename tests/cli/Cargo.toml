@@ -8,4 +8,12 @@ version = "0.1.0"
 [dependencies]
 anyhow = "1.0.57"
 clap = {version = "3.1.15", features = ["derive"]}
+config = "0.13.1"
 protostar-cw = {path = "../../modules/cw"}
+protostar-project = {path = "../../modules/project"}
+serde = "1.0.137"
+
+[dev_dependencies]
+assert_fs = "1.0.7"
+predicates = "2.1.1"
+serial_test = "0.6.0"

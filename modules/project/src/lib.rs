@@ -1,12 +1,15 @@
 use anyhow::Result;
 use clap::Subcommand;
 use protostar_helper_template::Template;
+use serde::Deserialize;
 use std::path::Path;
 use std::path::PathBuf;
 
+#[derive(Deserialize)]
 pub struct Project {
-    repo: String,
-    subfolder: String,
+    // TODO: add config file name
+    pub repo: String,
+    pub subfolder: String,
 }
 
 impl Default for Project {
@@ -57,7 +60,7 @@ impl Project {
     pub fn new(repo: String, subfolder: String) -> Self {
         Project { repo, subfolder }
     }
-    pub fn execute(self: &Self, cmd: Cmd) -> Result<()> {
+    pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
         match cmd {
             Cmd::New {
                 name,
@@ -86,7 +89,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         Project::default()
-            .execute(Cmd::New {
+            .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: None,
                 version: None,
@@ -111,7 +114,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         Project::default()
-            .execute(Cmd::New {
+            .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
                 version: None,

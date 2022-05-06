@@ -1,11 +1,27 @@
 use anyhow::Result;
 use clap::Subcommand;
 use protostar_helper_template::Template;
+use serde::Deserialize;
 use std::path::Path;
 use std::path::PathBuf;
 
+#[derive(Deserialize)]
+pub struct CW {
+    pub contract_dir: String,
+    pub template_repo: String,
+}
+
+impl Default for CW {
+    fn default() -> Self {
+        Self {
+            contract_dir: "contracts".to_string(),
+            template_repo: "InterWasm/cw-template".to_string(),
+        }
+    }
+}
+
 #[derive(Subcommand, Debug)]
-pub enum CW {
+pub enum Cmd {
     /// generate CosmWasm contract from boilerplate
     New {
         /// contract name
@@ -20,23 +36,28 @@ pub enum CW {
 }
 
 impl CW {
-    pub fn execute(self: &Self) -> Result<()> {
-        match self {
-            CW::New {
+    pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
+        match cmd {
+            Cmd::New {
                 name,
                 target_dir,
                 version,
-            } => CW::new(name, version, target_dir),
+            } => self.new(name, version, target_dir),
         }
     }
 
-    fn new(name: &String, version: &Option<String>, target_dir: &Option<PathBuf>) -> Result<()> {
-        let repo = "InterWasm/cw-template";
+    fn new(
+        self: &Self,
+        name: &String,
+        version: &Option<String>,
+        target_dir: &Option<PathBuf>,
+    ) -> Result<()> {
+        let repo = self.template_repo.as_str();
         let version = version.as_ref().map(|v| v.as_str()).unwrap_or(&"main");
         let target_dir = target_dir
             .as_ref()
             .map(|p| p.as_path())
-            .unwrap_or(&Path::new("contracts"));
+            .unwrap_or(&Path::new(self.contract_dir.as_str()));
 
         let cw_template = Template::new(name, repo, version, target_dir);
         cw_template.generate()
@@ -64,11 +85,15 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::new(&"counter-1".to_string(), &None, &None).unwrap();
+        CW::default()
+            .new(&"counter-1".to_string(), &None, &None)
+            .unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
 
-        CW::new(&"counter-2".to_string(), &None, &None).unwrap();
+        CW::default()
+            .new(&"counter-2".to_string(), &None, &None)
+            .unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
 
@@ -87,12 +112,16 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::new(&"counter-1".to_string(), &Some("0.16".to_string()), &None).unwrap();
+        CW::default()
+            .new(&"counter-1".to_string(), &Some("0.16".to_string()), &None)
+            .unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
-        CW::new(&"counter-2".to_string(), &Some("0.16".to_string()), &None).unwrap();
+        CW::default()
+            .new(&"counter-2".to_string(), &Some("0.16".to_string()), &None)
+            .unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-2/Cargo.toml"), "0.16");
@@ -112,21 +141,23 @@ mod tests {
         temp.child("custom-path/counter-2")
             .assert(predicate::path::missing());
 
-        CW::new(
-            &"counter-1".to_string(),
-            &None,
-            &Some(PathBuf::from_str("custom-path").unwrap()),
-        )
-        .unwrap();
+        CW::default()
+            .new(
+                &"counter-1".to_string(),
+                &None,
+                &Some(PathBuf::from_str("custom-path").unwrap()),
+            )
+            .unwrap();
         temp.child("custom-path/counter-1")
             .assert(predicate::path::exists());
 
-        CW::new(
-            &"counter-2".to_string(),
-            &None,
-            &Some(PathBuf::from_str("custom-path").unwrap()),
-        )
-        .unwrap();
+        CW::default()
+            .new(
+                &"counter-2".to_string(),
+                &None,
+                &Some(PathBuf::from_str("custom-path").unwrap()),
+            )
+            .unwrap();
         temp.child("custom-path/counter-2")
             .assert(predicate::path::exists());
 
