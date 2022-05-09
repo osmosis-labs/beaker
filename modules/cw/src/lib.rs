@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Subcommand;
+use derive_new::new;
 use protostar_core::Module;
 use protostar_helper_template::Template;
 use serde::Deserialize;
@@ -8,12 +9,12 @@ use serde::Serialize;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-pub struct CW {
+pub struct CWConfig {
     pub contract_dir: String,
     pub template_repo: String,
 }
 
-impl Default for CW {
+impl Default for CWConfig {
     fn default() -> Self {
         Self {
             contract_dir: "contracts".to_string(),
@@ -23,7 +24,7 @@ impl Default for CW {
 }
 
 #[derive(Subcommand, Debug)]
-pub enum Cmd {
+pub enum CWCmd {
     /// create new CosmWasm contract from boilerplate
     New {
         /// contract name
@@ -37,16 +38,19 @@ pub enum Cmd {
     },
 }
 
-impl CW {
-    fn new(
-        self: &Self,
+#[derive(new)]
+pub struct CWModule {}
+
+impl CWModule {
+    fn new_(
+        cfg: &CWConfig,
         name: &str,
         version: Option<String>,
         target_dir: Option<PathBuf>,
     ) -> Result<()> {
-        let repo = &self.template_repo;
+        let repo = &cfg.template_repo;
         let version = version.unwrap_or("main".to_string());
-        let target_dir = target_dir.unwrap_or(PathBuf::from(self.contract_dir.as_str()));
+        let target_dir = target_dir.unwrap_or(PathBuf::from(cfg.contract_dir.as_str()));
 
         let cw_template =
             Template::new(name.to_string(), repo.to_owned(), version, target_dir, None);
@@ -54,14 +58,14 @@ impl CW {
     }
 }
 
-impl Module<'_, Cmd, anyhow::Error> for CW {
-    fn execute(&self, cmd: &Cmd) -> Result<()> {
+impl Module<'_, CWConfig, CWCmd, anyhow::Error> for CWModule {
+    fn execute(&self, cfg: &CWConfig, cmd: &CWCmd) -> Result<()> {
         match cmd {
-            Cmd::New {
+            CWCmd::New {
                 name,
                 target_dir,
                 version,
-            } => self.new(&name, version.to_owned(), target_dir.to_owned()),
+            } => CWModule::new_(&cfg, name, version.to_owned(), target_dir.to_owned()),
         }
     }
 }
@@ -87,15 +91,12 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::default()
-            .new(&"counter-1".to_string(), None, None)
-            .unwrap();
+        let cfg = CWConfig::default();
+        CWModule::new_(&cfg, &"counter-1".to_string(), None, None).unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
 
-        CW::default()
-            .new(&"counter-2".to_string(), None, None)
-            .unwrap();
+        CWModule::new_(&cfg, &"counter-2".to_string(), None, None).unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
 
@@ -114,16 +115,25 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CW::default()
-            .new(&"counter-1".to_string(), Some("0.16".to_string()), None)
-            .unwrap();
+        let cfg = CWConfig::default();
+        CWModule::new_(
+            &cfg,
+            &"counter-1".to_string(),
+            Some("0.16".to_string()),
+            None,
+        )
+        .unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
-        CW::default()
-            .new(&"counter-2".to_string(), Some("0.16".to_string()), None)
-            .unwrap();
+        CWModule::new_(
+            &cfg,
+            &"counter-2".to_string(),
+            Some("0.16".to_string()),
+            None,
+        )
+        .unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-2/Cargo.toml"), "0.16");
@@ -143,23 +153,24 @@ mod tests {
         temp.child("custom-path/counter-2")
             .assert(predicate::path::missing());
 
-        CW::default()
-            .new(
-                &"counter-1".to_string(),
-                None,
-                Some(PathBuf::from_str("custom-path").unwrap()),
-            )
-            .unwrap();
+        let cfg = CWConfig::default();
+        CWModule::new_(
+            &cfg,
+            &"counter-1".to_string(),
+            None,
+            Some(PathBuf::from_str("custom-path").unwrap()),
+        )
+        .unwrap();
         temp.child("custom-path/counter-1")
             .assert(predicate::path::exists());
 
-        CW::default()
-            .new(
-                &"counter-2".to_string(),
-                None,
-                Some(PathBuf::from_str("custom-path").unwrap().to_owned()),
-            )
-            .unwrap();
+        CWModule::new_(
+            &cfg,
+            &"counter-2".to_string(),
+            None,
+            Some(PathBuf::from_str("custom-path").unwrap().to_owned()),
+        )
+        .unwrap();
         temp.child("custom-path/counter-2")
             .assert(predicate::path::exists());
 

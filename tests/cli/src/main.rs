@@ -4,8 +4,8 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
 use protostar_core::Module;
-use protostar_cw::CW;
-use protostar_workspace::Workspace;
+use protostar_cw::{CWConfig, CWModule};
+use protostar_workspace::{WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -27,44 +27,44 @@ pub enum Commands {
     /// Manipulating and interacting with CosmWasm contract
     CW {
         #[clap(subcommand)]
-        cmd: protostar_cw::Cmd,
+        cmd: protostar_cw::CWCmd,
     },
 }
 
 #[derive(Default, Serialize, Deserialize)]
-pub struct App {
-    cw: CW,
-    workspace: Workspace,
+pub struct AppConfig {
+    cw: CWConfig,
+    workspace: WorkspaceConfig,
 }
 
-impl App {
-    pub fn with_config(file_name: &str) -> Result<App> {
+impl AppConfig {
+    pub fn with_config(file_name: &str) -> Result<AppConfig> {
         let conf = Config::builder()
             .add_source(Config::try_from(&Self::default())?)
             .add_source(config::File::with_name(file_name))
             .build()?;
 
-        conf.try_deserialize::<App>()
+        conf.try_deserialize::<AppConfig>()
             .with_context(|| "Unable to deserilize configuration.")
     }
+}
 
-    pub fn execute(self: &Self, cmd: Commands) -> Result<()> {
-        match cmd {
-            Commands::CW { cmd } => self.cw.execute(&cmd),
-            Commands::Workspace { cmd } => self.workspace.execute(&cmd),
-        }
+pub fn execute(cfg: &AppConfig, cmd: &Commands) -> Result<()> {
+    match cmd {
+        Commands::CW { cmd } => CWModule::new().execute(&cfg.cw, &cmd),
+        Commands::Workspace { cmd } => WorkspaceModule::new().execute(&cfg.workspace, &cmd),
     }
 }
 
 fn main() -> Result<(), anyhow::Error> {
     let cli = Cli::parse();
 
-    let app = App {
-        cw: CW::default(),
-        workspace: Workspace::default(),
+    let app_cfg = AppConfig {
+        cw: CWConfig::default(),
+        workspace: WorkspaceConfig::default(),
     };
 
-    app.execute(cli.command)
+    execute(&app_cfg, &cli.command)
 }
 #[cfg(test)]
 mod tests {
@@ -81,15 +81,18 @@ mod tests {
 
         env::set_current_dir(temp.to_path_buf()).unwrap();
 
-        let app = App::default();
+        let app = AppConfig::default();
 
-        app.execute(Commands::Workspace {
-            cmd: protostar_workspace::WorkspaceCmd::New {
-                name: "dapp".to_string(),
-                target_dir: None,
-                branch: None,
+        execute(
+            &app,
+            &Commands::Workspace {
+                cmd: protostar_workspace::WorkspaceCmd::New {
+                    name: "dapp".to_string(),
+                    target_dir: None,
+                    branch: None,
+                },
             },
-        })
+        )
         .unwrap();
 
         let mut path = temp.to_path_buf();
@@ -103,15 +106,18 @@ contract_dir = "whatever""#;
         path.push(Path::new("Protostar.toml"));
         fs::write(path.as_path(), conf).unwrap();
 
-        let app = App::with_config("Protostar.toml").unwrap();
+        let app = AppConfig::with_config("Protostar.toml").unwrap();
 
-        app.execute(Commands::CW {
-            cmd: protostar_cw::Cmd::New {
-                name: "counter".to_string(),
-                target_dir: None,
-                version: None,
+        execute(
+            &app,
+            &Commands::CW {
+                cmd: protostar_cw::CWCmd::New {
+                    name: "counter".to_string(),
+                    target_dir: None,
+                    version: None,
+                },
             },
-        })
+        )
         .unwrap();
 
         temp.child("dapp/Protostar.toml")
