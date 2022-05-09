@@ -47,10 +47,10 @@ impl App {
             .with_context(|| "Unable to deserilize configuration.")
     }
 
-    pub fn execute(self: &Self, cmd: &Commands) -> Result<()> {
+    pub fn execute(self: &Self, cmd: Commands) -> Result<()> {
         match cmd {
             Commands::CW { cmd } => self.cw.execute(cmd),
-            Commands::Workspace { cmd } => self.workspace.execute(cmd),
+            Commands::Workspace { cmd } => self.workspace.execute(&cmd),
         }
     }
 }
@@ -63,7 +63,7 @@ fn main() -> Result<(), anyhow::Error> {
         workspace: Workspace::default(),
     };
 
-    app.execute(&cli.command)
+    app.execute(cli.command)
 }
 #[cfg(test)]
 mod tests {
@@ -82,11 +82,11 @@ mod tests {
 
         let app = App::default();
 
-        app.execute(&Commands::Workspace {
+        app.execute(Commands::Workspace {
             cmd: protostar_workspace::Cmd::New {
                 name: "dapp".to_string(),
                 target_dir: None,
-                version: None,
+                branch: None,
             },
         })
         .unwrap();
@@ -104,7 +104,7 @@ contract_dir = "whatever""#;
 
         let app = App::with_config("Protostar.toml").unwrap();
 
-        app.execute(&Commands::CW {
+        app.execute(Commands::CW {
             cmd: protostar_cw::Cmd::New {
                 name: "counter".to_string(),
                 target_dir: None,

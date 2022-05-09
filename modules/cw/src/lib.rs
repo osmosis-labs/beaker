@@ -3,7 +3,7 @@ use clap::Subcommand;
 use protostar_helper_template::Template;
 use serde::Deserialize;
 use serde::Serialize;
-use std::path::Path;
+
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
@@ -23,7 +23,7 @@ impl Default for CW {
 
 #[derive(Subcommand, Debug)]
 pub enum Cmd {
-    /// generate CosmWasm contract from boilerplate
+    /// create new CosmWasm contract from boilerplate
     New {
         /// contract name
         name: String,
@@ -37,30 +37,27 @@ pub enum Cmd {
 }
 
 impl CW {
-    pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
+    pub fn execute(self: &Self, cmd: Cmd) -> Result<()> {
         match cmd {
             Cmd::New {
                 name,
                 target_dir,
                 version,
-            } => self.new(name, version, target_dir),
+            } => self.new(&name, version, target_dir),
         }
     }
 
     fn new(
         self: &Self,
-        name: &String,
-        version: &Option<String>,
-        target_dir: &Option<PathBuf>,
+        name: &str,
+        version: Option<String>,
+        target_dir: Option<PathBuf>,
     ) -> Result<()> {
-        let repo = self.template_repo.as_str();
-        let version = version.as_ref().map(|v| v.as_str()).unwrap_or(&"main");
-        let target_dir = target_dir
-            .as_ref()
-            .map(|p| p.as_path())
-            .unwrap_or(&Path::new(self.contract_dir.as_str()));
+        let repo = &self.template_repo;
+        let version = version.unwrap_or("main".to_string());
+        let target_dir = target_dir.unwrap_or(PathBuf::from(self.contract_dir.as_str()));
 
-        let cw_template = Template::new(name, repo, version, target_dir);
+        let cw_template = Template::new(name.to_string(), repo.to_owned(), version, target_dir);
         cw_template.generate()
     }
 }
@@ -72,7 +69,7 @@ mod tests {
     use cargo_toml::{Dependency, DependencyDetail, Manifest};
     use predicates::prelude::*;
     use serial_test::serial;
-    use std::{env, str::FromStr};
+    use std::{env, path::Path, str::FromStr};
 
     #[test]
     #[serial]
@@ -87,13 +84,13 @@ mod tests {
             .assert(predicate::path::missing());
 
         CW::default()
-            .new(&"counter-1".to_string(), &None, &None)
+            .new(&"counter-1".to_string(), None, None)
             .unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
 
         CW::default()
-            .new(&"counter-2".to_string(), &None, &None)
+            .new(&"counter-2".to_string(), None, None)
             .unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
@@ -114,14 +111,14 @@ mod tests {
             .assert(predicate::path::missing());
 
         CW::default()
-            .new(&"counter-1".to_string(), &Some("0.16".to_string()), &None)
+            .new(&"counter-1".to_string(), Some("0.16".to_string()), None)
             .unwrap();
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
         CW::default()
-            .new(&"counter-2".to_string(), &Some("0.16".to_string()), &None)
+            .new(&"counter-2".to_string(), Some("0.16".to_string()), None)
             .unwrap();
         temp.child("contracts/counter-2")
             .assert(predicate::path::exists());
@@ -145,8 +142,8 @@ mod tests {
         CW::default()
             .new(
                 &"counter-1".to_string(),
-                &None,
-                &Some(PathBuf::from_str("custom-path").unwrap()),
+                None,
+                Some(PathBuf::from_str("custom-path").unwrap()),
             )
             .unwrap();
         temp.child("custom-path/counter-1")
@@ -155,8 +152,8 @@ mod tests {
         CW::default()
             .new(
                 &"counter-2".to_string(),
-                &None,
-                &Some(PathBuf::from_str("custom-path").unwrap()),
+                None,
+                Some(PathBuf::from_str("custom-path").unwrap().to_owned()),
             )
             .unwrap();
         temp.child("custom-path/counter-2")

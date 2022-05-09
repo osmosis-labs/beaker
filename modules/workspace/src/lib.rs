@@ -3,72 +3,94 @@ use clap::Subcommand;
 use protostar_helper_template::Template;
 use serde::Deserialize;
 use serde::Serialize;
-use std::path::Path;
+
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
 pub struct Workspace {
     // TODO: add config file name
-    pub repo: String,
-    pub subfolder: String,
+    template: Template,
 }
 
 impl Default for Workspace {
     fn default() -> Self {
         Self {
-            repo: "iboss-ptk/protostar-sdk".to_string(),
-            subfolder: "templates/project".to_string(),
+            template: Template::new(
+                "workspace-template".to_string(),
+                "iboss-ptk/protostar-sdk".to_string(),
+                "main".to_string(),
+                PathBuf::from("."),
+            )
+            .with_subfolder("templates/project"),
         }
     }
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Cmd {
-    /// generate workspace from boilerplate
+    /// create new workspace from boilerplate
     New {
         /// workspace name
         name: String,
         /// path to store generated workspace
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
-        /// template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
+        /// template's branch, using main if not specified
         #[clap(short, long)]
-        version: Option<String>,
+        branch: Option<String>,
     },
 }
 
-impl Cmd {
-    fn new(
-        name: &String,
-        repo: &str,
-        subfolder: &str,
-        version: &Option<String>,
-        target_dir: &Option<PathBuf>,
-    ) -> Result<()> {
-        let version = version.as_ref().map(|v| v.as_str()).unwrap_or(&"main");
-        let target_dir = target_dir
-            .as_ref()
-            .map(|p| p.as_path())
-            .unwrap_or(&Path::new("."));
-
-        Template::new(name, repo, version, target_dir)
-            .with_subfolder(subfolder)
-            .generate()
-    }
-}
-
 impl Workspace {
-    pub fn new(repo: String, subfolder: String) -> Self {
-        Workspace { repo, subfolder }
+    pub fn new(repo: &str, subfolder: &str) -> Self {
+        let w = Workspace::default();
+        let t = w.template;
+        Workspace {
+            template: Template::new(
+                t.name().to_string(),
+                repo.to_string(),
+                t.branch().to_string(),
+                t.target_dir().to_owned(),
+            )
+            .with_subfolder(&subfolder.clone()),
+        }
     }
     pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
         match cmd {
             Cmd::New {
                 name,
                 target_dir,
-                version,
-            } => Cmd::new(&name, &self.repo, &self.subfolder, &version, &target_dir),
+                branch,
+            } => self.new_workspace(&name, &branch, &target_dir),
         }
+    }
+
+    pub fn new_workspace(
+        &self,
+        name: &String,
+        branch: &Option<String>,
+        target_dir: &Option<PathBuf>,
+    ) -> Result<()> {
+        let branch = branch
+            .as_ref()
+            .map(|v| v.as_str())
+            .unwrap_or(&self.template.branch());
+        let target_dir = target_dir
+            .as_ref()
+            .unwrap_or(self.template.target_dir())
+            .to_owned();
+
+        let template = Template::new(
+            name.to_string(),
+            self.template.repo().to_string(),
+            branch.to_string(),
+            target_dir,
+        );
+        let template = match &self.template.subfolder() {
+            Some(subfolder) => template.with_subfolder(subfolder),
+            _ => template,
+        };
+        template.generate()
     }
 }
 
@@ -93,7 +115,7 @@ mod tests {
             .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: None,
-                version: None,
+                branch: None,
             })
             .unwrap();
 
@@ -118,7 +140,7 @@ mod tests {
             .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
-                version: None,
+                branch: None,
             })
             .unwrap();
 
