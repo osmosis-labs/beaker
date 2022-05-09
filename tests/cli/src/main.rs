@@ -19,7 +19,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Manipulating and interacting with Protostar project
+    /// Manipulating and interacting with the workspace
     Workspace {
         #[clap(subcommand)]
         cmd: protostar_workspace::WorkspaceCmd,

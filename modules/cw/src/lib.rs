@@ -31,7 +31,7 @@ pub enum Cmd {
         /// path to store generated contract
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
-        /// template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
+        /// template's version, using main branch if not specified
         #[clap(short, long)]
         version: Option<String>,
     },
