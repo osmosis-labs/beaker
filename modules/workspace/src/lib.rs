@@ -56,7 +56,7 @@ impl Workspace {
             .generate()
     }
 }
-impl Module<WorkspaceCmd, anyhow::Error> for Workspace {
+impl Module<'_, WorkspaceCmd, anyhow::Error> for Workspace {
     fn execute(self: &Self, cmd: &WorkspaceCmd) -> Result<()> {
         match cmd {
             WorkspaceCmd::New {

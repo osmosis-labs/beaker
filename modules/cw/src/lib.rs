@@ -54,7 +54,7 @@ impl CW {
     }
 }
 
-impl Module<Cmd, anyhow::Error> for CW {
+impl Module<'_, Cmd, anyhow::Error> for CW {
     fn execute(&self, cmd: &Cmd) -> Result<()> {
         match cmd {
             Cmd::New {
