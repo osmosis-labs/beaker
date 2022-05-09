@@ -1,14 +1,5 @@
-struct Workspace {}
-impl Workspace {
-    pub fn config() {}
-    pub fn new() {}
-}
+use clap::Subcommand;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
+pub trait Module<Cmd: Subcommand, Err> {
+    fn execute(self: &Self, cmd: &Cmd) -> Result<(), Err>;
 }

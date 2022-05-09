@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Subcommand;
+use protostar_core::Module;
 use protostar_helper_template::Template;
 use serde::Deserialize;
 use serde::Serialize;
@@ -37,16 +38,6 @@ pub enum Cmd {
 }
 
 impl CW {
-    pub fn execute(self: &Self, cmd: Cmd) -> Result<()> {
-        match cmd {
-            Cmd::New {
-                name,
-                target_dir,
-                version,
-            } => self.new(&name, version, target_dir),
-        }
-    }
-
     fn new(
         self: &Self,
         name: &str,
@@ -60,6 +51,18 @@ impl CW {
         let cw_template =
             Template::new(name.to_string(), repo.to_owned(), version, target_dir, None);
         cw_template.generate()
+    }
+}
+
+impl Module<Cmd, anyhow::Error> for CW {
+    fn execute(&self, cmd: &Cmd) -> Result<()> {
+        match cmd {
+            Cmd::New {
+                name,
+                target_dir,
+                version,
+            } => self.new(&name, version.to_owned(), target_dir.to_owned()),
+        }
     }
 }
 

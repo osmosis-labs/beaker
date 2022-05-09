@@ -9,6 +9,7 @@ version = "0.1.0"
 anyhow = "1.0.57"
 clap = {version = "3.1.15", features = ["derive"]}
 config = "0.13.1"
+protostar-core = {path = "../../core"}
 protostar-cw = {path = "../../modules/cw"}
 protostar-workspace = {path = "../../modules/workspace"}
 serde = "1.0.137"

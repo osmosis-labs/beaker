@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Subcommand;
+use protostar_core::Module;
 use protostar_helper_template::Template;
 use serde::Deserialize;
 use serde::Serialize;
@@ -41,26 +42,8 @@ pub enum WorkspaceCmd {
     },
 }
 
-pub trait Module<Cmd: Subcommand> {
-    fn execute(self: &Self, cmd: &Cmd) -> Result<()>;
-}
-
 impl Workspace {
-    pub fn new(repo: &str, subfolder: &str) -> Self {
-        let w = Workspace::default();
-        let t = w.template;
-        Workspace {
-            template: Template::new(
-                t.name().to_string(),
-                repo.to_string(),
-                t.branch().to_string(),
-                t.target_dir().to_owned(),
-                Some(subfolder.to_string()),
-            ),
-        }
-    }
-
-    pub fn new_workspace(
+    pub fn new(
         &self,
         name: &String,
         branch: &Option<String>,
@@ -73,14 +56,14 @@ impl Workspace {
             .generate()
     }
 }
-impl Module<WorkspaceCmd> for Workspace {
+impl Module<WorkspaceCmd, anyhow::Error> for Workspace {
     fn execute(self: &Self, cmd: &WorkspaceCmd) -> Result<()> {
         match cmd {
             WorkspaceCmd::New {
                 name,
                 target_dir,
                 branch,
-            } => self.new_workspace(&name, &branch, &target_dir),
+            } => self.new(&name, &branch, &target_dir),
         }
     }
 }

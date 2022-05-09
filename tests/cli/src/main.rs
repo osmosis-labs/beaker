@@ -3,8 +3,9 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
+use protostar_core::Module;
 use protostar_cw::CW;
-use protostar_workspace::{Module, Workspace};
+use protostar_workspace::Workspace;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -49,7 +50,7 @@ impl App {
 
     pub fn execute(self: &Self, cmd: Commands) -> Result<()> {
         match cmd {
-            Commands::CW { cmd } => self.cw.execute(cmd),
+            Commands::CW { cmd } => self.cw.execute(&cmd),
             Commands::Workspace { cmd } => self.workspace.execute(&cmd),
         }
     }
