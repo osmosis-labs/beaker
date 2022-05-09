@@ -7,13 +7,13 @@ use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-pub struct Project {
+pub struct Workspace {
     // TODO: add config file name
     pub repo: String,
     pub subfolder: String,
 }
 
-impl Default for Project {
+impl Default for Workspace {
     fn default() -> Self {
         Self {
             repo: "iboss-ptk/protostar-sdk".to_string(),
@@ -24,11 +24,11 @@ impl Default for Project {
 
 #[derive(Subcommand, Debug)]
 pub enum Cmd {
-    /// generate CosmWasm contract from boilerplate
+    /// generate workspace from boilerplate
     New {
-        /// contract name
+        /// workspace name
         name: String,
-        /// path to store generated contract
+        /// path to store generated workspace
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
         /// template's version, using latest version if not specified (all available versions can be found here: `https://github.com/InterWasm/cw-template/branches`)
@@ -57,9 +57,9 @@ impl Cmd {
     }
 }
 
-impl Project {
+impl Workspace {
     pub fn new(repo: String, subfolder: String) -> Self {
-        Project { repo, subfolder }
+        Workspace { repo, subfolder }
     }
     pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
         match cmd {
@@ -89,7 +89,7 @@ mod tests {
         temp.child("cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        Project::default()
+        Workspace::default()
             .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: None,
@@ -114,7 +114,7 @@ mod tests {
         temp.child("custom-path/cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        Project::default()
+        Workspace::default()
             .execute(&Cmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),

@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
 use protostar_cw::CW;
-use protostar_project::Project;
+use protostar_workspace::Workspace;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -19,9 +19,9 @@ struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     /// Manipulating and interacting with Protostar project
-    Project {
+    Workspace {
         #[clap(subcommand)]
-        cmd: protostar_project::Cmd,
+        cmd: protostar_workspace::Cmd,
     },
     /// Manipulating and interacting with CosmWasm contract
     CW {
@@ -33,7 +33,7 @@ pub enum Commands {
 #[derive(Default, Serialize, Deserialize)]
 pub struct App {
     cw: CW,
-    project: Project,
+    workspace: Workspace,
 }
 
 impl App {
@@ -50,7 +50,7 @@ impl App {
     pub fn execute(self: &Self, cmd: &Commands) -> Result<()> {
         match cmd {
             Commands::CW { cmd } => self.cw.execute(cmd),
-            Commands::Project { cmd } => self.project.execute(cmd),
+            Commands::Workspace { cmd } => self.workspace.execute(cmd),
         }
     }
 }
@@ -60,7 +60,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     let app = App {
         cw: CW::default(),
-        project: Project::default(),
+        workspace: Workspace::default(),
     };
 
     app.execute(&cli.command)
@@ -82,8 +82,8 @@ mod tests {
 
         let app = App::default();
 
-        app.execute(&Commands::Project {
-            cmd: protostar_project::Cmd::New {
+        app.execute(&Commands::Workspace {
+            cmd: protostar_workspace::Cmd::New {
                 name: "dapp".to_string(),
                 target_dir: None,
                 version: None,
