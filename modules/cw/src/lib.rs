@@ -57,7 +57,8 @@ impl CW {
         let version = version.unwrap_or("main".to_string());
         let target_dir = target_dir.unwrap_or(PathBuf::from(self.contract_dir.as_str()));
 
-        let cw_template = Template::new(name.to_string(), repo.to_owned(), version, target_dir);
+        let cw_template =
+            Template::new(name.to_string(), repo.to_owned(), version, target_dir, None);
         cw_template.generate()
     }
 }

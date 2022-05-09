@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
 use protostar_cw::CW;
-use protostar_workspace::Workspace;
+use protostar_workspace::{Module, Workspace};
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -21,7 +21,7 @@ pub enum Commands {
     /// Manipulating and interacting with Protostar project
     Workspace {
         #[clap(subcommand)]
-        cmd: protostar_workspace::Cmd,
+        cmd: protostar_workspace::WorkspaceCmd,
     },
     /// Manipulating and interacting with CosmWasm contract
     CW {
@@ -83,7 +83,7 @@ mod tests {
         let app = App::default();
 
         app.execute(Commands::Workspace {
-            cmd: protostar_workspace::Cmd::New {
+            cmd: protostar_workspace::WorkspaceCmd::New {
                 name: "dapp".to_string(),
                 target_dir: None,
                 branch: None,

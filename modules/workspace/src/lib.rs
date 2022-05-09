@@ -20,14 +20,14 @@ impl Default for Workspace {
                 "iboss-ptk/protostar-sdk".to_string(),
                 "main".to_string(),
                 PathBuf::from("."),
-            )
-            .with_subfolder("templates/project"),
+                Some("templates/project".to_string()),
+            ),
         }
     }
 }
 
 #[derive(Subcommand, Debug)]
-pub enum Cmd {
+pub enum WorkspaceCmd {
     /// create new workspace from boilerplate
     New {
         /// workspace name
@@ -41,6 +41,10 @@ pub enum Cmd {
     },
 }
 
+pub trait Module<Cmd: Subcommand> {
+    fn execute(self: &Self, cmd: &Cmd) -> Result<()>;
+}
+
 impl Workspace {
     pub fn new(repo: &str, subfolder: &str) -> Self {
         let w = Workspace::default();
@@ -51,17 +55,8 @@ impl Workspace {
                 repo.to_string(),
                 t.branch().to_string(),
                 t.target_dir().to_owned(),
-            )
-            .with_subfolder(&subfolder.clone()),
-        }
-    }
-    pub fn execute(self: &Self, cmd: &Cmd) -> Result<()> {
-        match cmd {
-            Cmd::New {
-                name,
-                target_dir,
-                branch,
-            } => self.new_workspace(&name, &branch, &target_dir),
+                Some(subfolder.to_string()),
+            ),
         }
     }
 
@@ -71,26 +66,22 @@ impl Workspace {
         branch: &Option<String>,
         target_dir: &Option<PathBuf>,
     ) -> Result<()> {
-        let branch = branch
-            .as_ref()
-            .map(|v| v.as_str())
-            .unwrap_or(&self.template.branch());
-        let target_dir = target_dir
-            .as_ref()
-            .unwrap_or(self.template.target_dir())
-            .to_owned();
-
-        let template = Template::new(
-            name.to_string(),
-            self.template.repo().to_string(),
-            branch.to_string(),
-            target_dir,
-        );
-        let template = match &self.template.subfolder() {
-            Some(subfolder) => template.with_subfolder(subfolder),
-            _ => template,
-        };
-        template.generate()
+        self.template
+            .with_name(Some(name.to_string()))
+            .with_branch(branch.to_owned())
+            .with_target_dir(target_dir.to_owned())
+            .generate()
+    }
+}
+impl Module<WorkspaceCmd> for Workspace {
+    fn execute(self: &Self, cmd: &WorkspaceCmd) -> Result<()> {
+        match cmd {
+            WorkspaceCmd::New {
+                name,
+                target_dir,
+                branch,
+            } => self.new_workspace(&name, &branch, &target_dir),
+        }
     }
 }
 
@@ -112,7 +103,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         Workspace::default()
-            .execute(&Cmd::New {
+            .execute(&WorkspaceCmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: None,
                 branch: None,
@@ -137,7 +128,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         Workspace::default()
-            .execute(&Cmd::New {
+            .execute(&WorkspaceCmd::New {
                 name: "cosmwasm-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
                 branch: None,

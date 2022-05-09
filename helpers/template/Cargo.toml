@@ -8,6 +8,7 @@ version = "0.1.0"
 [dependencies]
 anyhow = "1.0.57"
 cargo-generate = {version = "0.13.1", features = ["vendored-openssl"]}
+derive-new = "0.5.9"
 getset = "0.1.2"
 serde = "1.0.137"
 structopt = "0.3.26"

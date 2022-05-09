@@ -1,6 +1,7 @@
 use anyhow::Context;
 use anyhow::Result;
 use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
+use derive_new::new;
 use getset::Getters;
 use serde::Deserialize;
 use serde::Serialize;
@@ -8,7 +9,7 @@ use std::path::PathBuf;
 use std::{env, fs};
 use structopt::StructOpt;
 
-#[derive(Clone, Deserialize, Serialize, Getters)]
+#[derive(Clone, Deserialize, Serialize, Getters, new)]
 #[get = "pub"]
 pub struct Template {
     /// name of the generated directory
@@ -21,20 +22,22 @@ pub struct Template {
 }
 
 impl Template {
-    pub fn new(name: String, repo: String, branch: String, target_dir: PathBuf) -> Template {
+    pub fn with_name(&self, name: Option<String>) -> Template {
         Template {
-            repo,
-            name,
-            branch,
-            target_dir,
-            subfolder: None,
+            name: name.unwrap_or(self.name.clone()),
+            ..self.clone()
         }
     }
-
-    pub fn with_subfolder(self, subfolder: &str) -> Template {
+    pub fn with_branch(&self, branch: Option<String>) -> Template {
         Template {
-            subfolder: Some(subfolder.to_string()),
-            ..self
+            branch: branch.unwrap_or(self.branch.clone()),
+            ..self.clone()
+        }
+    }
+    pub fn with_target_dir(&self, target_dir: Option<PathBuf>) -> Template {
+        Template {
+            target_dir: target_dir.unwrap_or(self.target_dir.clone()),
+            ..self.clone()
         }
     }
 
