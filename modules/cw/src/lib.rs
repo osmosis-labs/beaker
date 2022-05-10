@@ -8,7 +8,7 @@ use serde::Serialize;
 
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CWConfig {
     pub contract_dir: String,
     pub template_repo: String,

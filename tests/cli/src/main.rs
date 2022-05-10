@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::{Context as ErrContext, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
-use protostar_core::Module;
+use protostar_core::{Context, Module};
 use protostar_cw::{CWConfig, CWModule};
 use protostar_workspace::{WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
@@ -49,6 +49,50 @@ impl AppConfig {
     }
 }
 
+// - module contains context
+// - context can materialize config
+// - execute consume context and config (or better yet, config is in context)
+// - fn context with default (for the case where you wanna custom config from code)
+
+// TODO:
+// [x] 1. Create context trait, impl in `core`
+// [x] 2. build root and config fn for the config type
+// [ ] 3. strip down cfg from execute function, use it from context instead, pass context to `Module::new`
+//   [ ] 3.1. Make Context generic for all modul:::: // Reconstruct Cfg as a wrapper struct for module specific one ..... (on this,)
+//     [ ] 3.1.1. Change module interface to support passing in CTX. make sure all the shits still works fine
+// [ ] 4. remove app config
+// [ ] 5. make workspace module update Protostar.toml to eg. `Membrane.toml` as per config
+
+struct AppContext;
+
+impl AppContext {
+    fn new() -> Self {
+        AppContext {}
+    }
+}
+
+impl Context<'_, AppConfig> for AppContext {}
+
+struct CWContext {}
+impl<'a> Context<'a, CWConfig> for CWContext {
+    fn config(&self) -> Result<CWConfig> {
+        #[derive(Default, Serialize, Deserialize)]
+        struct ConfigWrapper {
+            cw: CWConfig,
+        }
+
+        let conf = Config::builder().add_source(Config::try_from(&ConfigWrapper::default())?);
+        let conf = match self.config_file_path() {
+            Ok(path) => conf.add_source(config::File::from(path)),
+            _ => conf,
+        };
+        conf.build()?
+            .try_deserialize::<ConfigWrapper>()
+            .with_context(|| "Unable to deserilize configuration.")
+            .map(|w| w.cw)
+    }
+}
+
 pub fn execute(cfg: &AppConfig, cmd: &Commands) -> Result<()> {
     match cmd {
         Commands::CW { cmd } => CWModule::new().execute(&cfg.cw, &cmd),
@@ -57,30 +101,31 @@ pub fn execute(cfg: &AppConfig, cmd: &Commands) -> Result<()> {
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    let cli = Cli::parse();
+    let app_ctx = AppContext::new();
+    let app_cfg = app_ctx.config()?;
 
-    let app_cfg = AppConfig {
-        cw: CWConfig::default(),
-        workspace: WorkspaceConfig::default(),
-    };
+    let cli = Cli::parse();
 
     execute(&app_cfg, &cli.command)
 }
+
 #[cfg(test)]
 mod tests {
     use std::{env, fs, path::Path};
 
-    use assert_fs::{assert::PathAssert, fixture::PathChild};
+    use assert_fs::{assert::PathAssert, fixture::PathChild, TempDir};
     use predicates::prelude::predicate;
 
     use super::*;
 
+    fn setup() -> TempDir {
+        let temp = assert_fs::TempDir::new().unwrap();
+        env::set_current_dir(temp.to_path_buf()).unwrap();
+        temp
+    }
     #[test]
     fn test_configuration() {
-        let temp = assert_fs::TempDir::new().unwrap();
-
-        env::set_current_dir(temp.to_path_buf()).unwrap();
-
+        let temp = setup();
         let app = AppConfig::default();
 
         execute(

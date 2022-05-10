@@ -61,6 +61,20 @@ impl WorkspaceModule {
     }
 }
 impl Module<'_, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceModule {
+    // fn execute_(
+    //     self: &Self,
+    //     ctx: Box<dyn Context<'a, CWConfig>>,
+    //     cmd: &WorkspaceCmd,
+    // ) -> Result<()> {
+    //     let cfg = ctx.config()?;
+    //     match cmd {
+    //         WorkspaceCmd::New {
+    //             name,
+    //             target_dir,
+    //             branch,
+    //         } => WorkspaceModule::new_(&cfg, &name, &branch, &target_dir),
+    //     }
+    // }
     fn execute(self: &Self, cfg: &WorkspaceConfig, cmd: &WorkspaceCmd) -> Result<()> {
         match cmd {
             WorkspaceCmd::New {
