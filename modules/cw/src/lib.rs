@@ -26,14 +26,14 @@ impl Default for CWConfig {
 
 #[derive(Subcommand, Debug)]
 pub enum CWCmd {
-    /// create new CosmWasm contract from boilerplate
+    /// Create new CosmWasm contract from boilerplate
     New {
-        /// contract name
+        /// Contract name
         name: String,
-        /// path to store generated contract
+        /// Path to store generated contract
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
-        /// template's version, using main branch if not specified
+        /// Template's version, using main branch if not specified
         #[clap(short, long)]
         version: Option<String>,
     },

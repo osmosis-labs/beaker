@@ -32,14 +32,14 @@ impl Default for WorkspaceConfig {
 
 #[derive(Subcommand, Debug)]
 pub enum WorkspaceCmd {
-    /// create new workspace from boilerplate
+    /// Create new workspace from boilerplate
     New {
-        /// workspace name
+        /// Workspace name
         name: String,
-        /// path to store generated workspace
+        /// Path to store generated workspace
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
-        /// template's branch, using main if not specified
+        /// Template's branch, using main if not specified
         #[clap(short, long)]
         branch: Option<String>,
     },
