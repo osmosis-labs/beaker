@@ -53,6 +53,6 @@ where
         };
         conf.build()?
             .try_deserialize::<Cfg>()
-            .with_context(|| "Unable to deserilize configuration.")
+            .with_context(|| "Unable to deserialize configuration.")
     }
 }
