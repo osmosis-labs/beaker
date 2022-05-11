@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use anyhow::{Context as ErrContext, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
-use protostar_core::{Context, Module};
+use protostar_core::{context, Context, Module};
 use protostar_cw::{CWConfig, CWModule};
 use protostar_workspace::{WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
@@ -17,6 +17,8 @@ struct Cli {
     command: Commands,
 }
 
+// === APP DEFINITION ===
+// Could potentially move all this to macro
 #[derive(Subcommand)]
 pub enum Commands {
     /// Manipulating and interacting with the workspace
@@ -31,50 +33,10 @@ pub enum Commands {
     },
 }
 
-#[derive(Default, Serialize, Deserialize)]
-pub struct AppConfig {
-    cw: CWConfig,
-    workspace: WorkspaceConfig,
-}
-
-struct CWContext {}
-impl<'a> Context<'a, CWConfig> for CWContext {
-    fn config(&self) -> Result<CWConfig> {
-        #[derive(Default, Serialize, Deserialize)]
-        struct ConfigWrapper {
-            cw: CWConfig,
-        }
-
-        let conf = Config::builder().add_source(Config::try_from(&ConfigWrapper::default())?);
-        let conf = match self.config_file_path() {
-            Ok(path) => conf.add_source(config::File::from(path)),
-            _ => conf,
-        };
-        conf.build()?
-            .try_deserialize::<ConfigWrapper>()
-            .with_context(|| "Unable to deserilize configuration.")
-            .map(|w| w.cw)
-    }
-}
-struct WorkspaceContext {}
-impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {
-    fn config(&self) -> Result<WorkspaceConfig> {
-        #[derive(Default, Serialize, Deserialize)]
-        struct ConfigWrapper {
-            workspace: WorkspaceConfig,
-        }
-
-        let conf = Config::builder().add_source(Config::try_from(&ConfigWrapper::default())?);
-        let conf = match self.config_file_path() {
-            Ok(path) => conf.add_source(config::File::from(path)),
-            _ => conf,
-        };
-        conf.build()?
-            .try_deserialize::<ConfigWrapper>()
-            .with_context(|| "Unable to deserilize configuration.")
-            .map(|w| w.workspace)
-    }
-}
+context!(
+    CWContext, config = { cw: CWConfig };
+    WorkspaceContext, config = { workspace: WorkspaceConfig }
+);
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
@@ -82,6 +44,8 @@ pub fn execute(cmd: &Commands) -> Result<()> {
         Commands::Workspace { cmd } => WorkspaceModule::execute(WorkspaceContext {}, &cmd),
     }
 }
+
+// === END APP DEFINITION ===
 
 fn main() -> Result<(), anyhow::Error> {
     let cli = Cli::parse();
