@@ -2,7 +2,7 @@ use std::{env, path::PathBuf};
 
 use anyhow::{anyhow, Context as ErrContext, Result};
 use clap::Subcommand;
-use config::{builder::DefaultState, Config, ConfigBuilder};
+use config::Config;
 
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,7 @@ pub trait Module<'a, Config, Cmd: Subcommand, Err>
 where
     Config: Serialize + Deserialize<'a> + Default,
 {
-    // fn execute_<Ctx: Context<'a, Config>>(&self, ctx: Ctx, cmd: &Cmd) -> Result<(), Err>;
+    fn execute_<Ctx: Context<'a, Config>>(ctx: Ctx, cmd: &Cmd) -> Result<(), Err>;
     fn execute(&self, cfg: &Config, cmd: &Cmd) -> Result<(), Err>;
 }
 

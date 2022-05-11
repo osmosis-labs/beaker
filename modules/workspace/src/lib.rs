@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
+use protostar_core::Context;
 use protostar_core::Module;
 use protostar_helper_template::Template;
 use serde::Deserialize;
@@ -60,22 +61,22 @@ impl WorkspaceModule {
             .generate()
     }
 }
-impl Module<'_, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceModule {
-    // fn execute_(
-    //     self: &Self,
-    //     ctx: Box<dyn Context<'a, CWConfig>>,
-    //     cmd: &WorkspaceCmd,
-    // ) -> Result<()> {
-    //     let cfg = ctx.config()?;
-    //     match cmd {
-    //         WorkspaceCmd::New {
-    //             name,
-    //             target_dir,
-    //             branch,
-    //         } => WorkspaceModule::new_(&cfg, &name, &branch, &target_dir),
-    //     }
-    // }
+impl<'a> Module<'a, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceModule {
     fn execute(self: &Self, cfg: &WorkspaceConfig, cmd: &WorkspaceCmd) -> Result<()> {
+        match cmd {
+            WorkspaceCmd::New {
+                name,
+                target_dir,
+                branch,
+            } => WorkspaceModule::new_(&cfg, &name, &branch, &target_dir),
+        }
+    }
+
+    fn execute_<Ctx: Context<'a, WorkspaceConfig>>(
+        ctx: Ctx,
+        cmd: &WorkspaceCmd,
+    ) -> Result<(), anyhow::Error> {
+        let cfg = ctx.config()?;
         match cmd {
             WorkspaceCmd::New {
                 name,
@@ -94,6 +95,9 @@ mod tests {
     use serial_test::serial;
     use std::{env, str::FromStr};
 
+    struct WorkspaceContext {}
+    impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {}
+
     #[test]
     #[serial]
     fn generate_project_with_default_path() {
@@ -103,17 +107,15 @@ mod tests {
         temp.child("cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        let cfg = WorkspaceConfig::default();
-        WorkspaceModule::new()
-            .execute(
-                &cfg,
-                &WorkspaceCmd::New {
-                    name: "cosmwasm-dapp".to_string(),
-                    target_dir: None,
-                    branch: None,
-                },
-            )
-            .unwrap();
+        WorkspaceModule::execute_(
+            WorkspaceContext {},
+            &WorkspaceCmd::New {
+                name: "cosmwasm-dapp".to_string(),
+                target_dir: None,
+                branch: None,
+            },
+        )
+        .unwrap();
 
         temp.child("cosmwasm-dapp/Protostar.toml")
             .assert(predicate::path::exists());
@@ -132,17 +134,15 @@ mod tests {
         temp.child("custom-path/cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        let cfg = WorkspaceConfig::default();
-        WorkspaceModule::new()
-            .execute(
-                &cfg,
-                &WorkspaceCmd::New {
-                    name: "cosmwasm-dapp".to_string(),
-                    target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
-                    branch: None,
-                },
-            )
-            .unwrap();
+        WorkspaceModule::execute_(
+            WorkspaceContext {},
+            &WorkspaceCmd::New {
+                name: "cosmwasm-dapp".to_string(),
+                target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
+                branch: None,
+            },
+        )
+        .unwrap();
 
         temp.child("custom-path/cosmwasm-dapp/Protostar.toml")
             .assert(predicate::path::exists());

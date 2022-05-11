@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
+use protostar_core::Context;
 use protostar_core::Module;
 use protostar_helper_template::Template;
 use serde::Deserialize;
@@ -8,7 +9,7 @@ use serde::Serialize;
 
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct CWConfig {
     pub contract_dir: String,
     pub template_repo: String,
@@ -58,8 +59,19 @@ impl CWModule {
     }
 }
 
-impl Module<'_, CWConfig, CWCmd, anyhow::Error> for CWModule {
+impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
     fn execute(&self, cfg: &CWConfig, cmd: &CWCmd) -> Result<()> {
+        match cmd {
+            CWCmd::New {
+                name,
+                target_dir,
+                version,
+            } => CWModule::new_(&cfg, name, version.to_owned(), target_dir.to_owned()),
+        }
+    }
+
+    fn execute_<Ctx: Context<'a, CWConfig>>(ctx: Ctx, cmd: &CWCmd) -> Result<(), anyhow::Error> {
+        let cfg = ctx.config()?;
         match cmd {
             CWCmd::New {
                 name,

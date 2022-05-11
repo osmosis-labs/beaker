@@ -37,42 +37,6 @@ pub struct AppConfig {
     workspace: WorkspaceConfig,
 }
 
-impl AppConfig {
-    pub fn with_config(file_name: &str) -> Result<AppConfig> {
-        let conf = Config::builder()
-            .add_source(Config::try_from(&Self::default())?)
-            .add_source(config::File::with_name(file_name))
-            .build()?;
-
-        conf.try_deserialize::<AppConfig>()
-            .with_context(|| "Unable to deserilize configuration.")
-    }
-}
-
-// - module contains context
-// - context can materialize config
-// - execute consume context and config (or better yet, config is in context)
-// - fn context with default (for the case where you wanna custom config from code)
-
-// TODO:
-// [x] 1. Create context trait, impl in `core`
-// [x] 2. build root and config fn for the config type
-// [ ] 3. strip down cfg from execute function, use it from context instead, pass context to `Module::new`
-//   [ ] 3.1. Make Context generic for all modul:::: // Reconstruct Cfg as a wrapper struct for module specific one ..... (on this,)
-//     [ ] 3.1.1. Change module interface to support passing in CTX. make sure all the shits still works fine
-// [ ] 4. remove app config
-// [ ] 5. make workspace module update Protostar.toml to eg. `Membrane.toml` as per config
-
-struct AppContext;
-
-impl AppContext {
-    fn new() -> Self {
-        AppContext {}
-    }
-}
-
-impl Context<'_, AppConfig> for AppContext {}
-
 struct CWContext {}
 impl<'a> Context<'a, CWConfig> for CWContext {
     fn config(&self) -> Result<CWConfig> {
@@ -92,21 +56,36 @@ impl<'a> Context<'a, CWConfig> for CWContext {
             .map(|w| w.cw)
     }
 }
+struct WorkspaceContext {}
+impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {
+    fn config(&self) -> Result<WorkspaceConfig> {
+        #[derive(Default, Serialize, Deserialize)]
+        struct ConfigWrapper {
+            workspace: WorkspaceConfig,
+        }
 
-pub fn execute(cfg: &AppConfig, cmd: &Commands) -> Result<()> {
+        let conf = Config::builder().add_source(Config::try_from(&ConfigWrapper::default())?);
+        let conf = match self.config_file_path() {
+            Ok(path) => conf.add_source(config::File::from(path)),
+            _ => conf,
+        };
+        conf.build()?
+            .try_deserialize::<ConfigWrapper>()
+            .with_context(|| "Unable to deserilize configuration.")
+            .map(|w| w.workspace)
+    }
+}
+
+pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::CW { cmd } => CWModule::new().execute(&cfg.cw, &cmd),
-        Commands::Workspace { cmd } => WorkspaceModule::new().execute(&cfg.workspace, &cmd),
+        Commands::CW { cmd } => CWModule::execute_(CWContext {}, &cmd),
+        Commands::Workspace { cmd } => WorkspaceModule::execute_(WorkspaceContext {}, &cmd),
     }
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    let app_ctx = AppContext::new();
-    let app_cfg = app_ctx.config()?;
-
     let cli = Cli::parse();
-
-    execute(&app_cfg, &cli.command)
+    execute(&cli.command)
 }
 
 #[cfg(test)]
@@ -126,18 +105,13 @@ mod tests {
     #[test]
     fn test_configuration() {
         let temp = setup();
-        let app = AppConfig::default();
-
-        execute(
-            &app,
-            &Commands::Workspace {
-                cmd: protostar_workspace::WorkspaceCmd::New {
-                    name: "dapp".to_string(),
-                    target_dir: None,
-                    branch: None,
-                },
+        execute(&Commands::Workspace {
+            cmd: protostar_workspace::WorkspaceCmd::New {
+                name: "dapp".to_string(),
+                target_dir: None,
+                branch: None,
             },
-        )
+        })
         .unwrap();
 
         let mut path = temp.to_path_buf();
@@ -151,18 +125,13 @@ contract_dir = "whatever""#;
         path.push(Path::new("Protostar.toml"));
         fs::write(path.as_path(), conf).unwrap();
 
-        let app = AppConfig::with_config("Protostar.toml").unwrap();
-
-        execute(
-            &app,
-            &Commands::CW {
-                cmd: protostar_cw::CWCmd::New {
-                    name: "counter".to_string(),
-                    target_dir: None,
-                    version: None,
-                },
+        execute(&Commands::CW {
+            cmd: protostar_cw::CWCmd::New {
+                name: "counter".to_string(),
+                target_dir: None,
+                version: None,
             },
-        )
+        })
         .unwrap();
 
         temp.child("dapp/Protostar.toml")
