@@ -62,17 +62,7 @@ impl WorkspaceModule {
     }
 }
 impl<'a> Module<'a, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceModule {
-    fn execute(self: &Self, cfg: &WorkspaceConfig, cmd: &WorkspaceCmd) -> Result<()> {
-        match cmd {
-            WorkspaceCmd::New {
-                name,
-                target_dir,
-                branch,
-            } => WorkspaceModule::new_(&cfg, &name, &branch, &target_dir),
-        }
-    }
-
-    fn execute_<Ctx: Context<'a, WorkspaceConfig>>(
+    fn execute<Ctx: Context<'a, WorkspaceConfig>>(
         ctx: Ctx,
         cmd: &WorkspaceCmd,
     ) -> Result<(), anyhow::Error> {
@@ -107,7 +97,7 @@ mod tests {
         temp.child("cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        WorkspaceModule::execute_(
+        WorkspaceModule::execute(
             WorkspaceContext {},
             &WorkspaceCmd::New {
                 name: "cosmwasm-dapp".to_string(),
@@ -134,7 +124,7 @@ mod tests {
         temp.child("custom-path/cosmwasm-dapp")
             .assert(predicate::path::missing());
 
-        WorkspaceModule::execute_(
+        WorkspaceModule::execute(
             WorkspaceContext {},
             &WorkspaceCmd::New {
                 name: "cosmwasm-dapp".to_string(),

@@ -78,8 +78,8 @@ impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::CW { cmd } => CWModule::execute_(CWContext {}, &cmd),
-        Commands::Workspace { cmd } => WorkspaceModule::execute_(WorkspaceContext {}, &cmd),
+        Commands::CW { cmd } => CWModule::execute(CWContext {}, &cmd),
+        Commands::Workspace { cmd } => WorkspaceModule::execute(WorkspaceContext {}, &cmd),
     }
 }
 

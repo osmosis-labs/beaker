@@ -10,8 +10,7 @@ pub trait Module<'a, Config, Cmd: Subcommand, Err>
 where
     Config: Serialize + Deserialize<'a> + Default,
 {
-    fn execute_<Ctx: Context<'a, Config>>(ctx: Ctx, cmd: &Cmd) -> Result<(), Err>;
-    fn execute(&self, cfg: &Config, cmd: &Cmd) -> Result<(), Err>;
+    fn execute<Ctx: Context<'a, Config>>(ctx: Ctx, cmd: &Cmd) -> Result<(), Err>;
 }
 
 pub trait Context<'a, Cfg>
