@@ -40,8 +40,8 @@ context!(
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::CW { cmd } => CWModule::execute(CWContext {}, &cmd),
-        Commands::Workspace { cmd } => WorkspaceModule::execute(WorkspaceContext {}, &cmd),
+        Commands::CW { cmd } => CWModule::execute(CWContext {}, cmd),
+        Commands::Workspace { cmd } => WorkspaceModule::execute(WorkspaceContext {}, cmd),
     }
 }
 
@@ -63,7 +63,7 @@ mod tests {
 
     fn setup() -> TempDir {
         let temp = assert_fs::TempDir::new().unwrap();
-        env::set_current_dir(temp.to_path_buf()).unwrap();
+        env::set_current_dir(&temp).unwrap();
         temp
     }
     #[test]
@@ -80,7 +80,7 @@ mod tests {
 
         let mut path = temp.to_path_buf();
         path.push(Path::new("dapp"));
-        env::set_current_dir(path.to_path_buf()).unwrap();
+        env::set_current_dir(&path).unwrap();
 
         let conf = r#"
 [cw]

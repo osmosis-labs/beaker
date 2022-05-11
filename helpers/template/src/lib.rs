@@ -62,7 +62,7 @@ impl Template {
         ];
 
         let argv = if let Some(subfolder) = &self.subfolder {
-            [argv, vec!["--", &subfolder]].concat()
+            [argv, vec!["--", subfolder]].concat()
         } else {
             argv
         };

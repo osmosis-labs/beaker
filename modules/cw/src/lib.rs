@@ -208,7 +208,7 @@ mod tests {
     #[serial]
     fn generate_contract_with_custom_path() {
         let temp = setup();
-        env::set_current_dir(temp.to_path_buf()).unwrap();
+        env::set_current_dir(&temp).unwrap();
 
         temp.child("custom-path").assert(predicate::path::missing());
         temp.child("custom-path/counter-1")
@@ -245,7 +245,7 @@ mod tests {
 
     fn setup() -> TempDir {
         let temp = assert_fs::TempDir::new().unwrap();
-        env::set_current_dir(temp.to_path_buf()).unwrap();
+        env::set_current_dir(&temp).unwrap();
         fs::File::create("Protostar.toml").unwrap();
         temp
     }

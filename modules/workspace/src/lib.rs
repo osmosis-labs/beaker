@@ -87,7 +87,7 @@ impl<'a> Module<'a, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceM
                 name,
                 target_dir,
                 branch,
-            } => WorkspaceModule::new_(ctx, &name, &branch, &target_dir),
+            } => WorkspaceModule::new_(ctx, name, branch, target_dir),
         }
     }
 }
@@ -114,7 +114,7 @@ mod tests {
     #[serial]
     fn generate_project_with_default_path() {
         let temp = assert_fs::TempDir::new().unwrap();
-        env::set_current_dir(temp.to_path_buf()).unwrap();
+        env::set_current_dir(&temp).unwrap();
 
         temp.child("cosmwasm-dapp")
             .assert(predicate::path::missing());
@@ -153,7 +153,7 @@ mod tests {
     #[serial]
     fn generate_project_with_custom_path() {
         let temp = assert_fs::TempDir::new().unwrap();
-        env::set_current_dir(temp.to_path_buf()).unwrap();
+        env::set_current_dir(&temp).unwrap();
 
         temp.child("custom-path").assert(predicate::path::missing());
 

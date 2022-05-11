@@ -23,12 +23,12 @@ where
 
     fn config_file_path(&self) -> Result<PathBuf> {
         let curr = env::current_dir()?;
-        let mut it = curr.ancestors();
+        let it = curr.ancestors();
 
-        while let Some(p) = it.next() {
+        for p in it {
             let p = p.join(self.config_file_name());
             if p.exists() {
-                return Ok(p.to_path_buf());
+                return Ok(p);
             }
         }
 
