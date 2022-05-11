@@ -1,3 +1,4 @@
+use anyhow::Context as ErrContext;
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
@@ -7,11 +8,11 @@ use protostar_helper_template::Template;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::fs;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
 pub struct WorkspaceConfig {
-    // TODO: add config file name
     template: Template,
 }
 
@@ -47,18 +48,33 @@ pub enum WorkspaceCmd {
 #[derive(new)]
 pub struct WorkspaceModule {}
 
-impl WorkspaceModule {
-    pub fn new_(
-        cfg: &WorkspaceConfig,
+impl<'a> WorkspaceModule {
+    pub fn new_<Ctx: Context<'a, WorkspaceConfig>>(
+        ctx: Ctx,
         name: &String,
         branch: &Option<String>,
         target_dir: &Option<PathBuf>,
     ) -> Result<()> {
-        cfg.template
+        let template = ctx
+            .config()?
+            .template
             .with_name(Some(name.to_string()))
             .with_branch(branch.to_owned())
-            .with_target_dir(target_dir.to_owned())
-            .generate()
+            .with_target_dir(target_dir.to_owned());
+
+        template.generate()?;
+
+        let root_dir = template.target_dir().join::<PathBuf>(name.into());
+
+        let default_config_file_name = "Protostar.toml";
+        let config_file_name = ctx.config_file_name();
+        fs::rename(
+            root_dir.join::<PathBuf>(default_config_file_name.into()),
+            root_dir.join::<PathBuf>(config_file_name.clone().into()),
+        )
+        .with_context(|| {
+            format!("Unable to rename {default_config_file_name} to {config_file_name}")
+        })
     }
 }
 impl<'a> Module<'a, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceModule {
@@ -66,13 +82,12 @@ impl<'a> Module<'a, WorkspaceConfig, WorkspaceCmd, anyhow::Error> for WorkspaceM
         ctx: Ctx,
         cmd: &WorkspaceCmd,
     ) -> Result<(), anyhow::Error> {
-        let cfg = ctx.config()?;
         match cmd {
             WorkspaceCmd::New {
                 name,
                 target_dir,
                 branch,
-            } => WorkspaceModule::new_(&cfg, &name, &branch, &target_dir),
+            } => WorkspaceModule::new_(ctx, &name, &branch, &target_dir),
         }
     }
 }
@@ -87,6 +102,13 @@ mod tests {
 
     struct WorkspaceContext {}
     impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {}
+
+    struct MembraneWorkspaceContext {}
+    impl<'a> Context<'a, WorkspaceConfig> for MembraneWorkspaceContext {
+        fn config_file_name(&self) -> String {
+            String::from("Membrane.toml")
+        }
+    }
 
     #[test]
     #[serial]
@@ -108,6 +130,20 @@ mod tests {
         .unwrap();
 
         temp.child("cosmwasm-dapp/Protostar.toml")
+            .assert(predicate::path::exists());
+
+        // with custom config file name
+        WorkspaceModule::execute(
+            MembraneWorkspaceContext {},
+            &WorkspaceCmd::New {
+                name: "osmo-dapp".to_string(),
+                target_dir: None,
+                branch: None,
+            },
+        )
+        .unwrap();
+
+        temp.child("osmo-dapp/Membrane.toml")
             .assert(predicate::path::exists());
 
         temp.close().unwrap();
@@ -135,6 +171,20 @@ mod tests {
         .unwrap();
 
         temp.child("custom-path/cosmwasm-dapp/Protostar.toml")
+            .assert(predicate::path::exists());
+
+        // with custom config file name
+        WorkspaceModule::execute(
+            MembraneWorkspaceContext {},
+            &WorkspaceCmd::New {
+                name: "osmo-dapp".to_string(),
+                target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
+                branch: None,
+            },
+        )
+        .unwrap();
+
+        temp.child("custom-path/osmo-dapp/Membrane.toml")
             .assert(predicate::path::exists());
 
         temp.close().unwrap();
