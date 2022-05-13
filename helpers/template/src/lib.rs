@@ -24,19 +24,19 @@ pub struct Template {
 impl Template {
     pub fn with_name(&self, name: Option<String>) -> Template {
         Template {
-            name: name.unwrap_or(self.name.clone()),
+            name: name.unwrap_or_else(|| self.name.clone()),
             ..self.clone()
         }
     }
     pub fn with_branch(&self, branch: Option<String>) -> Template {
         Template {
-            branch: branch.unwrap_or(self.branch.clone()),
+            branch: branch.unwrap_or_else(|| self.branch.clone()),
             ..self.clone()
         }
     }
     pub fn with_target_dir(&self, target_dir: Option<PathBuf>) -> Template {
         Template {
-            target_dir: target_dir.unwrap_or(self.target_dir.clone()),
+            target_dir: target_dir.unwrap_or_else(|| self.target_dir.clone()),
             ..self.clone()
         }
     }

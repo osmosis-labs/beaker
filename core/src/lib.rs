@@ -42,7 +42,7 @@ where
         self.config_file_path()?
             .parent()
             .map(|p| p.to_path_buf())
-            .ok_or(anyhow!("Already at root dir"))
+            .ok_or_else(|| anyhow!("Already at root dir"))
     }
 
     fn config(&self) -> Result<Cfg> {
