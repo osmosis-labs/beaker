@@ -1,14 +1,22 @@
-mod cw;
-mod workspace;
+// target refactoring
+// cli
+// -- core
+// -- modules
+//   -- cw
+//   -- workspace
+// -- utils
+//   -- template
+
+mod modules;
 
 use anyhow::{Context as ErrContext, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
-use cw::{CWConfig, CWModule};
+use modules::cw::{CWCmd, CWConfig, CWModule};
+use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
 use protostar_core::{context, Context, Module};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use workspace::{WorkspaceConfig, WorkspaceModule};
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -25,11 +33,11 @@ struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     #[clap(flatten)]
-    Workspace(workspace::WorkspaceCmd),
+    Workspace(WorkspaceCmd),
     /// Manipulating and interacting with CosmWasm contract
     CW {
         #[clap(subcommand)]
-        cmd: cw::CWCmd,
+        cmd: CWCmd,
     },
 }
 
@@ -58,7 +66,6 @@ mod tests {
     use predicates::prelude::predicate;
     use serial_test::serial;
     use std::{env, fs, path::Path};
-    use workspace::WorkspaceCmd;
 
     use super::*;
 
@@ -90,7 +97,7 @@ contract_dir = "whatever""#;
         fs::write(path.as_path(), conf).unwrap();
 
         execute(&Commands::CW {
-            cmd: cw::CWCmd::New {
+            cmd: CWCmd::New {
                 name: "counter".to_string(),
                 target_dir: None,
                 version: None,
