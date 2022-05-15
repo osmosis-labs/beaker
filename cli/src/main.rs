@@ -1,7 +1,7 @@
 mod workspace;
 
 use anyhow::{Context as ErrContext, Result};
-use clap::{Parser, Subcommand};
+use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use protostar_core::{context, Context, Module};
 use protostar_cw::{CWConfig, CWModule};
@@ -12,6 +12,7 @@ use workspace::{WorkspaceConfig, WorkspaceModule};
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
 #[clap(propagate_version = true)]
+#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 struct Cli {
     config: Option<PathBuf>,
     #[clap(subcommand)]
@@ -22,11 +23,8 @@ struct Cli {
 // Could potentially move all this to macro
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Manipulating and interacting with the workspace
-    Workspace {
-        #[clap(subcommand)]
-        cmd: crate::workspace::WorkspaceCmd,
-    },
+    #[clap(flatten)]
+    Workspace(workspace::WorkspaceCmd),
     /// Manipulating and interacting with CosmWasm contract
     CW {
         #[clap(subcommand)]
@@ -42,7 +40,7 @@ context!(
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
         Commands::CW { cmd } => CWModule::execute(CWContext {}, cmd),
-        Commands::Workspace { cmd } => WorkspaceModule::execute(WorkspaceContext {}, cmd),
+        Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext {}, cmd),
     }
 }
 
@@ -72,13 +70,11 @@ mod tests {
     #[serial]
     fn test_configuration() {
         let temp = setup();
-        execute(&Commands::Workspace {
-            cmd: WorkspaceCmd::New {
-                name: "dapp".to_string(),
-                target_dir: None,
-                branch: None,
-            },
-        })
+        execute(&Commands::Workspace(WorkspaceCmd::New {
+            name: "dapp".to_string(),
+            target_dir: None,
+            branch: None,
+        }))
         .unwrap();
 
         let mut path = temp.to_path_buf();

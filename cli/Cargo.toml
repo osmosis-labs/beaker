@@ -10,9 +10,9 @@ anyhow = "1.0.57"
 clap = {version = "3.1.15", features = ["derive"]}
 config = "0.13.1"
 derive-new = "0.5.9"
-protostar-core = {path = "../../core"}
-protostar-cw = {path = "../../modules/cw"}
-protostar-helper-template = {path = "../../helpers/template"}
+protostar-core = {path = "../core"}
+protostar-cw = {path = "../modules/cw"}
+protostar-helper-template = {path = "../helpers/template"}
 serde = "1.0.137"
 
 [dev_dependencies]

@@ -3,5 +3,5 @@
 members = [
   "modules/*",
   "helpers/*",
-  "tests/*",
+  "cli",
 ]
