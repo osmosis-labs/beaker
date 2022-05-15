@@ -1,8 +1,7 @@
-use std::path::PathBuf;
-
-use protostar_helper_template::Template;
+use crate::utils::template::Template;
 use serde::Deserialize;
 use serde::Serialize;
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
 pub struct WorkspaceConfig {

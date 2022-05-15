@@ -1,14 +1,6 @@
-// target refactoring
-// cli
-// -- core
-// -- modules
-//   -- cw
-//   -- workspace
-// -- utils
-//   -- template
-
 mod framework;
 mod modules;
+mod utils;
 
 use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};

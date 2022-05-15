@@ -1,7 +1,7 @@
 use super::config::CWConfig;
 use crate::framework::Context;
+use crate::utils::template::Template;
 use anyhow::Result;
-use protostar_helper_template::Template;
 use std::{env, path::PathBuf, process::Command};
 
 pub fn new<'a, Ctx: Context<'a, CWConfig>>(
