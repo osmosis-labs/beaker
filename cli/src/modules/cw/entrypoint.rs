@@ -1,10 +1,9 @@
 use super::config::CWConfig;
 use super::ops;
+use crate::framework::{Context, Module};
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
-use protostar_core::Context;
-use protostar_core::Module;
 use std::path::PathBuf;
 
 #[derive(Subcommand, Debug)]

@@ -1,6 +1,6 @@
 use super::config::WorkspaceConfig;
+use crate::framework::Context;
 use anyhow::{Context as _, Result};
-use protostar_core::Context;
 use std::{fs, path::PathBuf};
 
 pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(

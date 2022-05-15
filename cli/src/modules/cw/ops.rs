@@ -1,6 +1,6 @@
 use super::config::CWConfig;
+use crate::framework::Context;
 use anyhow::Result;
-use protostar_core::Context;
 use protostar_helper_template::Template;
 use std::{env, path::PathBuf, process::Command};
 

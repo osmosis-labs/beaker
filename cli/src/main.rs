@@ -7,14 +7,15 @@
 // -- utils
 //   -- template
 
+mod framework;
 mod modules;
 
-use anyhow::{Context as ErrContext, Result};
+use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
+use framework::{Context, Module};
 use modules::cw::{CWCmd, CWConfig, CWModule};
 use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
-use protostar_core::{context, Context, Module};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 

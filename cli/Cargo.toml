@@ -11,7 +11,6 @@ cargo-generate = {version = "0.13.1", features = ["vendored-openssl"]}
 clap = {version = "3.1.15", features = ["derive"]}
 config = "0.13.1"
 derive-new = "0.5.9"
-protostar-core = {path = "../core"}
 protostar-helper-template = {path = "../helpers/template"}
 serde = "1.0.137"
 structopt = "0.3.26"
