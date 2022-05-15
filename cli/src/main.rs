@@ -1,10 +1,11 @@
+mod cw;
 mod workspace;
 
 use anyhow::{Context as ErrContext, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
+use cw::{CWConfig, CWModule};
 use protostar_core::{context, Context, Module};
-use protostar_cw::{CWConfig, CWModule};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use workspace::{WorkspaceConfig, WorkspaceModule};
@@ -28,7 +29,7 @@ pub enum Commands {
     /// Manipulating and interacting with CosmWasm contract
     CW {
         #[clap(subcommand)]
-        cmd: protostar_cw::CWCmd,
+        cmd: cw::CWCmd,
     },
 }
 
@@ -89,7 +90,7 @@ contract_dir = "whatever""#;
         fs::write(path.as_path(), conf).unwrap();
 
         execute(&Commands::CW {
-            cmd: protostar_cw::CWCmd::New {
+            cmd: cw::CWCmd::New {
                 name: "counter".to_string(),
                 target_dir: None,
                 version: None,

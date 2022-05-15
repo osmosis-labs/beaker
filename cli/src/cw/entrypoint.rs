@@ -1,29 +1,11 @@
+use super::config::CWConfig;
+use super::ops;
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
 use protostar_core::Context;
 use protostar_core::Module;
-use protostar_helper_template::Template;
-use serde::Deserialize;
-use serde::Serialize;
-use std::env;
 use std::path::PathBuf;
-use std::process::Command;
-
-#[derive(Serialize, Deserialize)]
-pub struct CWConfig {
-    pub contract_dir: String,
-    pub template_repo: String,
-}
-
-impl Default for CWConfig {
-    fn default() -> Self {
-        Self {
-            contract_dir: "contracts".to_string(),
-            template_repo: "InterWasm/cw-template".to_string(),
-        }
-    }
-}
 
 #[derive(Subcommand, Debug)]
 pub enum CWCmd {
@@ -52,66 +34,6 @@ pub enum CWCmd {
 #[derive(new)]
 pub struct CWModule {}
 
-impl<'a> CWModule {
-    fn new_<Ctx: Context<'a, CWConfig>>(
-        ctx: Ctx,
-        name: &str,
-        version: Option<String>,
-        target_dir: Option<PathBuf>,
-    ) -> Result<()> {
-        let cfg = ctx.config()?;
-        let repo = &cfg.template_repo;
-        let version = version.unwrap_or_else(|| "main".to_string());
-        let target_dir =
-            target_dir.unwrap_or(ctx.root()?.join(PathBuf::from(cfg.contract_dir.as_str())));
-
-        let cw_template =
-            Template::new(name.to_string(), repo.to_owned(), version, target_dir, None);
-        cw_template.generate()
-    }
-
-    fn build<Ctx: Context<'a, CWConfig>>(ctx: Ctx, optimize: &bool, aarch64: &bool) -> Result<()> {
-        let root = ctx.root()?;
-
-        let wp_name = root.file_name().unwrap().to_str().unwrap(); // handle properly
-
-        env::set_current_dir(&root)?;
-
-        let root_dir_str = root.to_str().unwrap();
-
-        let _build = Command::new("cargo")
-            .env(" RUSTFLAGS", "-C link-arg=-s")
-            .arg("build")
-            .arg("--release")
-            .arg("--target=wasm32-unknown-unknown")
-            .spawn()?
-            .wait()?;
-
-        if *optimize {
-            println!("Optimizing wasm...");
-
-            let arch_suffix = if *aarch64 { "-arm64" } else { "" };
-
-            let _optim = Command::new("docker")
-                .args(&[
-                    "run",
-                    "--rm",
-                    "-v",
-                    format!("{root_dir_str}:/code").as_str(),
-                    "--mount",
-                    format!("type=volume,source={wp_name}_cache,target=/code/target").as_str(),
-                    "--mount",
-                    "type=volume,source=registry_cache,target=/usr/local/cargo/registry",
-                    format!("cosmwasm/workspace-optimizer{arch_suffix}:0.12.6").as_str(), // TODO: Extract version & check for architecture
-                ])
-                .spawn()?
-                .wait()?;
-        }
-
-        Ok(())
-    }
-}
-
 impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
     fn execute<Ctx: Context<'a, CWConfig>>(ctx: Ctx, cmd: &CWCmd) -> Result<(), anyhow::Error> {
         match cmd {
@@ -119,8 +41,8 @@ impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
                 name,
                 target_dir, // TODO: Rremove this
                 version,
-            } => CWModule::new_(ctx, name, version.to_owned(), target_dir.to_owned()),
-            CWCmd::Build { optimize, aarch64 } => CWModule::build(ctx, optimize, aarch64),
+            } => ops::new(ctx, name, version.to_owned(), target_dir.to_owned()),
+            CWCmd::Build { optimize, aarch64 } => ops::build(ctx, optimize, aarch64),
         }
     }
 }
