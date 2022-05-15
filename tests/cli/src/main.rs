@@ -1,12 +1,13 @@
-use std::path::PathBuf;
+mod workspace;
 
 use anyhow::{Context as ErrContext, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
 use protostar_core::{context, Context, Module};
 use protostar_cw::{CWConfig, CWModule};
-use protostar_workspace::{WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+use workspace::{WorkspaceConfig, WorkspaceModule};
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -24,7 +25,7 @@ pub enum Commands {
     /// Manipulating and interacting with the workspace
     Workspace {
         #[clap(subcommand)]
-        cmd: protostar_workspace::WorkspaceCmd,
+        cmd: crate::workspace::WorkspaceCmd,
     },
     /// Manipulating and interacting with CosmWasm contract
     CW {
@@ -54,10 +55,11 @@ fn main() -> Result<(), anyhow::Error> {
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs, path::Path};
-
     use assert_fs::{assert::PathAssert, fixture::PathChild, TempDir};
     use predicates::prelude::predicate;
+    use serial_test::serial;
+    use std::{env, fs, path::Path};
+    use workspace::WorkspaceCmd;
 
     use super::*;
 
@@ -67,10 +69,11 @@ mod tests {
         temp
     }
     #[test]
+    #[serial]
     fn test_configuration() {
         let temp = setup();
         execute(&Commands::Workspace {
-            cmd: protostar_workspace::WorkspaceCmd::New {
+            cmd: WorkspaceCmd::New {
                 name: "dapp".to_string(),
                 target_dir: None,
                 branch: None,
