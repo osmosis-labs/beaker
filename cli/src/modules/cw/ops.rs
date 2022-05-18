@@ -96,7 +96,7 @@ pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
         None => bail!("signer account: `{signer_account}` is not defined"),
         Some(Account::FromMnemonic { mnemonic }) => from_mnemonic(mnemonic, derivation_path),
         Some(Account::FromPrivateKey { private_key }) => {
-            Ok(secp256k1::SigningKey::from_bytes(private_key.as_bytes()).unwrap())
+            Ok(secp256k1::SigningKey::from_bytes(&base64::decode(private_key)?).unwrap())
             // TODO: need fix
         }
     }?;
@@ -174,10 +174,8 @@ fn from_mnemonic(
     derivation_path: &str,
 ) -> Result<secp256k1::SigningKey, anyhow::Error> {
     let seed = bip32::Mnemonic::new(phrase, bip32::Language::English)?.to_seed("");
-    let signer_priv: secp256k1::SigningKey =
-        bip32::XPrv::derive_from_path(seed, &derivation_path.parse()?)
-            .map(Into::into)
-            .unwrap();
+    let xprv = bip32::XPrv::derive_from_path(seed, &derivation_path.parse()?)?;
+    let signer_priv: secp256k1::SigningKey = xprv.into();
     Ok(signer_priv)
 }
 
