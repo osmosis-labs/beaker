@@ -1,6 +1,9 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
+use cosmrs::{bip32, crypto::secp256k1};
 use prost::Message;
+
+use crate::framework::config::Account;
 pub struct Client {
     base_url: String,
     chain_id: String,
@@ -77,4 +80,41 @@ impl Client {
 
         BaseAccount::decode(res.value.as_slice()).context("Unable to decode BaseAccount")
     }
+}
+
+pub fn extract_private_key(
+    global_config: &crate::framework::config::GlobalConfig,
+    signer_account: Option<&str>,
+    signer_mnemonic: Option<&str>,
+    signer_private_key: Option<&str>,
+) -> Result<secp256k1::SigningKey, anyhow::Error> {
+    let derivation_path = global_config.derivation_path();
+    let signer_priv = if let Some(signer_account) = signer_account {
+        match global_config.accounts().get(signer_account) {
+            None => bail!("signer account: `{signer_account}` is not defined"),
+            Some(Account::FromMnemonic { mnemonic }) => {
+                from_mnemonic(mnemonic.as_str(), derivation_path)
+            }
+            Some(Account::FromPrivateKey { private_key }) => {
+                Ok(secp256k1::SigningKey::from_bytes(&base64::decode(private_key)?).unwrap())
+            }
+        }
+    } else if let Some(signer_mnemonic) = signer_mnemonic {
+        from_mnemonic(signer_mnemonic, derivation_path)
+    } else if let Some(signer_private_key) = signer_private_key {
+        Ok(secp256k1::SigningKey::from_bytes(&base64::decode(signer_private_key)?).unwrap())
+    } else {
+        bail!("Unable to retrive signer private key")
+    }?;
+    Ok(signer_priv)
+}
+
+fn from_mnemonic(
+    phrase: &str,
+    derivation_path: &str,
+) -> Result<secp256k1::SigningKey, anyhow::Error> {
+    let seed = bip32::Mnemonic::new(phrase, bip32::Language::English)?.to_seed("");
+    let xprv = bip32::XPrv::derive_from_path(seed, &derivation_path.parse()?)?;
+    let signer_priv: secp256k1::SigningKey = xprv.into();
+    Ok(signer_priv)
 }

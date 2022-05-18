@@ -1,6 +1,9 @@
 use super::config::CWConfig;
 use super::ops;
-use crate::framework::{Context, Module};
+use crate::{
+    framework::{Context, Module},
+    utils::cosmos::extract_private_key,
+};
 use anyhow::Result;
 use clap::Subcommand;
 use derive_new::new;
@@ -47,8 +50,16 @@ pub enum CWCmd {
         timeout_height: u32,
 
         /// Specifies predifined account as a tx signer
-        #[clap(short, long, default_value = "0")]
-        signer_account: String,
+        #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]
+        signer_account: Option<String>,
+
+        /// Specifies mnemonic as a tx signer
+        #[clap(long, conflicts_with_all=&["signer-account", "signer-private-key"])]
+        signer_mnemonic: Option<String>,
+
+        /// Specifies private_key as a tx signer (base64 encoded string)
+        #[clap(long, conflicts_with_all=&["signer-account", "signer-mnemonic"])]
+        signer_private_key: Option<String>,
         // TODO: implement --all flag
     },
 }
@@ -72,15 +83,27 @@ impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
                 gas_limit,
                 timeout_height,
                 signer_account,
-            } => ops::store_code(
-                ctx,
-                contract_name,
-                chain_id,
-                gas_amount,
-                gas_limit,
-                timeout_height,
-                signer_account,
-            ),
+                signer_mnemonic,
+                signer_private_key,
+            } => {
+                let signer_priv = extract_private_key(
+                    &ctx.global_config()?,
+                    signer_account.as_ref().map(|s| &**s),
+                    signer_mnemonic.as_ref().map(|s| &**s),
+                    signer_private_key.as_ref().map(|s| &**s),
+                )?;
+
+                ops::store_code(
+                    ctx,
+                    contract_name,
+                    chain_id,
+                    gas_amount,
+                    gas_limit,
+                    timeout_height,
+                    signer_priv,
+                )?;
+                Ok(())
+            }
         }
     }
 }

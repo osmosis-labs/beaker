@@ -1,21 +1,22 @@
 use super::config::CWConfig;
-use crate::framework::config::Account;
 use crate::utils::template::Template;
 use crate::{framework::Context, utils::cosmos::Client};
+use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
-use anyhow::{anyhow, bail};
 use cosmrs::cosmwasm::MsgStoreCode;
+use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::rpc::endpoint::broadcast::tx_commit::Response;
+use cosmrs::tendermint::abci::tag::Key;
+use cosmrs::{dev, rpc};
 use cosmrs::{
-    bip32,
-    crypto::secp256k1,
     tx::{self, Fee, Msg, SignDoc, SignerInfo},
     Coin,
 };
-use cosmrs::{dev, rpc};
+use getset::Getters;
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
 
 pub fn new<'a, Ctx: Context<'a, CWConfig>>(
@@ -78,6 +79,13 @@ pub fn build<'a, Ctx: Context<'a, CWConfig>>(
 
     Ok(())
 }
+
+#[derive(Getters)]
+#[get = "pub"]
+pub struct StoreCodeResult {
+    code_id: u64,
+}
+
 pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
     ctx: Ctx,
     contract_name: &str,
@@ -85,21 +93,12 @@ pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
     gas_amount: &u64,
     gas_limit: &u64,
     timeout_height: &u32,
-    signer_account: &str,
-) -> Result<()> {
+    signer_priv: SigningKey,
+) -> Result<StoreCodeResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let denom = global_config.denom().as_str();
     let derivation_path = global_config.derivation_path().as_str();
-
-    let signer_priv = match global_config.accounts().get(signer_account) {
-        None => bail!("signer account: `{signer_account}` is not defined"),
-        Some(Account::FromMnemonic { mnemonic }) => from_mnemonic(mnemonic, derivation_path),
-        Some(Account::FromPrivateKey { private_key }) => {
-            Ok(secp256k1::SigningKey::from_bytes(&base64::decode(private_key)?).unwrap())
-            // TODO: need fix
-        }
-    }?;
 
     let signer_pub = signer_priv.public_key();
     let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
@@ -122,7 +121,7 @@ pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
     .to_any()
     .unwrap();
 
-    let _: Response = init_tokio_runtime().block_on(async {
+    init_tokio_runtime().block_on(async {
         let client = Client::local(chain_id, derivation_path);
         let acc = client
             .account(signer_account_id.as_ref())
@@ -159,24 +158,26 @@ pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
             ));
         }
 
-        dbg!(&tx_commit_response);
+        let code_id: u64 = tx_commit_response
+            .deliver_tx
+            .events
+            .iter()
+            .find(|e| e.type_str == "store_code")
+            .unwrap()
+            .attributes
+            .iter()
+            .find(|a| a.key == Key::from_str("code_id").unwrap())
+            .unwrap()
+            .value
+            .to_string()
+            .parse()?;
 
         dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
 
-        anyhow::Ok(tx_commit_response)
-    })?;
+        println!("🎉  Code stored successfully with code id: {code_id}");
 
-    Ok(())
-}
-
-fn from_mnemonic(
-    phrase: &str,
-    derivation_path: &str,
-) -> Result<secp256k1::SigningKey, anyhow::Error> {
-    let seed = bip32::Mnemonic::new(phrase, bip32::Language::English)?.to_seed("");
-    let xprv = bip32::XPrv::derive_from_path(seed, &derivation_path.parse()?)?;
-    let signer_priv: secp256k1::SigningKey = xprv.into();
-    Ok(signer_priv)
+        anyhow::Ok(StoreCodeResult { code_id })
+    })
 }
 
 fn read_wasm<'a, Ctx: Context<'a, CWConfig>>(
