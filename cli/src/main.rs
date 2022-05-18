@@ -91,7 +91,7 @@ contract_dir = "whatever""#;
 
         execute(&Commands::CW {
             cmd: CWCmd::New {
-                name: "counter".to_string(),
+                contract_name: "counter".to_string(),
                 target_dir: None,
                 version: None,
             },

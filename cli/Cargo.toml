@@ -10,10 +10,14 @@ anyhow = "1.0.57"
 cargo-generate = {version = "0.13.1", features = ["vendored-openssl"]}
 clap = {version = "3.1.15", features = ["derive"]}
 config = "0.13.1"
+cosmos-sdk-proto = "0.12.2"
+cosmrs = {version = "0.7.0", features = ["dev", "cosmwasm"]}
 derive-new = "0.5.9"
 getset = "0.1.2"
+prost = "0.10.3"
 serde = "1.0.137"
 structopt = "0.3.26"
+tokio = {version = "1.18.2", features = ["full"]}
 
 [dev_dependencies]
 assert_fs = "1.0.7"

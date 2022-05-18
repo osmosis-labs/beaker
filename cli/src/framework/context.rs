@@ -3,7 +3,9 @@ use config::Config;
 use serde::{Deserialize, Serialize};
 use std::{env, path::PathBuf};
 
-pub trait Context<'a, Cfg>
+use super::config::GlobalConfig;
+
+pub trait Context<'a, Cfg>: Send
 where
     Cfg: Serialize + Deserialize<'a> + Default,
 {
@@ -43,6 +45,17 @@ where
         };
         conf.build()?
             .try_deserialize::<Cfg>()
+            .with_context(|| "Unable to deserialize configuration.")
+    }
+
+    fn global_config(&self) -> Result<GlobalConfig> {
+        let conf = Config::builder().add_source(Config::try_from(&GlobalConfig::default())?);
+        let conf = match self.config_file_path() {
+            Ok(path) => conf.add_source(config::File::from(path)),
+            _ => conf,
+        };
+        conf.build()?
+            .try_deserialize::<GlobalConfig>()
             .with_context(|| "Unable to deserialize configuration.")
     }
 }

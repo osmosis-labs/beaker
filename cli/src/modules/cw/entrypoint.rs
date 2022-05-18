@@ -11,7 +11,7 @@ pub enum CWCmd {
     /// Create new CosmWasm contract from boilerplate
     New {
         /// Contract name
-        name: String,
+        contract_name: String,
         /// Path to store generated contract
         #[clap(short, long)]
         target_dir: Option<PathBuf>,
@@ -28,6 +28,29 @@ pub enum CWCmd {
         #[clap(short, long)]
         aarch64: bool,
     },
+    /// Store .wasm on chain for later initialization
+    StoreCode {
+        /// Name of the contract to store
+        contract_name: String,
+        /// Target chain to store code
+        #[clap(short, long, default_value = "localosmosis")]
+        chain_id: String,
+        /// Amount of coin willing to pay as gas
+        #[clap(long)]
+        gas_amount: u64,
+        /// Limit to how much gas amount allowed to be consumed
+        #[clap(long)]
+        gas_limit: u64,
+
+        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
+        #[clap(short, long, default_value = "0")]
+        timeout_height: u32,
+
+        /// Specifies predifined account as a tx signer
+        #[clap(short, long, default_value = "0")]
+        signer_account: String,
+        // TODO: implement --all flag
+    },
 }
 
 #[derive(new)]
@@ -37,11 +60,27 @@ impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
     fn execute<Ctx: Context<'a, CWConfig>>(ctx: Ctx, cmd: &CWCmd) -> Result<(), anyhow::Error> {
         match cmd {
             CWCmd::New {
-                name,
+                contract_name: name,
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(ctx, name, version.to_owned(), target_dir.to_owned()),
             CWCmd::Build { optimize, aarch64 } => ops::build(ctx, optimize, aarch64),
+            CWCmd::StoreCode {
+                chain_id,
+                contract_name,
+                gas_amount,
+                gas_limit,
+                timeout_height,
+                signer_account,
+            } => ops::store_code(
+                ctx,
+                contract_name,
+                chain_id,
+                gas_amount,
+                gas_limit,
+                timeout_height,
+                signer_account,
+            ),
         }
     }
 }
@@ -72,9 +111,9 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-1".to_string(),
-                target_dir: None,
+                contract_name: "counter-1".to_string(),
                 version: None,
+                target_dir: None,
             },
         )
         .unwrap();
@@ -87,7 +126,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-2".to_string(),
+                contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
             },
@@ -113,7 +152,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-1".to_string(),
+                contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: None,
             },
@@ -125,7 +164,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-2".to_string(),
+                contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
             },
@@ -151,7 +190,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-1".to_string(),
+                contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
             },
@@ -164,7 +203,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-2".to_string(),
+                contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
             },
@@ -192,7 +231,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-1".to_string(),
+                contract_name: "counter-1".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,
             },
@@ -204,7 +243,7 @@ mod tests {
         CWModule::execute(
             CWContext {},
             &CWCmd::New {
-                name: "counter-2".to_string(),
+                contract_name: "counter-2".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,
             },
