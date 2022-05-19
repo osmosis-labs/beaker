@@ -50,10 +50,10 @@ mod tests {
     struct WorkspaceContext {}
     impl<'a> Context<'a, WorkspaceConfig> for WorkspaceContext {}
 
-    struct MembraneWorkspaceContext {}
-    impl<'a> Context<'a, WorkspaceConfig> for MembraneWorkspaceContext {
+    struct RandomWorkspaceContext {}
+    impl<'a> Context<'a, WorkspaceConfig> for RandomWorkspaceContext {
         fn config_file_name(&self) -> String {
-            String::from("Membrane.toml")
+            String::from("Random.toml")
         }
     }
 
@@ -76,12 +76,12 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("cosmwasm-dapp/Protostar.toml")
+        temp.child("cosmwasm-dapp/Membrane.toml")
             .assert(predicate::path::exists());
 
         // with custom config file name
         WorkspaceModule::execute(
-            MembraneWorkspaceContext {},
+            RandomWorkspaceContext {},
             &WorkspaceCmd::New {
                 name: "osmo-dapp".to_string(),
                 target_dir: None,
@@ -90,7 +90,7 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("osmo-dapp/Membrane.toml")
+        temp.child("osmo-dapp/Random.toml")
             .assert(predicate::path::exists());
 
         temp.close().unwrap();
@@ -117,12 +117,12 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("custom-path/cosmwasm-dapp/Protostar.toml")
+        temp.child("custom-path/cosmwasm-dapp/Membrane.toml")
             .assert(predicate::path::exists());
 
         // with custom config file name
         WorkspaceModule::execute(
-            MembraneWorkspaceContext {},
+            RandomWorkspaceContext {},
             &WorkspaceCmd::New {
                 name: "osmo-dapp".to_string(),
                 target_dir: Some(PathBuf::from_str("custom-path").unwrap()),
@@ -131,7 +131,7 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("custom-path/osmo-dapp/Membrane.toml")
+        temp.child("custom-path/osmo-dapp/Random.toml")
             .assert(predicate::path::exists());
 
         temp.close().unwrap();

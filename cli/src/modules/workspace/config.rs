@@ -13,7 +13,7 @@ impl Default for WorkspaceConfig {
         Self {
             template: Template::new(
                 "workspace-template".to_string(),
-                "iboss-ptk/protostar-sdk".to_string(),
+                "osmosis-labs/membrane".to_string(),
                 "main".to_string(),
                 PathBuf::from("."),
                 Some("templates/project".to_string()),

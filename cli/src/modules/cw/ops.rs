@@ -6,7 +6,6 @@ use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::cosmwasm::MsgStoreCode;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::rpc::endpoint::broadcast::tx_commit::Response;
 use cosmrs::tendermint::abci::tag::Key;
 use cosmrs::{dev, rpc};
 use cosmrs::{
