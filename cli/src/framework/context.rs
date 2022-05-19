@@ -10,7 +10,7 @@ where
     Cfg: Serialize + Deserialize<'a> + Default,
 {
     fn config_file_name(&self) -> String {
-        "Protostar.toml".to_string()
+        "Membrane.toml".to_string()
     }
 
     fn config_file_path(&self) -> Result<PathBuf> {
