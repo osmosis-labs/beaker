@@ -1,4 +1,4 @@
-use super::config::CWConfig;
+use super::config::WasmConfig;
 use crate::utils::template::Template;
 use crate::{framework::Context, utils::cosmos::Client};
 use anyhow::anyhow;
@@ -18,7 +18,7 @@ use std::io::{BufReader, Read};
 use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
 
-pub fn new<'a, Ctx: Context<'a, CWConfig>>(
+pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     name: &str,
     version: Option<String>,
@@ -34,7 +34,7 @@ pub fn new<'a, Ctx: Context<'a, CWConfig>>(
     cw_template.generate()
 }
 
-pub fn build<'a, Ctx: Context<'a, CWConfig>>(
+pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     optimize: &bool,
     aarch64: &bool,
@@ -85,7 +85,7 @@ pub struct StoreCodeResult {
     code_id: u64,
 }
 
-pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
+pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     contract_name: &str,
     chain_id: &str,
@@ -173,13 +173,13 @@ pub fn store_code<'a, Ctx: Context<'a, CWConfig>>(
 
         dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
 
-        println!("🎉  Code stored successfully with code id: {code_id}");
+        println!("  🎉  Code stored successfully with code id: {code_id}");
 
         anyhow::Ok(StoreCodeResult { code_id })
     })
 }
 
-fn read_wasm<'a, Ctx: Context<'a, CWConfig>>(
+fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     contract_name: &str,
 ) -> Result<Vec<u8>, anyhow::Error> {

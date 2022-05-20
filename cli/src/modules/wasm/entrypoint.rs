@@ -1,4 +1,4 @@
-use super::config::CWConfig;
+use super::config::WasmConfig;
 use super::ops;
 use crate::{
     framework::{Context, Module},
@@ -10,7 +10,7 @@ use derive_new::new;
 use std::path::PathBuf;
 
 #[derive(Subcommand, Debug)]
-pub enum CWCmd {
+pub enum WasmCmd {
     /// Create new CosmWasm contract from boilerplate
     New {
         /// Contract name
@@ -40,7 +40,7 @@ pub enum CWCmd {
         chain_id: String,
         /// Amount of coin willing to pay as gas
         #[clap(long)]
-        gas_amount: u64,
+        gas: u64,
         /// Limit to how much gas amount allowed to be consumed
         #[clap(long)]
         gas_limit: u64,
@@ -65,21 +65,21 @@ pub enum CWCmd {
 }
 
 #[derive(new)]
-pub struct CWModule {}
+pub struct WasmModule {}
 
-impl<'a> Module<'a, CWConfig, CWCmd, anyhow::Error> for CWModule {
-    fn execute<Ctx: Context<'a, CWConfig>>(ctx: Ctx, cmd: &CWCmd) -> Result<(), anyhow::Error> {
+impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
+    fn execute<Ctx: Context<'a, WasmConfig>>(ctx: Ctx, cmd: &WasmCmd) -> Result<(), anyhow::Error> {
         match cmd {
-            CWCmd::New {
+            WasmCmd::New {
                 contract_name: name,
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(ctx, name, version.to_owned(), target_dir.to_owned()),
-            CWCmd::Build { optimize, aarch64 } => ops::build(ctx, optimize, aarch64),
-            CWCmd::StoreCode {
+            WasmCmd::Build { optimize, aarch64 } => ops::build(ctx, optimize, aarch64),
+            WasmCmd::StoreCode {
                 chain_id,
                 contract_name,
-                gas_amount,
+                gas: gas_amount,
                 gas_limit,
                 timeout_height,
                 signer_account,
@@ -118,7 +118,7 @@ mod tests {
     use std::{env, fs, path::Path};
 
     struct CWContext {}
-    impl<'a> Context<'a, CWConfig> for CWContext {}
+    impl<'a> Context<'a, WasmConfig> for CWContext {}
 
     #[test]
     #[serial]
@@ -131,9 +131,9 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 version: None,
                 target_dir: None,
@@ -146,9 +146,9 @@ mod tests {
         // cd into contract before running command
         env::set_current_dir(temp.to_path_buf().join(PathBuf::from("contracts"))).unwrap();
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
@@ -172,9 +172,9 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: None,
@@ -184,9 +184,9 @@ mod tests {
         temp.child("contracts/counter-1")
             .assert(predicate::path::exists());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
@@ -210,9 +210,9 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
@@ -223,9 +223,9 @@ mod tests {
             .assert(predicate::path::exists());
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
@@ -251,9 +251,9 @@ mod tests {
         temp.child("custom-path/counter-2")
             .assert(predicate::path::missing());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,
@@ -263,9 +263,9 @@ mod tests {
         temp.child("custom-path/counter-1")
             .assert(predicate::path::exists());
 
-        CWModule::execute(
+        WasmModule::execute(
             CWContext {},
-            &CWCmd::New {
+            &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,

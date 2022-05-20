@@ -1,2 +1,2 @@
-pub mod cw;
+pub mod wasm;
 pub mod workspace;

@@ -2,12 +2,12 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Serialize, Deserialize)]
-pub struct CWConfig {
+pub struct WasmConfig {
     pub contract_dir: String,
     pub template_repo: String,
 }
 
-impl Default for CWConfig {
+impl Default for WasmConfig {
     fn default() -> Self {
         Self {
             contract_dir: "contracts".to_string(),

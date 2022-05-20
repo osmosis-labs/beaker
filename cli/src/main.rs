@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use framework::{Context, Module};
-use modules::cw::{CWCmd, CWConfig, CWModule};
+use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
 use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -28,20 +28,20 @@ pub enum Commands {
     #[clap(flatten)]
     Workspace(WorkspaceCmd),
     /// Manipulating and interacting with CosmWasm contract
-    CW {
+    Wasm {
         #[clap(subcommand)]
-        cmd: CWCmd,
+        cmd: WasmCmd,
     },
 }
 
 context!(
-    CWContext, config = { cw: CWConfig };
+    CWContext, config = { cw: WasmConfig };
     WorkspaceContext, config = { workspace: WorkspaceConfig }
 );
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::CW { cmd } => CWModule::execute(CWContext {}, cmd),
+        Commands::Wasm { cmd } => WasmModule::execute(CWContext {}, cmd),
         Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext {}, cmd),
     }
 }
@@ -89,8 +89,8 @@ contract_dir = "whatever""#;
         path.push(Path::new("Membrane.toml"));
         fs::write(path.as_path(), conf).unwrap();
 
-        execute(&Commands::CW {
-            cmd: CWCmd::New {
+        execute(&Commands::Wasm {
+            cmd: WasmCmd::New {
                 contract_name: "counter".to_string(),
                 target_dir: None,
                 version: None,
