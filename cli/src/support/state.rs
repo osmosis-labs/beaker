@@ -57,6 +57,30 @@ impl State {
         Ok(s)
     }
 
+    pub fn update_address(
+        &self,
+        chain_id: &str,
+        contract_name: &str,
+        label: &str,
+        address: &str,
+    ) -> Self {
+        let State(m) = self;
+        let mut m = m.clone();
+        m.entry(chain_id.to_string()).and_modify(|contracts| {
+            contracts
+                .entry(contract_name.to_string())
+                .and_modify(|wasm_ref| {
+                    wasm_ref
+                        .addresses
+                        .entry(label.to_string())
+                        .and_modify(|a| *a = address.to_string())
+                        .or_insert_with(|| address.to_string());
+                });
+        });
+
+        State(m)
+    }
+
     pub fn update_code_id(&self, chain_id: &str, contract_name: &str, code_id: &u64) -> Self {
         let State(m) = self;
         let mut m = m.clone();
@@ -285,6 +309,107 @@ mod tests {
                     },
                 ),
             ]),
+        )]));
+
+        assert_eq!(updated_state, state);
+    }
+
+    #[test]
+    fn update_address_test() {
+        // No code id, no update, since contract_name `counter` doesn't exist
+        let empty_state = State(Map::new());
+        let updated_state = empty_state.update_address(
+            "localosmosis",
+            "counter",
+            "default",
+            "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85",
+        );
+
+        assert_eq!(updated_state, empty_state);
+
+        // Need to add code_id first, else you can't update address
+        let updated_state = empty_state.update_code_id("localosmosis", "counter", &1);
+        let updated_state = updated_state.update_address(
+            "localosmosis",
+            "counter",
+            "default",
+            "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85",
+        );
+
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: 1,
+                    addresses: Map::from([(
+                        "default".to_string(),
+                        "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85"
+                            .to_string(),
+                    )]),
+                },
+            )]),
+        )]));
+
+        assert_eq!(updated_state, state);
+
+        let updated_state = updated_state.update_address(
+            "localosmosis",
+            "counter",
+            "hello",
+            "osmo1warl5pyfkxzd8v8megu8nt25gu8u07km0ncekk5969m3w8eg6wcqr9m700",
+        );
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: 1,
+                    addresses: Map::from([
+                        (
+                            "default".to_string(),
+                            "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85"
+                                .to_string(),
+                        ),
+                        (
+                            "hello".to_string(),
+                            "osmo1warl5pyfkxzd8v8megu8nt25gu8u07km0ncekk5969m3w8eg6wcqr9m700"
+                                .to_string(),
+                        ),
+                    ]),
+                },
+            )]),
+        )]));
+
+        assert_eq!(updated_state, state);
+
+        // update existing
+        let updated_state = updated_state.update_address(
+            "localosmosis",
+            "counter",
+            "default",
+            "osmo1warl5pyfkxzd8v8megu8nt25gu8u07km0ncekk5969m3w8eg6wcqr9m700",
+        );
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: 1,
+                    addresses: Map::from([
+                        (
+                            "default".to_string(),
+                            "osmo1warl5pyfkxzd8v8megu8nt25gu8u07km0ncekk5969m3w8eg6wcqr9m700"
+                                .to_string(),
+                        ),
+                        (
+                            "hello".to_string(),
+                            "osmo1warl5pyfkxzd8v8megu8nt25gu8u07km0ncekk5969m3w8eg6wcqr9m700"
+                                .to_string(),
+                        ),
+                    ]),
+                },
+            )]),
         )]));
 
         assert_eq!(updated_state, state);

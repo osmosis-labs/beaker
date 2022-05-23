@@ -280,6 +280,11 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
             .value
             .to_string();
 
+        let root = ctx.root()?;
+        State::update_state_file(root, &|s: &State| -> State {
+            s.update_address(chain_id, contract_name, "default", &address) // TODO: make label an argument
+        })?;
+
         println!();
         println!("  Contract instantiated successfully!! 🎉 ");
         println!("    +");
