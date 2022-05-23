@@ -4,9 +4,9 @@ use anyhow::{Context as _, Result};
 use config::Map;
 use serde::{Deserialize, Serialize};
 
-pub const STATE_DIR: &'static str = ".membrane";
-pub const STATE_FILE: &'static str = "state.json";
-pub const STATE_FILE_LOCAL: &'static str = "state.local.json";
+pub const STATE_DIR: &str = ".membrane";
+// pub const STATE_FILE: &'static str = "state.json";
+pub const STATE_FILE_LOCAL: &str = "state.local.json";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct WasmRef {

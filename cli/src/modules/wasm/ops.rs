@@ -14,7 +14,7 @@ use cosmrs::{
     Coin,
 };
 use getset::Getters;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{BufReader, Read};
 use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
@@ -80,6 +80,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     Ok(())
 }
 
+#[allow(dead_code)]
 #[derive(Getters)]
 #[get = "pub"]
 pub struct StoreCodeResult {

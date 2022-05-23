@@ -4,6 +4,8 @@ use cosmrs::{bip32, crypto::secp256k1};
 use prost::Message;
 
 use crate::framework::config::Account;
+
+#[allow(dead_code)]
 pub struct Client {
     base_url: String,
     chain_id: String,
