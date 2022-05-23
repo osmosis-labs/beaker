@@ -4,6 +4,10 @@ use anyhow::{Context as _, Result};
 use config::Map;
 use serde::{Deserialize, Serialize};
 
+pub const STATE_DIR: &'static str = ".membrane";
+pub const STATE_FILE: &'static str = "state.json";
+pub const STATE_FILE_LOCAL: &'static str = "state.local.json";
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct WasmRef {
     code_id: u64,
@@ -27,6 +31,18 @@ impl State {
         let content =
             serde_json::to_string_pretty(self).with_context(|| "Unable to serialize to json")?;
         fs::write(&path, content).with_context(|| format!("Unabel to write to `{path_str}`"))
+    }
+
+    pub fn update_state_file(root: PathBuf, f: &(dyn Fn(&State) -> State)) -> Result<State> {
+        let state_dir = &root.join(STATE_DIR);
+        let state_file = &state_dir.join(STATE_FILE_LOCAL); // TODO: Make state file generic
+        fs::create_dir_all(state_dir)?;
+        let s = State::load(state_file).unwrap_or_default();
+
+        let s = f(&s);
+        s.save(state_file)?;
+
+        Ok(s)
     }
 
     pub fn update_code_id(&self, chain_id: &str, contract_name: &str, code_id: &u64) -> Self {

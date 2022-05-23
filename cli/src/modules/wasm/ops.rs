@@ -174,13 +174,10 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
         dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
 
-        let state_dir = &ctx.root()?.join(".membrane"); // STATE_DIR, STATE_FILE, STATE_FILE_LOCAL
-        let state_file = &state_dir.join("state.local.json");
-        fs::create_dir_all(state_dir)?;
-        State::load(state_file)
-            .unwrap_or_default()
-            .update_code_id(chain_id, contract_name, &code_id)
-            .save(state_file)?;
+        let root = ctx.root()?;
+        State::update_state_file(root, &|s: &State| -> State {
+            s.update_code_id(chain_id, contract_name, &code_id)
+        })?;
 
         println!("  🎉  Code stored successfully with code id: {code_id}");
 
