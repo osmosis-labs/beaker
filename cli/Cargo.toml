@@ -17,6 +17,7 @@ derive-new = "0.5.9"
 getset = "0.1.2"
 prost = "0.10.3"
 serde = "1.0.137"
+serde_json = "1.0.81"
 structopt = "0.3.26"
 tokio = {version = "1.18.2", features = ["full"]}
 
