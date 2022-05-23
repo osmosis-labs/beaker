@@ -2,7 +2,7 @@ use super::config::WasmConfig;
 use super::ops;
 use crate::{
     framework::{Context, Module},
-    utils::cosmos::extract_private_key,
+    support::cosmos::extract_private_key,
 };
 use anyhow::Result;
 use clap::Subcommand;

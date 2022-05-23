@@ -1,6 +1,6 @@
 use super::config::WasmConfig;
-use crate::utils::template::Template;
-use crate::{framework::Context, utils::cosmos::Client};
+use crate::support::template::Template;
+use crate::{framework::Context, support::cosmos::Client};
 use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;

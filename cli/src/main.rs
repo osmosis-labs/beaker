@@ -1,6 +1,6 @@
 mod framework;
 mod modules;
-mod utils;
+mod support;
 
 use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};

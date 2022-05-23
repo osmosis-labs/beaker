@@ -1,4 +1,4 @@
-use crate::utils::template::Template;
+use crate::support::template::Template;
 use serde::Deserialize;
 use serde::Serialize;
 use std::path::PathBuf;

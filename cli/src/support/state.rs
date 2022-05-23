@@ -2,7 +2,6 @@ use std::{fs, path::PathBuf};
 
 use anyhow::{Context as _, Result};
 use config::Map;
-use cosmos_sdk_proto::cosmwasm::wasm;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
