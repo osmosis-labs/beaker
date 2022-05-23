@@ -2,13 +2,15 @@ use std::{fs, path::PathBuf};
 
 use anyhow::{Context as _, Result};
 use config::Map;
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 pub const STATE_DIR: &str = ".membrane";
 // pub const STATE_FILE: &'static str = "state.json";
 pub const STATE_FILE_LOCAL: &str = "state.local.json";
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default, Getters)]
+#[get = "pub"]
 pub struct WasmRef {
     code_id: u64,
     addresses: Map<String, String>,
@@ -18,6 +20,16 @@ pub struct WasmRef {
 pub struct State(Map<String, Map<String, WasmRef>>);
 
 impl State {
+    pub fn get_ref(&self, chain_id: &str, contract_name: &str) -> Result<WasmRef> {
+        let State(m) = self;
+        let chain_id_m = m
+            .get(chain_id)
+            .with_context(|| format!("No state found for chain id `{chain_id}`"))?;
+        chain_id_m.get(contract_name).cloned().with_context(|| {
+            format!("No state found for contract name `{contract_name}` on chain id `{chain_id}`")
+        })
+    }
+
     pub fn load(path: &PathBuf) -> Result<Self> {
         let path_str = path.to_string_lossy();
         let content = fs::read_to_string(path)

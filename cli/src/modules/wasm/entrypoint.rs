@@ -62,6 +62,32 @@ pub enum WasmCmd {
         signer_private_key: Option<String>,
         // TODO: implement --all flag
     },
+    /// Instanitate .wasm stored on chain
+    Instantiate {
+        /// Name of the contract to instantiate
+        contract_name: String,
+        /// Raw json string to use as instantiate msg
+        raw: Option<String>,
+        /// Target chain to store code
+        #[clap(short, long, default_value = "localosmosis")]
+        chain_id: String,
+
+        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
+        #[clap(short, long, default_value = "0")]
+        timeout_height: u32,
+
+        /// Specifies predifined account as a tx signer
+        #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]
+        signer_account: Option<String>,
+
+        /// Specifies mnemonic as a tx signer
+        #[clap(long, conflicts_with_all=&["signer-account", "signer-private-key"])]
+        signer_mnemonic: Option<String>,
+
+        /// Specifies private_key as a tx signer (base64 encoded string)
+        #[clap(long, conflicts_with_all=&["signer-account", "signer-mnemonic"])]
+        signer_private_key: Option<String>,
+    },
 }
 
 #[derive(new)]
@@ -103,6 +129,30 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_priv,
                 )?;
                 Ok(())
+            }
+            WasmCmd::Instantiate {
+                contract_name,
+                raw,
+                chain_id,
+                timeout_height,
+                signer_account,
+                signer_mnemonic,
+                signer_private_key,
+            } => {
+                let signer_priv = extract_private_key(
+                    &ctx.global_config()?,
+                    signer_account.as_ref().map(|s| &**s),
+                    signer_mnemonic.as_ref().map(|s| &**s),
+                    signer_private_key.as_ref().map(|s| &**s),
+                )?;
+                ops::instantiate(
+                    ctx,
+                    contract_name,
+                    raw.as_ref(),
+                    chain_id,
+                    timeout_height,
+                    signer_priv,
+                )
             }
         }
     }
