@@ -1,4 +1,5 @@
 use super::config::WasmConfig;
+use crate::support::state::State;
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::anyhow;
@@ -13,7 +14,7 @@ use cosmrs::{
     Coin,
 };
 use getset::Getters;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{BufReader, Read};
 use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
@@ -102,7 +103,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let signer_pub = signer_priv.public_key();
     let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
 
-    let wasm = read_wasm(ctx, contract_name)?;
+    let wasm = read_wasm(&ctx, contract_name)?;
 
     // TODO: auto gas
     // https://docs.cosmos.network/main/basics/tx-lifecycle.html#gas-and-fees
@@ -173,6 +174,14 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
         dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
 
+        let state_dir = &ctx.root()?.join(".membrane"); // STATE_DIR, STATE_FILE, STATE_FILE_LOCAL
+        let state_file = &state_dir.join("state.local.json");
+        fs::create_dir_all(state_dir)?;
+        State::load(state_file)
+            .unwrap_or_default()
+            .update_code_id(chain_id, contract_name, &code_id)
+            .save(state_file)?;
+
         println!("  🎉  Code stored successfully with code id: {code_id}");
 
         anyhow::Ok(StoreCodeResult { code_id })
@@ -180,7 +189,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 }
 
 fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: Ctx,
+    ctx: &Ctx,
     contract_name: &str,
 ) -> Result<Vec<u8>, anyhow::Error> {
     let wasm_path = ctx

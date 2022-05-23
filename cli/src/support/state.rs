@@ -4,13 +4,13 @@ use anyhow::{Context as _, Result};
 use config::Map;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct WasmRef {
     code_id: u64,
     addresses: Map<String, String>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct State(Map<String, Map<String, WasmRef>>);
 
 impl State {
