@@ -2,7 +2,7 @@ use super::config::WasmConfig;
 use super::ops;
 use crate::{
     framework::{Context, Module},
-    support::signer::SignerArgs,
+    support::{gas::GasArgs, signer::SignerArgs},
 };
 use anyhow::Result;
 use clap::Subcommand;
@@ -38,19 +38,16 @@ pub enum WasmCmd {
         /// Target chain to store code
         #[clap(short, long, default_value = "localosmosis")]
         chain_id: String,
-        /// Amount of coin willing to pay as gas
-        #[clap(long)]
-        gas: u64,
-        /// Limit to how much gas amount allowed to be consumed
-        #[clap(long)]
-        gas_limit: u64,
+
+        #[clap(flatten)]
+        gas_args: GasArgs,
+
+        #[clap(flatten)]
+        signer_args: SignerArgs,
 
         /// Specifies a block timeout height to prevent the tx from being committed past a certain height
         #[clap(short, long, default_value = "0")]
         timeout_height: u32,
-
-        #[clap(flatten)]
-        signer_args: SignerArgs,
         // TODO: implement --all flag
     },
     /// Instanitate .wasm stored on chain
@@ -64,12 +61,15 @@ pub enum WasmCmd {
         #[clap(short, long, default_value = "localosmosis")]
         chain_id: String,
 
-        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
-        #[clap(short, long, default_value = "0")]
-        timeout_height: u32,
+        #[clap(flatten)]
+        gas_args: GasArgs,
 
         #[clap(flatten)]
         signer_args: SignerArgs,
+
+        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
+        #[clap(short, long, default_value = "0")]
+        timeout_height: u32,
     },
 }
 
@@ -88,17 +88,16 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::StoreCode {
                 chain_id,
                 contract_name,
-                gas: gas_amount,
-                gas_limit,
-                timeout_height,
                 signer_args: signer_arg,
+                gas_args,
+                timeout_height,
             } => {
                 ops::store_code(
                     &ctx,
                     contract_name,
                     chain_id,
-                    gas_amount,
-                    gas_limit,
+                    gas_args.gas(),
+                    gas_args.gas_limit(),
                     timeout_height,
                     signer_arg.private_key(&ctx.global_config()?)?,
                 )?;
@@ -108,8 +107,9 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 raw,
                 chain_id,
-                timeout_height,
                 signer_args,
+                gas_args,
+                timeout_height,
             } => {
                 ops::instantiate(
                     &ctx,
@@ -117,6 +117,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     raw.as_ref(),
                     chain_id,
                     timeout_height,
+                    gas_args.gas(),
+                    gas_args.gas_limit(),
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())

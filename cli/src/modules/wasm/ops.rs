@@ -203,6 +203,8 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     raw: Option<&String>,
     chain_id: &str,
     timeout_height: &u32,
+    gas_amount: &u64,
+    gas_limit: &u64,
     signer_priv: SigningKey,
 ) -> Result<InstantiateResult> {
     let global_config = ctx.global_config()?;
@@ -216,10 +218,10 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     // TODO: auto gas
     // https://docs.cosmos.network/main/basics/tx-lifecycle.html#gas-and-fees
     let amount = Coin {
-        amount: 1000000u64.into(),
+        amount: (*gas_amount).into(),
         denom: denom.parse().unwrap(),
     };
-    let fee = Fee::from_amount_and_gas(amount, 10000000); // TODO: Expose this
+    let fee = Fee::from_amount_and_gas(amount, *gas_limit);
 
     let state = State::load(&ctx.root()?.join(".membrane/state.local.json"))?;
     let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
