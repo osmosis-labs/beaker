@@ -190,6 +190,13 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
+#[allow(dead_code)]
+#[derive(Getters)]
+#[get = "pub"]
+pub struct InstantiateResult {
+    address: String,
+}
+
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     contract_name: &str,
@@ -197,7 +204,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     chain_id: &str,
     timeout_height: &u32,
     signer_priv: SigningKey,
-) -> Result<()> {
+) -> Result<InstantiateResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let denom = global_config.denom().as_str();
@@ -292,9 +299,10 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         println!("    └── code_id: {code_id}");
         println!();
 
-        Ok(())
-    })?;
-    Ok(())
+        Ok(InstantiateResult {
+            address: address.to_string(),
+        })
+    })
 }
 
 fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(

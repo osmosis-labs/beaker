@@ -67,6 +67,7 @@ pub enum WasmCmd {
         /// Name of the contract to instantiate
         contract_name: String,
         /// Raw json string to use as instantiate msg
+        #[clap(short, long)]
         raw: Option<String>,
         /// Target chain to store code
         #[clap(short, long, default_value = "localosmosis")]
@@ -152,7 +153,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     chain_id,
                     timeout_height,
                     signer_priv,
-                )
+                )?;
+                Ok(())
             }
         }
     }
