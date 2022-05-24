@@ -2,7 +2,7 @@ use super::config::WasmConfig;
 use super::ops;
 use crate::{
     framework::{Context, Module},
-    support::cosmos::extract_private_key,
+    support::signer::SignerArgs,
 };
 use anyhow::Result;
 use clap::Subcommand;
@@ -49,17 +49,8 @@ pub enum WasmCmd {
         #[clap(short, long, default_value = "0")]
         timeout_height: u32,
 
-        /// Specifies predifined account as a tx signer
-        #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]
-        signer_account: Option<String>,
-
-        /// Specifies mnemonic as a tx signer
-        #[clap(long, conflicts_with_all=&["signer-account", "signer-private-key"])]
-        signer_mnemonic: Option<String>,
-
-        /// Specifies private_key as a tx signer (base64 encoded string)
-        #[clap(long, conflicts_with_all=&["signer-account", "signer-mnemonic"])]
-        signer_private_key: Option<String>,
+        #[clap(flatten)]
+        signer_args: SignerArgs,
         // TODO: implement --all flag
     },
     /// Instanitate .wasm stored on chain
@@ -77,17 +68,8 @@ pub enum WasmCmd {
         #[clap(short, long, default_value = "0")]
         timeout_height: u32,
 
-        /// Specifies predifined account as a tx signer
-        #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]
-        signer_account: Option<String>,
-
-        /// Specifies mnemonic as a tx signer
-        #[clap(long, conflicts_with_all=&["signer-account", "signer-private-key"])]
-        signer_mnemonic: Option<String>,
-
-        /// Specifies private_key as a tx signer (base64 encoded string)
-        #[clap(long, conflicts_with_all=&["signer-account", "signer-mnemonic"])]
-        signer_private_key: Option<String>,
+        #[clap(flatten)]
+        signer_args: SignerArgs,
     },
 }
 
@@ -101,33 +83,24 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name: name,
                 target_dir, // TODO: Rremove this
                 version,
-            } => ops::new(ctx, name, version.to_owned(), target_dir.to_owned()),
-            WasmCmd::Build { optimize, aarch64 } => ops::build(ctx, optimize, aarch64),
+            } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
+            WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64),
             WasmCmd::StoreCode {
                 chain_id,
                 contract_name,
                 gas: gas_amount,
                 gas_limit,
                 timeout_height,
-                signer_account,
-                signer_mnemonic,
-                signer_private_key,
+                signer_args: signer_arg,
             } => {
-                let signer_priv = extract_private_key(
-                    &ctx.global_config()?,
-                    signer_account.as_ref().map(|s| &**s),
-                    signer_mnemonic.as_ref().map(|s| &**s),
-                    signer_private_key.as_ref().map(|s| &**s),
-                )?;
-
                 ops::store_code(
-                    ctx,
+                    &ctx,
                     contract_name,
                     chain_id,
                     gas_amount,
                     gas_limit,
                     timeout_height,
-                    signer_priv,
+                    signer_arg.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())
             }
@@ -136,23 +109,15 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 raw,
                 chain_id,
                 timeout_height,
-                signer_account,
-                signer_mnemonic,
-                signer_private_key,
+                signer_args,
             } => {
-                let signer_priv = extract_private_key(
-                    &ctx.global_config()?,
-                    signer_account.as_ref().map(|s| &**s),
-                    signer_mnemonic.as_ref().map(|s| &**s),
-                    signer_private_key.as_ref().map(|s| &**s),
-                )?;
                 ops::instantiate(
-                    ctx,
+                    &ctx,
                     contract_name,
                     raw.as_ref(),
                     chain_id,
                     timeout_height,
-                    signer_priv,
+                    signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())
             }

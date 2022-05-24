@@ -20,7 +20,7 @@ use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
 
 pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: Ctx,
+    ctx: &Ctx,
     name: &str,
     version: Option<String>,
     target_dir: Option<PathBuf>,
@@ -36,7 +36,7 @@ pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
 }
 
 pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: Ctx,
+    ctx: &Ctx,
     optimize: &bool,
     aarch64: &bool,
 ) -> Result<()> {
@@ -88,7 +88,7 @@ pub struct StoreCodeResult {
 }
 
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: Ctx,
+    ctx: &Ctx,
     contract_name: &str,
     chain_id: &str,
     gas_amount: &u64,
@@ -104,7 +104,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let signer_pub = signer_priv.public_key();
     let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
 
-    let wasm = read_wasm(&ctx, contract_name)?;
+    let wasm = read_wasm(ctx, contract_name)?;
 
     // TODO: auto gas
     // https://docs.cosmos.network/main/basics/tx-lifecycle.html#gas-and-fees
@@ -198,7 +198,7 @@ pub struct InstantiateResult {
 }
 
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: Ctx,
+    ctx: &Ctx,
     contract_name: &str,
     raw: Option<&String>,
     chain_id: &str,
@@ -299,9 +299,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         println!("    └── code_id: {code_id}");
         println!();
 
-        Ok(InstantiateResult {
-            address: address.to_string(),
-        })
+        Ok(InstantiateResult { address })
     })
 }
 
