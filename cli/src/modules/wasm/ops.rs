@@ -1,4 +1,7 @@
 use super::config::WasmConfig;
+use super::response::{InstantiateResponse, StoreCodeResponse};
+use crate::modules::wasm::response::OpResponse;
+use crate::support::cosmos::ResponseValuePicker;
 use crate::support::state::State;
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
@@ -6,13 +9,10 @@ use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::cosmwasm::{MsgInstantiateContract, MsgStoreCode};
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::tendermint::abci::tag::Key;
 use cosmrs::tx::{Fee, Msg};
-use getset::Getters;
 use std::fs::File;
 use std::future::Future;
 use std::io::{BufReader, Read};
-use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
 
 pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
@@ -76,13 +76,6 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     Ok(())
 }
 
-#[allow(dead_code)]
-#[derive(Getters)]
-#[get = "pub"]
-pub struct StoreCodeResult {
-    code_id: u64,
-}
-
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
@@ -90,7 +83,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     fee: &Fee,
     timeout_height: &u32,
     signing_key: SigningKey,
-) -> Result<StoreCodeResult> {
+) -> Result<StoreCodeResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
@@ -108,47 +101,21 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     .unwrap();
 
     block(async {
-        let tx_commit_response = client
+        let response = client
             .sign_and_broadcast(vec![msg_store_code], fee.clone(), "", timeout_height)
             .await?;
 
-        // === Extract info (variant with pattern)
-        let code_id: u64 = tx_commit_response
-            .deliver_tx
-            .events
-            .iter()
-            .find(|e| e.type_str == "store_code")
-            .unwrap()
-            .attributes
-            .iter()
-            .find(|a| a.key == Key::from_str("code_id").unwrap())
-            .unwrap()
-            .value
-            .to_string()
-            .parse()?;
+        let code_id: u64 = response.pick("store_code", "code_id").to_string().parse()?;
+        let store_code_response = StoreCodeResponse { code_id };
 
-        // State update (variant)
-        let root = ctx.root()?;
-        State::update_state_file(root, &|s: &State| -> State {
+        State::update_state_file(ctx.root()?, &|s: &State| -> State {
             s.update_code_id(chain_id, contract_name, &code_id)
         })?;
 
-        // Format and print result (variant with pattern)
-        println!();
-        println!("  Code stored successfully!! 🎉 ");
-        println!("    +");
-        println!("    └── code_id: {code_id}");
-        println!();
+        println!("{}", store_code_response.output_format());
 
-        anyhow::Ok(StoreCodeResult { code_id })
+        anyhow::Ok(store_code_response)
     })
-}
-
-#[allow(dead_code)]
-#[derive(Getters)]
-#[get = "pub"]
-pub struct InstantiateResult {
-    address: String,
 }
 
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
@@ -159,7 +126,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     timeout_height: &u32,
     fee: &Fee,
     signing_key: SigningKey,
-) -> Result<InstantiateResult> {
+) -> Result<InstantiateResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
@@ -182,7 +149,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     .unwrap();
 
     block(async {
-        let tx_commit_response = client
+        let response = client
             .sign_and_broadcast(
                 vec![msg_instantiate_contract],
                 fee.clone(),
@@ -191,32 +158,23 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
             )
             .await?;
 
-        let address = tx_commit_response
-            .deliver_tx
-            .events
-            .iter()
-            .find(|e| e.type_str == "instantiate")
-            .unwrap()
-            .attributes
-            .iter()
-            .find(|a| a.key == Key::from_str("_contract_address").unwrap())
-            .unwrap()
-            .value
+        let contract_address = response
+            .pick("instantiate", "_contract_address")
             .to_string();
 
-        let root = ctx.root()?;
-        State::update_state_file(root, &|s: &State| -> State {
-            s.update_address(chain_id, contract_name, "default", &address) // TODO: make label an argument
+        let instantiate_response = InstantiateResponse {
+            code_id,
+            contract_address: contract_address.clone(),
+        };
+
+        println!("{}", instantiate_response.output_format());
+
+        State::update_state_file(ctx.root()?, &|s: &State| -> State {
+            s.update_address(chain_id, contract_name, "default", &contract_address)
+            // TODO: make label an argument
         })?;
 
-        println!();
-        println!("  Contract instantiated successfully!! 🎉 ");
-        println!("    +");
-        println!("    ├── address: {address}");
-        println!("    └── code_id: {code_id}");
-        println!();
-
-        Ok(InstantiateResult { address })
+        Ok(instantiate_response)
     })
 }
 

@@ -1,15 +1,36 @@
+use std::str::FromStr;
+
 use anyhow::anyhow;
 use anyhow::{Context, Result};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
-
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::tendermint::abci::tag::{Key, Value};
 use cosmrs::tx::{self, SignDoc, SignerInfo};
 use cosmrs::{dev, AccountId};
 use cosmrs::{rpc, tx::Fee, Any};
 use prost::Message;
 
-#[allow(dead_code)]
 pub type TxCommitResponse = rpc::endpoint::broadcast::tx_commit::Response;
+
+pub trait ResponseValuePicker {
+    fn pick(&self, event: &str, attribute: &str) -> Value;
+}
+
+impl ResponseValuePicker for TxCommitResponse {
+    fn pick(&self, event: &str, attribute: &str) -> Value {
+        self.deliver_tx
+            .events
+            .iter()
+            .find(|e| e.type_str == event)
+            .unwrap()
+            .attributes
+            .iter()
+            .find(|a| a.key == Key::from_str(attribute).unwrap())
+            .unwrap()
+            .value
+            .clone()
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
