@@ -97,7 +97,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     &ctx,
                     contract_name,
                     chain_id,
-                    &Fee::try_from(*gas_args)?,
+                    &Fee::try_from(gas_args)?,
                     timeout_height,
                     signer_arg.private_key(&ctx.global_config()?)?,
                 )?;
@@ -117,7 +117,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     raw.as_ref(),
                     chain_id,
                     timeout_height,
-                    &Fee::try_from(*gas_args)?,
+                    &Fee::try_from(gas_args)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())

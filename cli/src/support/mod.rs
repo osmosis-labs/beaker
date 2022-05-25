@@ -1,3 +1,4 @@
+pub mod coin;
 pub mod cosmos;
 pub mod gas;
 pub mod signer;

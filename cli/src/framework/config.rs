@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 pub struct GlobalConfig {
     name: String,
     account_prefix: String,
-    denom: String,
     derivation_path: String,
     accounts: Map<String, Account>,
 }
@@ -25,7 +24,6 @@ impl Default for GlobalConfig {
         Self {
             name: Default::default(),
             account_prefix: "osmo".to_string(),
-            denom: "uosmo".to_string(),
             derivation_path: "m/44'/118'/0'/0/0".to_string(),
             accounts: Map::from([
                 ("validator".into(), Account::FromMnemonic { mnemonic: "satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn".into() }),
