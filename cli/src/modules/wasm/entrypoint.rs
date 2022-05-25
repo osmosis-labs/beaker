@@ -6,6 +6,7 @@ use crate::{
 };
 use anyhow::Result;
 use clap::Subcommand;
+use cosmrs::tx::Fee;
 use derive_new::new;
 use std::path::PathBuf;
 
@@ -96,8 +97,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     &ctx,
                     contract_name,
                     chain_id,
-                    gas_args.gas(),
-                    gas_args.gas_limit(),
+                    &Fee::try_from(*gas_args)?,
                     timeout_height,
                     signer_arg.private_key(&ctx.global_config()?)?,
                 )?;
@@ -117,8 +117,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     raw.as_ref(),
                     chain_id,
                     timeout_height,
-                    gas_args.gas(),
-                    gas_args.gas_limit(),
+                    &Fee::try_from(*gas_args)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())

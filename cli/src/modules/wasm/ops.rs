@@ -8,11 +8,8 @@ use anyhow::Result;
 use cosmrs::cosmwasm::{MsgInstantiateContract, MsgStoreCode};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tendermint::abci::tag::Key;
+use cosmrs::tx::{self, Fee, Msg, SignDoc, SignerInfo};
 use cosmrs::{dev, rpc};
-use cosmrs::{
-    tx::{self, Fee, Msg, SignDoc, SignerInfo},
-    Coin,
-};
 use getset::Getters;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -91,28 +88,18 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
     chain_id: &str,
-    gas_amount: &u64,
-    gas_limit: &u64,
+    fee: &Fee,
     timeout_height: &u32,
     signer_priv: SigningKey,
 ) -> Result<StoreCodeResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
-    let denom = global_config.denom().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
     let signer_pub = signer_priv.public_key();
     let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
 
     let wasm = read_wasm(ctx, contract_name)?;
-
-    // TODO: auto gas
-    // https://docs.cosmos.network/main/basics/tx-lifecycle.html#gas-and-fees
-    let amount = Coin {
-        amount: gas_amount.to_owned().into(),
-        denom: denom.parse().unwrap(),
-    };
-    let fee = Fee::from_amount_and_gas(amount, *gas_limit);
 
     let msg_store_code = MsgStoreCode {
         sender: signer_account_id.clone(),
@@ -130,7 +117,8 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
             .with_context(|| "Account can't be initialized")?;
 
         let tx_body = tx::Body::new(vec![msg_store_code], "", *timeout_height);
-        let auth_info = SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee);
+        let auth_info =
+            SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee.clone());
         let sign_doc = SignDoc::new(
             &tx_body,
             &auth_info,
@@ -203,25 +191,15 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     raw: Option<&String>,
     chain_id: &str,
     timeout_height: &u32,
-    gas_amount: &u64,
-    gas_limit: &u64,
+    fee: &Fee,
     signer_priv: SigningKey,
 ) -> Result<InstantiateResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
-    let denom = global_config.denom().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
     let signer_pub = signer_priv.public_key();
     let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
-
-    // TODO: auto gas
-    // https://docs.cosmos.network/main/basics/tx-lifecycle.html#gas-and-fees
-    let amount = Coin {
-        amount: (*gas_amount).into(),
-        denom: denom.parse().unwrap(),
-    };
-    let fee = Fee::from_amount_and_gas(amount, *gas_limit);
 
     let state = State::load(&ctx.root()?.join(".membrane/state.local.json"))?;
     let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
@@ -245,7 +223,8 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
             .with_context(|| "Account can't be initialized")?;
 
         let tx_body = tx::Body::new(vec![msg_instantiate_contract], "", *timeout_height);
-        let auth_info = SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee);
+        let auth_info =
+            SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee.clone());
         let sign_doc = SignDoc::new(
             &tx_body,
             &auth_info,
