@@ -90,19 +90,18 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     chain_id: &str,
     fee: &Fee,
     timeout_height: &u32,
-    signer_priv: SigningKey,
+    signing_key: SigningKey,
 ) -> Result<StoreCodeResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
-    let signer_pub = signer_priv.public_key();
-    let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
+    let client = Client::local(chain_id, derivation_path)
+        .to_signing_client(signing_key, account_prefix.to_string());
 
     let wasm = read_wasm(ctx, contract_name)?;
-
     let msg_store_code = MsgStoreCode {
-        sender: signer_account_id.clone(),
+        sender: client.signer_account_id(),
         wasm_byte_code: wasm,
         instantiate_permission: None, // TODO: Add this when working on migration
     }
@@ -110,43 +109,11 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     .unwrap();
 
     init_tokio_runtime().block_on(async {
-        let client = Client::local(chain_id, derivation_path);
-        let acc = client
-            .account(signer_account_id.as_ref())
-            .await
-            .with_context(|| "Account can't be initialized")?;
+        let tx_commit_response = client
+            .sign_and_broadcast(vec![msg_store_code], fee.clone(), "", timeout_height)
+            .await?;
 
-        let tx_body = tx::Body::new(vec![msg_store_code], "", *timeout_height);
-        let auth_info =
-            SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee.clone());
-        let sign_doc = SignDoc::new(
-            &tx_body,
-            &auth_info,
-            &chain_id.parse().unwrap(),
-            acc.account_number,
-        )
-        .unwrap();
-        let tx_raw = sign_doc.sign(&signer_priv).unwrap();
-
-        let rpc_client = rpc::HttpClient::new(client.rpc_address().as_str()).unwrap();
-        dev::poll_for_first_block(&rpc_client).await;
-
-        let tx_commit_response = tx_raw.broadcast_commit(&rpc_client).await.unwrap();
-
-        if tx_commit_response.check_tx.code.is_err() {
-            return Err(anyhow!(
-                "check_tx failed: {:?}",
-                tx_commit_response.check_tx
-            ));
-        }
-
-        if tx_commit_response.deliver_tx.code.is_err() {
-            return Err(anyhow!(
-                "deliver_tx failed: {:?}",
-                tx_commit_response.deliver_tx
-            ));
-        }
-
+        // === Extract info (variant with pattern)
         let code_id: u64 = tx_commit_response
             .deliver_tx
             .events
@@ -161,13 +128,13 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
             .to_string()
             .parse()?;
 
-        dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
-
+        // State update (variant)
         let root = ctx.root()?;
         State::update_state_file(root, &|s: &State| -> State {
             s.update_code_id(chain_id, contract_name, &code_id)
         })?;
 
+        // Format and print result (variant with pattern)
         println!();
         println!("  Code stored successfully!! 🎉 ");
         println!("    +");
