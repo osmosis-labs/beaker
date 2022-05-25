@@ -2,16 +2,15 @@ use super::config::WasmConfig;
 use crate::support::state::State;
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
-use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::cosmwasm::{MsgInstantiateContract, MsgStoreCode};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tendermint::abci::tag::Key;
-use cosmrs::tx::{self, Fee, Msg, SignDoc, SignerInfo};
-use cosmrs::{dev, rpc};
+use cosmrs::tx::{Fee, Msg};
 use getset::Getters;
 use std::fs::File;
+use std::future::Future;
 use std::io::{BufReader, Read};
 use std::str::FromStr;
 use std::{env, path::PathBuf, process::Command};
@@ -108,7 +107,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     .to_any()
     .unwrap();
 
-    init_tokio_runtime().block_on(async {
+    block(async {
         let tx_commit_response = client
             .sign_and_broadcast(vec![msg_store_code], fee.clone(), "", timeout_height)
             .await?;
@@ -159,20 +158,20 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     chain_id: &str,
     timeout_height: &u32,
     fee: &Fee,
-    signer_priv: SigningKey,
+    signing_key: SigningKey,
 ) -> Result<InstantiateResult> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
-    let signer_pub = signer_priv.public_key();
-    let signer_account_id = signer_pub.account_id(account_prefix).unwrap();
+    let client = Client::local(chain_id, derivation_path)
+        .to_signing_client(signing_key, account_prefix.to_string());
 
     let state = State::load(&ctx.root()?.join(".membrane/state.local.json"))?;
     let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
 
     let msg_instantiate_contract = MsgInstantiateContract {
-        sender: signer_account_id.clone(),
+        sender: client.signer_account_id(),
         admin: None, // TODO: Fix this when working on migration
         code_id,
         label: Some("default".to_string()), // TODO: Expose this
@@ -182,45 +181,15 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     .to_any()
     .unwrap();
 
-    init_tokio_runtime().block_on(async {
-        let client = Client::local(chain_id, derivation_path);
-        let acc = client
-            .account(signer_account_id.as_ref())
-            .await
-            .with_context(|| "Account can't be initialized")?;
-
-        let tx_body = tx::Body::new(vec![msg_instantiate_contract], "", *timeout_height);
-        let auth_info =
-            SignerInfo::single_direct(Some(signer_pub), acc.sequence).auth_info(fee.clone());
-        let sign_doc = SignDoc::new(
-            &tx_body,
-            &auth_info,
-            &chain_id.parse().unwrap(),
-            acc.account_number,
-        )
-        .unwrap();
-        let tx_raw = sign_doc.sign(&signer_priv).unwrap();
-
-        let rpc_client = rpc::HttpClient::new(client.rpc_address().as_str()).unwrap();
-        dev::poll_for_first_block(&rpc_client).await;
-
-        let tx_commit_response = tx_raw.broadcast_commit(&rpc_client).await.unwrap();
-
-        if tx_commit_response.check_tx.code.is_err() {
-            return Err(anyhow!(
-                "check_tx failed: {:?}",
-                tx_commit_response.check_tx
-            ));
-        }
-
-        if tx_commit_response.deliver_tx.code.is_err() {
-            return Err(anyhow!(
-                "deliver_tx failed: {:?}",
-                tx_commit_response.deliver_tx
-            ));
-        }
-
-        dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
+    block(async {
+        let tx_commit_response = client
+            .sign_and_broadcast(
+                vec![msg_instantiate_contract],
+                fee.clone(),
+                "",
+                timeout_height,
+            )
+            .await?;
 
         let address = tx_commit_response
             .deliver_tx
@@ -272,9 +241,10 @@ fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(
     Ok(wasm)
 }
 
-fn init_tokio_runtime() -> tokio::runtime::Runtime {
+fn block<F: Future>(future: F) -> F::Output {
     tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap()
+        .block_on(future)
 }
