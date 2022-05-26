@@ -1,7 +1,7 @@
 use super::config::WasmConfig;
 use super::response::{InstantiateResponse, StoreCodeResponse};
-use crate::modules::wasm::response::OpResponse;
 use crate::support::cosmos::ResponseValuePicker;
+use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
@@ -111,8 +111,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
         State::update_state_file(ctx.root()?, &|s: &State| -> State {
             s.update_code_id(chain_id, contract_name, &code_id)
         })?;
-
-        println!("{}", store_code_response.output_format());
+        store_code_response.log();
 
         anyhow::Ok(store_code_response)
     })
@@ -144,14 +143,12 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         label: Some("default".to_string()), // TODO: Expose this
         msg: raw.map(|s| s.as_bytes().to_vec()).unwrap_or_default(),
         funds: vec![], // TODO: Add options for adding funds
-    }
-    .to_any()
-    .unwrap();
+    };
 
     block(async {
         let response = client
             .sign_and_broadcast(
-                vec![msg_instantiate_contract],
+                vec![msg_instantiate_contract.to_any().unwrap()],
                 fee.clone(),
                 "",
                 timeout_height,
@@ -165,9 +162,17 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         let instantiate_response = InstantiateResponse {
             code_id,
             contract_address: contract_address.clone(),
+            label: msg_instantiate_contract
+                .label
+                .unwrap_or_else(|| "-".to_string()),
+            creator: msg_instantiate_contract.sender.to_string(),
+            admin: msg_instantiate_contract
+                .admin
+                .map(|a| a.to_string())
+                .unwrap_or_else(|| "-".to_string()),
         };
 
-        println!("{}", instantiate_response.output_format());
+        instantiate_response.log();
 
         State::update_state_file(ctx.root()?, &|s: &State| -> State {
             s.update_address(chain_id, contract_name, "default", &contract_address)
