@@ -55,8 +55,8 @@ pub enum WasmCmd {
     Instantiate {
         /// Name of the contract to instantiate
         contract_name: String,
-        #[clap(short, long, default_value = "default")]
         /// Label for the instantiated contract for later reference
+        #[clap(short, long, default_value = "default")]
         label: String,
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]

@@ -10,7 +10,7 @@ use anyhow::Result;
 use cosmrs::cosmwasm::{MsgInstantiateContract, MsgStoreCode};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::{Fee, Msg};
-use std::fs::File;
+use std::fs::{self, File};
 use std::future::Future;
 use std::io::{BufReader, Read};
 use std::{env, path::PathBuf, process::Command};
@@ -143,7 +143,22 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         admin: None, // TODO: Fix this when working on migration
         code_id,
         label: Some(label.to_string()),
-        msg: raw.map(|s| s.as_bytes().to_vec()).unwrap_or_default(),
+        msg: raw
+            .map(|s| s.as_bytes().to_vec())
+            .map(Ok)
+            .unwrap_or_else(|| {
+                let path = ctx
+                    .root()?
+                    .join("contracts")
+                    .join(contract_name)
+                    .join("instantiate-msgs")
+                    .join(format!("{label}.json"));
+                fs::read_to_string(&path)
+                    .with_context(|| {
+                        format!("Unable to instantiate with `{}`", path.to_string_lossy())
+                    })
+                    .map(|s| s.as_bytes().to_vec())
+            })?,
         funds: vec![], // TODO: Add options for adding funds
     };
 
