@@ -2,7 +2,7 @@ use super::config::WasmConfig;
 use super::response::{InstantiateResponse, StoreCodeResponse};
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::ops_response::OpResponseDisplay;
-use crate::support::state::State;
+use crate::support::state::{State, STATE_DIR, STATE_FILE_LOCAL};
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::Context as _;
@@ -113,13 +113,15 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
         })?;
         store_code_response.log();
 
-        anyhow::Ok(store_code_response)
+        Ok(store_code_response)
     })
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
+    label: &str,
     raw: Option<&String>,
     chain_id: &str,
     timeout_height: &u32,
@@ -133,14 +135,14 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::local(chain_id, derivation_path)
         .to_signing_client(signing_key, account_prefix.to_string());
 
-    let state = State::load(&ctx.root()?.join(".membrane/state.local.json"))?;
+    let state = State::load(&ctx.root()?.join(STATE_DIR).join(STATE_FILE_LOCAL))?;
     let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),
         admin: None, // TODO: Fix this when working on migration
         code_id,
-        label: Some("default".to_string()), // TODO: Expose this
+        label: Some(label.to_string()),
         msg: raw.map(|s| s.as_bytes().to_vec()).unwrap_or_default(),
         funds: vec![], // TODO: Add options for adding funds
     };
@@ -175,8 +177,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         instantiate_response.log();
 
         State::update_state_file(ctx.root()?, &|s: &State| -> State {
-            s.update_address(chain_id, contract_name, "default", &contract_address)
-            // TODO: make label an argument
+            s.update_address(chain_id, contract_name, label, &contract_address)
         })?;
 
         Ok(instantiate_response)
