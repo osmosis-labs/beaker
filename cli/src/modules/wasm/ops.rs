@@ -210,7 +210,11 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     fee: &Fee,
     store_code_signing_key: SigningKey,
     instantiate_signing_key: SigningKey,
+    no_rebuild: &bool,
 ) -> Result<InstantiateResponse> {
+    if !*no_rebuild {
+        build(ctx, &true, &false)?;
+    }
     store_code(
         ctx,
         contract_name,

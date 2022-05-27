@@ -98,6 +98,10 @@ pub enum WasmCmd {
         /// Specifies a block timeout height to prevent the tx from being committed past a certain height
         #[clap(short, long, default_value = "0")]
         timeout_height: u32,
+
+        /// Use existing .wasm file to deploy if set to true
+        #[clap(short, long)]
+        no_rebuild: bool,
     },
 }
 
@@ -159,6 +163,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 gas_args,
                 signer_args,
                 timeout_height,
+                no_rebuild,
             } => {
                 ops::deploy(
                     &ctx,
@@ -170,6 +175,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     &Fee::try_from(gas_args)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                     signer_args.private_key(&ctx.global_config()?)?,
+                    no_rebuild,
                 )?;
                 Ok(())
             }
