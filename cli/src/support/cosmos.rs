@@ -83,12 +83,12 @@ impl Client {
     pub fn to_signing_client(
         &self,
         signing_key: SigningKey,
-        account_prefix: String,
+        account_prefix: &str,
     ) -> SigningClient {
         SigningClient {
             inner: self.clone(),
             signing_key,
-            account_prefix,
+            account_prefix: account_prefix.to_string(),
         }
     }
 

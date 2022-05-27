@@ -88,8 +88,8 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
-    let client = Client::local(chain_id, derivation_path)
-        .to_signing_client(signing_key, account_prefix.to_string());
+    let client =
+        Client::local(chain_id, derivation_path).to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx, contract_name)?;
     let msg_store_code = MsgStoreCode {
@@ -132,8 +132,8 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     let account_prefix = global_config.account_prefix().as_str();
     let derivation_path = global_config.derivation_path().as_str();
 
-    let client = Client::local(chain_id, derivation_path)
-        .to_signing_client(signing_key, account_prefix.to_string());
+    let client =
+        Client::local(chain_id, derivation_path).to_signing_client(signing_key, account_prefix);
 
     let state = State::load(&ctx.root()?.join(STATE_DIR).join(STATE_FILE_LOCAL))?;
     let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
@@ -197,6 +197,38 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
 
         Ok(instantiate_response)
     })
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
+    ctx: &Ctx,
+    contract_name: &str,
+    label: &str,
+    raw: Option<&String>,
+    chain_id: &str,
+    timeout_height: &u32,
+    fee: &Fee,
+    store_code_signing_key: SigningKey,
+    instantiate_signing_key: SigningKey,
+) -> Result<InstantiateResponse> {
+    store_code(
+        ctx,
+        contract_name,
+        chain_id,
+        fee,
+        timeout_height,
+        store_code_signing_key,
+    )?;
+    instantiate(
+        ctx,
+        contract_name,
+        label,
+        raw,
+        chain_id,
+        timeout_height,
+        fee,
+        instantiate_signing_key,
+    )
 }
 
 fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(

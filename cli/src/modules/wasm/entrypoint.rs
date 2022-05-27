@@ -75,6 +75,30 @@ pub enum WasmCmd {
         #[clap(short, long, default_value = "0")]
         timeout_height: u32,
     },
+    /// Build, Optimize, Store code, and instantiate contract
+    Deploy {
+        /// Name of the contract to deploy
+        contract_name: String,
+        /// Label for the instantiated contract for later reference
+        #[clap(short, long, default_value = "default")]
+        label: String,
+        /// Raw json string to use as instantiate msg
+        #[clap(short, long)]
+        raw: Option<String>,
+        /// Target chain to store code
+        #[clap(short, long, default_value = "localosmosis")]
+        chain_id: String,
+
+        #[clap(flatten)]
+        gas_args: GasArgs,
+
+        #[clap(flatten)]
+        signer_args: SignerArgs,
+
+        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
+        #[clap(short, long, default_value = "0")]
+        timeout_height: u32,
+    },
 }
 
 #[derive(new)]
@@ -88,7 +112,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
-            WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64),
+            WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64), // TODO: change optimize -> no-optimize
             WasmCmd::StoreCode {
                 chain_id,
                 contract_name,
@@ -123,6 +147,28 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     chain_id,
                     timeout_height,
                     &Fee::try_from(gas_args)?,
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
+                Ok(())
+            }
+            WasmCmd::Deploy {
+                contract_name,
+                label,
+                raw,
+                chain_id,
+                gas_args,
+                signer_args,
+                timeout_height,
+            } => {
+                ops::deploy(
+                    &ctx,
+                    contract_name,
+                    label.as_str(),
+                    raw.as_ref(),
+                    chain_id,
+                    timeout_height,
+                    &Fee::try_from(gas_args)?,
+                    signer_args.private_key(&ctx.global_config()?)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())
