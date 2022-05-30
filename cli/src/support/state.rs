@@ -81,11 +81,11 @@ impl State {
         State(m)
     }
 
-    pub fn update_code_id(&self, chain_id: &str, contract_name: &str, code_id: &u64) -> Self {
+    pub fn update_code_id(&self, network: &str, contract_name: &str, code_id: &u64) -> Self {
         let State(m) = self;
         let mut m = m.clone();
 
-        m.entry(chain_id.to_string())
+        m.entry(network.to_string())
             .and_modify(|contracts| {
                 contracts
                     .entry(contract_name.to_string())

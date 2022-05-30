@@ -36,9 +36,9 @@ pub enum WasmCmd {
     StoreCode {
         /// Name of the contract to store
         contract_name: String,
-        /// Target chain to store code
-        #[clap(short, long, default_value = "localosmosis")]
-        chain_id: String,
+        /// Target network to store code
+        #[clap(short, long, default_value = "local")]
+        network: String,
 
         #[clap(flatten)]
         gas_args: GasArgs,
@@ -61,9 +61,9 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
-        /// Target chain to store code
-        #[clap(short, long, default_value = "localosmosis")]
-        chain_id: String,
+        /// Target network to store code
+        #[clap(short, long, default_value = "local")]
+        network: String,
 
         #[clap(flatten)]
         gas_args: GasArgs,
@@ -85,9 +85,9 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
-        /// Target chain to store code
-        #[clap(short, long, default_value = "localosmosis")]
-        chain_id: String,
+        /// Target network to store code
+        #[clap(short, long, default_value = "local")]
+        network: String,
 
         #[clap(flatten)]
         gas_args: GasArgs,
@@ -100,7 +100,7 @@ pub enum WasmCmd {
         timeout_height: u32,
 
         /// Use existing .wasm file to deploy if set to true
-        #[clap(short, long)]
+        #[clap(long)]
         no_rebuild: bool,
     },
 }
@@ -118,7 +118,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
             WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64), // TODO: change optimize -> no-optimize
             WasmCmd::StoreCode {
-                chain_id,
+                network,
                 contract_name,
                 signer_args: signer_arg,
                 gas_args,
@@ -127,7 +127,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 ops::store_code(
                     &ctx,
                     contract_name,
-                    chain_id,
+                    network,
                     &Fee::try_from(gas_args)?,
                     timeout_height,
                     signer_arg.private_key(&ctx.global_config()?)?,
@@ -137,7 +137,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::Instantiate {
                 contract_name,
                 raw,
-                chain_id,
+                network,
                 signer_args,
                 gas_args,
                 timeout_height,
@@ -148,7 +148,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
-                    chain_id,
+                    network,
                     timeout_height,
                     &Fee::try_from(gas_args)?,
                     signer_args.private_key(&ctx.global_config()?)?,
@@ -159,7 +159,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
-                chain_id,
+                network,
                 gas_args,
                 signer_args,
                 timeout_height,
@@ -170,7 +170,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
-                    chain_id,
+                    network,
                     timeout_height,
                     &Fee::try_from(gas_args)?,
                     signer_args.private_key(&ctx.global_config()?)?,

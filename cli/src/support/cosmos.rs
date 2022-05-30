@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use crate::framework::config::Network;
 use anyhow::anyhow;
 use anyhow::{Context, Result};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
@@ -32,52 +33,14 @@ impl ResponseValuePicker for TxCommitResponse {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Client {
-    base_url: String,
-    chain_id: String,
-    address_path: String,
-    grpc_port: String,
-    rpc_port: String,
-}
-
-impl Default for Client {
-    fn default() -> Self {
-        Self {
-            chain_id: Default::default(),
-            address_path: Default::default(),
-            base_url: Default::default(),
-            grpc_port: "9090".to_string(),
-            rpc_port: "26657".to_string(),
-        }
-    }
+    network: Network,
 }
 
 impl Client {
-    pub fn _new(
-        base_url: &str,
-        chain_id: &str,
-        address_path: &str,
-        grpc_port: &str,
-        rpc_port: &str,
-    ) -> Self {
-        Client {
-            base_url: base_url.to_string(),
-            chain_id: chain_id.to_string(),
-            address_path: address_path.to_string(),
-            grpc_port: grpc_port.to_string(),
-            rpc_port: rpc_port.to_string(),
-        }
-    }
-
-    pub fn local(chain_id: &str, address_path: &str) -> Self {
-        Client {
-            base_url: "http://localhost".to_string(),
-            chain_id: chain_id.to_string(),
-            address_path: address_path.to_string(),
-            ..Client::default()
-        }
+    pub fn new(network: Network) -> Self {
+        Client { network }
     }
 
     pub fn to_signing_client(
@@ -92,24 +55,13 @@ impl Client {
         }
     }
 
-    pub fn grpc_address(&self) -> String {
-        let base_url = self.base_url.as_str();
-        let grpc_port = self.grpc_port.as_str();
-        format!("{base_url}:{grpc_port}")
-    }
-    pub fn rpc_address(&self) -> String {
-        let base_url = self.base_url.as_str();
-        let rpc_port = self.rpc_port.as_str();
-        format!("{base_url}:{rpc_port}")
-    }
-
     pub async fn account(&self, address: &str) -> Result<BaseAccount> {
         use cosmos_sdk_proto::cosmos::auth::v1beta1::*;
-        let grpc_address = self.grpc_address();
+        let grpc_endpoint = self.network.grpc_endpoint();
 
-        let mut c = query_client::QueryClient::connect(self.grpc_address())
+        let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
             .await
-            .context(format!("Unable to connect to {grpc_address}"))?;
+            .context(format!("Unable to connect to {grpc_endpoint}"))?;
 
         let res = c
             .account(QueryAccountRequest {
@@ -157,14 +109,14 @@ impl SigningClient {
         let sign_doc = SignDoc::new(
             &tx_body,
             &auth_info,
-            &self.inner.chain_id.parse().unwrap(),
+            &self.inner.network.chain_id().parse().unwrap(),
             acc.account_number,
         )
         .unwrap();
         let tx_raw = sign_doc.sign(&self.signing_key).unwrap();
 
         // === Poll for first block (Invariant)
-        let rpc_client = rpc::HttpClient::new(self.inner.rpc_address().as_str()).unwrap();
+        let rpc_client = rpc::HttpClient::new(self.inner.network.rpc_endpoint().as_str()).unwrap();
         dev::poll_for_first_block(&rpc_client).await;
 
         // === Broadcast (Invariant)

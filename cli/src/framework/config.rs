@@ -8,7 +8,16 @@ pub struct GlobalConfig {
     name: String,
     account_prefix: String,
     derivation_path: String,
+    networks: Map<String, Network>,
     accounts: Map<String, Account>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+#[get = "pub"]
+pub struct Network {
+    chain_id: String,
+    grpc_endpoint: String,
+    rpc_endpoint: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -25,6 +34,16 @@ impl Default for GlobalConfig {
             name: Default::default(),
             account_prefix: "osmo".to_string(),
             derivation_path: "m/44'/118'/0'/0/0".to_string(),
+            networks: Map::from([
+                (
+                    "local".into(),
+                    Network { 
+                        chain_id: "localosmosis".into(),
+                        grpc_endpoint: "http://localhost:9090".into(),
+                        rpc_endpoint: "http://localhost:26657".into()
+                    }
+                )
+            ]),
             accounts: Map::from([
                 ("validator".into(), Account::FromMnemonic { mnemonic: "satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn".into() }),
                 ("test1".into(), Account::FromMnemonic { mnemonic: "notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius".into() }),

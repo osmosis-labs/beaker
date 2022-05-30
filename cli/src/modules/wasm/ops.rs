@@ -79,17 +79,22 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
-    chain_id: &str,
+    network: &str,
     fee: &Fee,
     timeout_height: &u32,
     signing_key: SigningKey,
 ) -> Result<StoreCodeResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
-    let derivation_path = global_config.derivation_path().as_str();
 
-    let client =
-        Client::local(chain_id, derivation_path).to_signing_client(signing_key, account_prefix);
+    let client = Client::new(
+        global_config
+            .networks()
+            .get(network)
+            .with_context(|| format!("Unable to find network config: {network}"))?
+            .to_owned(),
+    )
+    .to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx, contract_name)?;
     let msg_store_code = MsgStoreCode {
@@ -109,7 +114,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
         let store_code_response = StoreCodeResponse { code_id };
 
         State::update_state_file(ctx.root()?, &|s: &State| -> State {
-            s.update_code_id(chain_id, contract_name, &code_id)
+            s.update_code_id(network, contract_name, &code_id)
         })?;
         store_code_response.log();
 
@@ -123,20 +128,25 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
-    chain_id: &str,
+    network: &str,
     timeout_height: &u32,
     fee: &Fee,
     signing_key: SigningKey,
 ) -> Result<InstantiateResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
-    let derivation_path = global_config.derivation_path().as_str();
 
-    let client =
-        Client::local(chain_id, derivation_path).to_signing_client(signing_key, account_prefix);
+    let client = Client::new(
+        global_config
+            .networks()
+            .get(network)
+            .with_context(|| format!("Unable to find network config: {network}"))?
+            .to_owned(),
+    )
+    .to_signing_client(signing_key, account_prefix);
 
     let state = State::load(&ctx.root()?.join(STATE_DIR).join(STATE_FILE_LOCAL))?;
-    let code_id = *state.get_ref(chain_id, contract_name)?.code_id();
+    let code_id = *state.get_ref(network, contract_name)?.code_id();
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),
@@ -192,7 +202,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         instantiate_response.log();
 
         State::update_state_file(ctx.root()?, &|s: &State| -> State {
-            s.update_address(chain_id, contract_name, label, &contract_address)
+            s.update_address(network, contract_name, label, &contract_address)
         })?;
 
         Ok(instantiate_response)
@@ -205,7 +215,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
-    chain_id: &str,
+    network: &str,
     timeout_height: &u32,
     fee: &Fee,
     store_code_signing_key: SigningKey,
@@ -218,7 +228,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     store_code(
         ctx,
         contract_name,
-        chain_id,
+        network,
         fee,
         timeout_height,
         store_code_signing_key,
@@ -228,7 +238,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         label,
         raw,
-        chain_id,
+        network,
         timeout_height,
         fee,
         instantiate_signing_key,
