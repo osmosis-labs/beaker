@@ -20,7 +20,7 @@ pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(
 
     let root_dir = template.target_dir().join::<PathBuf>(name.into());
 
-    let default_config_file_name = "Membrane.toml";
+    let default_config_file_name = "Beaker.toml";
     let config_file_name = ctx.config_file_name();
     fs::rename(
         root_dir.join::<PathBuf>(default_config_file_name.into()),

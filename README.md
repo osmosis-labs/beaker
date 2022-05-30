@@ -1,3 +1,3 @@
-# Codename Membrane (WIP)
+# Beaker
 
 CosmWasm development tooling.

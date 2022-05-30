@@ -86,7 +86,7 @@ mod tests {
 [cw]
 contract_dir = "whatever""#;
 
-        path.push(Path::new("Membrane.toml"));
+        path.push(Path::new("Beaker.toml"));
         fs::write(path.as_path(), conf).unwrap();
 
         execute(&Commands::Wasm {
@@ -98,7 +98,7 @@ contract_dir = "whatever""#;
         })
         .unwrap();
 
-        temp.child("dapp/Membrane.toml")
+        temp.child("dapp/Beaker.toml")
             .assert(predicate::path::exists());
 
         temp.child("dapp/whatever/counter/Cargo.toml")

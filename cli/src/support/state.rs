@@ -5,7 +5,7 @@ use config::Map;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-pub const STATE_DIR: &str = ".membrane";
+pub const STATE_DIR: &str = ".beaker";
 // pub const STATE_FILE: &'static str = "state.json";
 pub const STATE_FILE_LOCAL: &str = "state.local.json";
 

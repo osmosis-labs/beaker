@@ -356,7 +356,7 @@ mod tests {
     fn setup() -> TempDir {
         let temp = assert_fs::TempDir::new().unwrap();
         env::set_current_dir(&temp).unwrap();
-        fs::File::create("Membrane.toml").unwrap();
+        fs::File::create("Beaker.toml").unwrap();
         temp
     }
 
