@@ -1,6 +1,5 @@
 use super::config::WasmConfig;
 use super::response::{InstantiateResponse, StoreCodeResponse};
-use crate::support::coin::CoinFromStr;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::{State, STATE_DIR, STATE_FILE_LOCAL};
@@ -8,10 +7,10 @@ use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::Context as _;
 use anyhow::Result;
-use cosmos_sdk_proto::cosmos::gov::v1beta1::MsgSubmitProposal;
+use cosmrs::proto::cosmos::gov::v1beta1::MsgSubmitProposal;
 use cosmrs::{
-    cosmwasm::{AccessConfig, MsgInstantiateContract, MsgStoreCode},
-    Any, Coin,
+    cosmwasm::{MsgInstantiateContract, MsgStoreCode},
+    Any,
 };
 
 use cosmrs::crypto::secp256k1::SigningKey;
@@ -144,54 +143,6 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-/// StoreCodeProposal gov proposal content type to submit WASM code to the system
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct StoreCodeProposalProto {
-    /// Title is a short summary
-    #[prost(string, tag = "1")]
-    pub title: ::prost::alloc::string::String,
-    /// Description is a human readable text
-    #[prost(string, tag = "2")]
-    pub description: ::prost::alloc::string::String,
-    /// RunAs is the address that is passed to the contract's environment as sender
-    #[prost(string, tag = "3")]
-    pub run_as: ::prost::alloc::string::String,
-    /// WASMByteCode can be raw or gzip compressed
-    #[prost(bytes = "vec", tag = "4")]
-    pub wasm_byte_code: ::prost::alloc::vec::Vec<u8>,
-    /// InstantiatePermission to apply on contract creation, optional
-    #[prost(message, optional, tag = "7")]
-    pub instantiate_permission:
-        ::core::option::Option<cosmos_sdk_proto::cosmwasm::wasm::v1::AccessConfig>,
-}
-
-/// StoreCodeProposal gov proposal content type to submit WASM code to the system
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-pub struct StoreCodeProposal {
-    /// Title is a short summary
-    pub title: String,
-    /// Description is a human readable text
-    pub description: String,
-    /// RunAs is the address that is passed to the contract's environment as sender
-    pub run_as: String,
-    /// WASMByteCode can be raw or gzip compressed
-    pub wasm_byte_code: Vec<u8>,
-    /// InstantiatePermission to apply on contract creation, optional
-    pub instantiate_permission: Option<AccessConfig>,
-}
-
-impl From<StoreCodeProposal> for StoreCodeProposalProto {
-    fn from(msg: StoreCodeProposal) -> StoreCodeProposalProto {
-        StoreCodeProposalProto {
-            title: msg.title.to_string(),
-            description: msg.description.to_string(),
-            run_as: msg.run_as.to_string(),
-            wasm_byte_code: msg.wasm_byte_code,
-            instantiate_permission: msg.instantiate_permission.map(Into::into),
-        }
-    }
-}
-
 pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
@@ -213,13 +164,13 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     .to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx, contract_name)?;
-    let store_code_proposal = StoreCodeProposalProto::from(StoreCodeProposal {
+    let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
         title: "wat".to_string(),
         description: "wat".to_string(),
         run_as: client.signer_account_id().to_string(),
         wasm_byte_code: wasm,
         instantiate_permission: None,
-    });
+    };
 
     // let deposit = vec!["0uosmo".parse::<CoinFromStr>()?.inner().into()];
     let deposit = vec![];

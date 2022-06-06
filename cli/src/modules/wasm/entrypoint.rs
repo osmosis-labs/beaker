@@ -51,6 +51,25 @@ pub enum WasmCmd {
         timeout_height: u32,
         // TODO: implement --all flag
     },
+    /// Proposal for storing .wasm on chain for later initialization
+    ProposeStoreCode {
+        /// Name of the contract to store
+        contract_name: String,
+        /// Target network to store code
+        #[clap(short, long, default_value = "local")]
+        network: String,
+
+        #[clap(flatten)]
+        gas_args: GasArgs,
+
+        #[clap(flatten)]
+        signer_args: SignerArgs,
+
+        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
+        #[clap(short, long, default_value = "0")]
+        timeout_height: u32,
+        // TODO: implement --all flag
+    },
     /// Instanitate .wasm stored on chain
     Instantiate {
         /// Name of the contract to instantiate
@@ -120,7 +139,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::StoreCode {
                 network,
                 contract_name,
-                signer_args: signer_arg,
+                signer_args,
                 gas_args,
                 timeout_height,
             } => {
@@ -130,7 +149,24 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     network,
                     &Fee::try_from(gas_args)?,
                     timeout_height,
-                    signer_arg.private_key(&ctx.global_config()?)?,
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
+                Ok(())
+            }
+            WasmCmd::ProposeStoreCode {
+                contract_name,
+                network,
+                gas_args,
+                signer_args,
+                timeout_height,
+            } => {
+                ops::propose_store_code(
+                    &ctx,
+                    contract_name,
+                    network,
+                    &Fee::try_from(gas_args)?,
+                    timeout_height,
+                    signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())
             }
