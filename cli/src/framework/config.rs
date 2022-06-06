@@ -42,6 +42,22 @@ impl Default for GlobalConfig {
                         grpc_endpoint: "http://localhost:9090".into(),
                         rpc_endpoint: "http://localhost:26657".into()
                     }
+                ),
+                (
+                    "testnet".into(),
+                    Network {
+                        chain_id: "osmo-test-4".into(),
+                        grpc_endpoint: "https://grpc-test.osmosis.zone:9090".into(),
+                        rpc_endpoint: "https://rpc-test.osmosis.zone".into(),
+                    }
+                ),
+                (
+                    "mainnet".into(),
+                    Network {
+                        chain_id: "osmosis-1".into(),
+                        grpc_endpoint: "https://grpc.osmosis.zone:9090".into(),
+                        rpc_endpoint: "https://rpc.osmosis.zone".into(),
+                    }
                 )
             ]),
             accounts: Map::from([
