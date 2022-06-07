@@ -7,11 +7,10 @@ pub mod ops {
     use cosmrs::crypto::secp256k1::SigningKey;
     use cosmrs::{tx::Fee, Any};
 
-    use crate::{
-        framework::Context,
-        modules::wasm::{response::StoreCodeResponse, WasmConfig},
-        support::cosmos::Client,
-    };
+    use crate::modules::wasm::proposal::reponse::ProposeStoreCodeResponse;
+    use crate::support::cosmos::ResponseValuePicker;
+    use crate::support::ops_response::OpResponseDisplay;
+    use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 
     pub trait MessageExt: prost::Message {
         /// Serialize this protobuf message as a byte vector.
@@ -39,7 +38,7 @@ pub mod ops {
         fee: &Fee,
         timeout_height: &u32,
         signing_key: SigningKey,
-    ) -> Result<StoreCodeResponse> {
+    ) -> Result<ProposeStoreCodeResponse> {
         let global_config = ctx.global_config()?;
         let account_prefix = global_config.account_prefix().as_str();
 
@@ -84,23 +83,30 @@ pub mod ops {
                 .sign_and_broadcast(vec![msg_submit_proposal], fee.clone(), "", timeout_height)
                 .await?;
 
-            dbg!(&response);
+            let proposal_id: u64 = response
+                .pick("submit_proposal", "proposal_id")
+                .to_string()
+                .parse()?;
 
-            // let proposal_id: u64 = response
-            //     .pick("proposal_deposit", "proposal_id")
-            //     .to_string()
-            //     .parse()?;
+            let deposit_amount: String = response.pick("proposal_deposit", "amount").to_string();
+            let deposit_amount = if deposit_amount.is_empty() {
+                "-".to_string()
+            } else {
+                deposit_amount
+            };
 
-            // TODO: Create its own response type
-            let store_code_response = StoreCodeResponse { code_id: 0 };
+            let propose_store_code_response = ProposeStoreCodeResponse {
+                proposal_id,
+                deposit_amount,
+            };
 
             // TODO: Update state
             // State::update_state_file(ctx.root()?, &|s: &State| -> State {
             //     s.update_code_id(network, contract_name, &code_id)
             // })?;
-            // store_code_response.log();
+            propose_store_code_response.log();
 
-            Ok(store_code_response)
+            Ok(propose_store_code_response)
         })
     }
 
@@ -193,6 +199,25 @@ pub mod entrypoint {
                 )?;
                 Ok(())
             }
+        }
+    }
+}
+
+pub mod reponse {
+    use crate::{attrs_format, support::ops_response::OpResponseDisplay};
+
+    #[allow(dead_code)]
+    pub struct ProposeStoreCodeResponse {
+        pub(crate) proposal_id: u64,
+        pub(crate) deposit_amount: String,
+    }
+
+    impl OpResponseDisplay for ProposeStoreCodeResponse {
+        fn headline() -> &'static str {
+            "Store code proposal has been submitted!! 🎉"
+        }
+        fn attrs(&self) -> Vec<String> {
+            attrs_format! { self | proposal_id, deposit_amount }
         }
     }
 }
