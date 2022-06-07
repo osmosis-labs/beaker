@@ -8,6 +8,7 @@ pub mod ops {
     use cosmrs::{tx::Fee, Any};
 
     use crate::modules::wasm::proposal::reponse::ProposeStoreCodeResponse;
+    use crate::support::coin::CoinFromStr;
     use crate::support::cosmos::ResponseValuePicker;
     use crate::support::ops_response::OpResponseDisplay;
     use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
@@ -34,6 +35,7 @@ pub mod ops {
         contract_name: &str,
         title: &str,
         description: &str,
+        deposit: &str,
         network: &str,
         fee: &Fee,
         timeout_height: &u32,
@@ -60,9 +62,7 @@ pub mod ops {
             instantiate_permission: None, // TODO: add instantitate permission
         };
 
-        // let deposit = vec!["0uosmo".parse::<CoinFromStr>()?.inner().into()];
-        // TODO: add deposit input
-        let deposit = vec![];
+        let deposit = vec![deposit.parse::<CoinFromStr>()?.inner().into()];
 
         let msg_submit_proposal = MsgSubmitProposal {
             content: Some(Any {
@@ -164,6 +164,10 @@ pub mod entrypoint {
             #[clap(short, long)]
             description: String,
 
+            /// Proposal decsription
+            #[clap(long)]
+            deposit: String,
+
             #[clap(flatten)]
             base_tx_args: BaseTxArgs,
         },
@@ -179,6 +183,7 @@ pub mod entrypoint {
                 title,
                 description,
                 base_tx_args,
+                deposit,
             } => {
                 let BaseTxArgs {
                     network,
@@ -192,6 +197,7 @@ pub mod entrypoint {
                     contract_name,
                     title,
                     description,
+                    deposit,
                     network,
                     &Fee::try_from(gas_args)?,
                     timeout_height,
