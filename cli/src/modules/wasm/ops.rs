@@ -2,7 +2,7 @@ use super::config::WasmConfig;
 use super::response::{InstantiateResponse, StoreCodeResponse};
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::ops_response::OpResponseDisplay;
-use crate::support::state::{State, STATE_DIR, STATE_FILE_LOCAL};
+use crate::support::state::State;
 use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::Context as _;
@@ -88,14 +88,13 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
 
-    let client = Client::new(
-        global_config
-            .networks()
-            .get(network)
-            .with_context(|| format!("Unable to find network config: {network}"))?
-            .to_owned(),
-    )
-    .to_signing_client(signing_key, account_prefix);
+    let network_info = global_config
+        .networks()
+        .get(network)
+        .with_context(|| format!("Unable to find network config: {network}"))?
+        .to_owned();
+
+    let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx, contract_name)?;
     let msg_store_code = MsgStoreCode {
@@ -114,9 +113,11 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
         let code_id: u64 = response.pick("store_code", "code_id").to_string().parse()?;
         let store_code_response = StoreCodeResponse { code_id };
 
-        State::update_state_file(ctx.root()?, &|s: &State| -> State {
-            s.update_code_id(network, contract_name, &code_id)
-        })?;
+        State::update_state_file(
+            network_info.network_variant(),
+            ctx.root()?,
+            &|s: &State| -> State { s.update_code_id(network, contract_name, &code_id) },
+        )?;
         store_code_response.log();
 
         Ok(store_code_response)
@@ -137,16 +138,15 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
 
-    let client = Client::new(
-        global_config
-            .networks()
-            .get(network)
-            .with_context(|| format!("Unable to find network config: {network}"))?
-            .to_owned(),
-    )
-    .to_signing_client(signing_key, account_prefix);
+    let network_info = global_config
+        .networks()
+        .get(network)
+        .with_context(|| format!("Unable to find network config: {network}"))?
+        .to_owned();
 
-    let state = State::load(&ctx.root()?.join(STATE_DIR).join(STATE_FILE_LOCAL))?;
+    let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
+
+    let state = State::load_by_network(network_info.clone(), ctx.root()?)?;
     let code_id = *state.get_ref(network, contract_name)?.code_id();
 
     let msg_instantiate_contract = MsgInstantiateContract {
@@ -202,9 +202,13 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
 
         instantiate_response.log();
 
-        State::update_state_file(ctx.root()?, &|s: &State| -> State {
-            s.update_address(network, contract_name, label, &contract_address)
-        })?;
+        State::update_state_file(
+            network_info.network_variant(),
+            ctx.root()?,
+            &|s: &State| -> State {
+                s.update_address(network, contract_name, label, &contract_address)
+            },
+        )?;
 
         Ok(instantiate_response)
     })

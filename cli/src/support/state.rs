@@ -5,9 +5,11 @@ use config::Map;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
+use crate::framework::config::{Network, NetworkVariant};
+
 pub const STATE_DIR: &str = ".beaker";
-// pub const STATE_FILE: &'static str = "state.json";
 pub const STATE_FILE_LOCAL: &str = "state.local.json";
+pub const STATE_FILE_SHARED: &str = "state.json";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default, Getters)]
 #[get = "pub"]
@@ -45,9 +47,23 @@ impl State {
         fs::write(&path, content).with_context(|| format!("Unabel to write to `{path_str}`"))
     }
 
-    pub fn update_state_file(root: PathBuf, f: &(dyn Fn(&State) -> State)) -> Result<State> {
+    pub fn load_by_network(network: Network, root: PathBuf) -> Result<Self> {
+        Self::load(&root.join(STATE_DIR).join(match network.network_variant() {
+            NetworkVariant::Local => STATE_FILE_LOCAL,
+            NetworkVariant::Shared => STATE_FILE_SHARED,
+        }))
+    }
+
+    pub fn update_state_file(
+        network_variant: &NetworkVariant,
+        root: PathBuf,
+        f: &(dyn Fn(&State) -> State),
+    ) -> Result<State> {
         let state_dir = &root.join(STATE_DIR);
-        let state_file = &state_dir.join(STATE_FILE_LOCAL); // TODO: Make state file generic
+        let state_file = &state_dir.join(match network_variant {
+            NetworkVariant::Local => STATE_FILE_LOCAL,
+            NetworkVariant::Shared => STATE_FILE_SHARED,
+        });
         fs::create_dir_all(state_dir)?;
         let s = State::load(state_file).unwrap_or_default();
 

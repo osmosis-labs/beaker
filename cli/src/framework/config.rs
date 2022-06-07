@@ -12,10 +12,17 @@ pub struct GlobalConfig {
     accounts: Map<String, Account>,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub enum NetworkVariant {
+    Local,
+    Shared,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
 #[get = "pub"]
 pub struct Network {
     chain_id: String,
+    network_variant: NetworkVariant,
     grpc_endpoint: String,
     rpc_endpoint: String,
 }
@@ -39,6 +46,7 @@ impl Default for GlobalConfig {
                     "local".into(),
                     Network { 
                         chain_id: "localosmosis".into(),
+                        network_variant: NetworkVariant::Local,
                         grpc_endpoint: "http://localhost:9090".into(),
                         rpc_endpoint: "http://localhost:26657".into()
                     }
@@ -47,6 +55,7 @@ impl Default for GlobalConfig {
                     "testnet".into(),
                     Network {
                         chain_id: "osmo-test-4".into(),
+                        network_variant: NetworkVariant::Shared,
                         grpc_endpoint: "https://grpc-test.osmosis.zone:9090".into(),
                         rpc_endpoint: "https://rpc-test.osmosis.zone".into(),
                     }
@@ -55,6 +64,7 @@ impl Default for GlobalConfig {
                     "mainnet".into(),
                     Network {
                         chain_id: "osmosis-1".into(),
+                        network_variant: NetworkVariant::Shared,
                         grpc_endpoint: "https://grpc.osmosis.zone:9090".into(),
                         rpc_endpoint: "https://rpc.osmosis.zone".into(),
                     }
