@@ -4,7 +4,7 @@ use cosmrs::{bip32, crypto::secp256k1::SigningKey};
 
 use crate::framework::config::Account;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 pub struct SignerArgs {
     /// Specifies predefined account as a tx signer
     #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]

@@ -1,9 +1,7 @@
-use super::config::WasmConfig;
-use super::ops;
-use crate::{
-    framework::{Context, Module},
-    support::{gas::GasArgs, signer::SignerArgs},
-};
+use super::proposal::entrypoint::ProposalCmd;
+use super::{args::BaseTxArgs, config::WasmConfig};
+use super::{ops, proposal};
+use crate::framework::{Context, Module};
 use anyhow::Result;
 use clap::Subcommand;
 use cosmrs::tx::Fee;
@@ -36,40 +34,12 @@ pub enum WasmCmd {
     StoreCode {
         /// Name of the contract to store
         contract_name: String,
-        /// Target network to store code
-        #[clap(short, long, default_value = "local")]
-        network: String,
 
-        #[clap(flatten)]
-        gas_args: GasArgs,
-
-        #[clap(flatten)]
-        signer_args: SignerArgs,
-
-        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
-        #[clap(short, long, default_value = "0")]
-        timeout_height: u32,
         // TODO: implement --all flag
-    },
-    /// Proposal for storing .wasm on chain for later initialization
-    ProposeStoreCode {
-        /// Name of the contract to store
-        contract_name: String,
-        /// Target network to store code
-        #[clap(short, long, default_value = "local")]
-        network: String,
-
         #[clap(flatten)]
-        gas_args: GasArgs,
-
-        #[clap(flatten)]
-        signer_args: SignerArgs,
-
-        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
-        #[clap(short, long, default_value = "0")]
-        timeout_height: u32,
-        // TODO: implement --all flag
+        base_tx_args: BaseTxArgs,
     },
+
     /// Instanitate .wasm stored on chain
     Instantiate {
         /// Name of the contract to instantiate
@@ -80,47 +50,33 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
-        /// Target network to store code
-        #[clap(short, long, default_value = "local")]
-        network: String,
 
         #[clap(flatten)]
-        gas_args: GasArgs,
-
-        #[clap(flatten)]
-        signer_args: SignerArgs,
-
-        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
-        #[clap(short, long, default_value = "0")]
-        timeout_height: u32,
+        base_tx_args: BaseTxArgs,
     },
     /// Build, Optimize, Store code, and instantiate contract
     Deploy {
         /// Name of the contract to deploy
         contract_name: String,
+
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
         label: String,
+
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
-        /// Target network to store code
-        #[clap(short, long, default_value = "local")]
-        network: String,
-
-        #[clap(flatten)]
-        gas_args: GasArgs,
-
-        #[clap(flatten)]
-        signer_args: SignerArgs,
-
-        /// Specifies a block timeout height to prevent the tx from being committed past a certain height
-        #[clap(short, long, default_value = "0")]
-        timeout_height: u32,
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
         no_rebuild: bool,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
+    Proposal {
+        #[clap(subcommand)]
+        cmd: ProposalCmd,
     },
 }
 
@@ -137,12 +93,16 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
             WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64), // TODO: change optimize -> no-optimize
             WasmCmd::StoreCode {
-                network,
                 contract_name,
-                signer_args,
-                gas_args,
-                timeout_height,
+                base_tx_args,
             } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+
                 ops::store_code(
                     &ctx,
                     contract_name,
@@ -153,32 +113,19 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 )?;
                 Ok(())
             }
-            WasmCmd::ProposeStoreCode {
-                contract_name,
-                network,
-                gas_args,
-                signer_args,
-                timeout_height,
-            } => {
-                ops::propose_store_code(
-                    &ctx,
-                    contract_name,
-                    network,
-                    &Fee::try_from(gas_args)?,
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                )?;
-                Ok(())
-            }
+
             WasmCmd::Instantiate {
                 contract_name,
-                raw,
-                network,
-                signer_args,
-                gas_args,
-                timeout_height,
                 label,
+                raw,
+                base_tx_args,
             } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
                 ops::instantiate(
                     &ctx,
                     contract_name,
@@ -195,12 +142,15 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
-                network,
-                gas_args,
-                signer_args,
-                timeout_height,
                 no_rebuild,
+                base_tx_args,
             } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
                 ops::deploy(
                     &ctx,
                     contract_name,
@@ -215,6 +165,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 )?;
                 Ok(())
             }
+            WasmCmd::Proposal { cmd } => proposal::entrypoint::execute(ctx, cmd),
         }
     }
 }

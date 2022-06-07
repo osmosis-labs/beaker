@@ -7,11 +7,7 @@ use crate::support::template::Template;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::Context as _;
 use anyhow::Result;
-use cosmrs::proto::cosmos::gov::v1beta1::MsgSubmitProposal;
-use cosmrs::{
-    cosmwasm::{MsgInstantiateContract, MsgStoreCode},
-    Any,
-};
+use cosmrs::cosmwasm::{MsgInstantiateContract, MsgStoreCode};
 
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::{Fee, Msg};
@@ -19,22 +15,6 @@ use std::fs::{self, File};
 use std::future::Future;
 use std::io::{BufReader, Read};
 use std::{env, path::PathBuf, process::Command};
-
-pub trait MessageExt: prost::Message {
-    /// Serialize this protobuf message as a byte vector.
-    fn to_bytes(&self) -> Result<Vec<u8>>;
-}
-
-impl<M> MessageExt for M
-where
-    M: prost::Message,
-{
-    fn to_bytes(&self) -> Result<Vec<u8>> {
-        let mut bytes = Vec::new();
-        prost::Message::encode(self, &mut bytes)?;
-        Ok(bytes)
-    }
-}
 
 pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
@@ -138,75 +118,6 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
             s.update_code_id(network, contract_name, &code_id)
         })?;
         store_code_response.log();
-
-        Ok(store_code_response)
-    })
-}
-
-pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: &Ctx,
-    contract_name: &str,
-    network: &str,
-    fee: &Fee,
-    timeout_height: &u32,
-    signing_key: SigningKey,
-) -> Result<StoreCodeResponse> {
-    let global_config = ctx.global_config()?;
-    let account_prefix = global_config.account_prefix().as_str();
-
-    let client = Client::new(
-        global_config
-            .networks()
-            .get(network)
-            .with_context(|| format!("Unable to find network config: {network}"))?
-            .to_owned(),
-    )
-    .to_signing_client(signing_key, account_prefix);
-
-    let wasm = read_wasm(ctx, contract_name)?;
-    let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
-        title: "wat".to_string(),
-        description: "wat".to_string(),
-        run_as: client.signer_account_id().to_string(),
-        wasm_byte_code: wasm,
-        instantiate_permission: None,
-    };
-
-    // let deposit = vec!["0uosmo".parse::<CoinFromStr>()?.inner().into()];
-    let deposit = vec![];
-
-    let msg_submit_proposal = MsgSubmitProposal {
-        content: Some(Any {
-            type_url: "/cosmwasm.wasm.v1.StoreCodeProposal".to_owned(),
-            value: store_code_proposal.to_bytes()?,
-        }),
-        initial_deposit: deposit,
-        proposer: client.signer_account_id().to_string(),
-    };
-
-    let msg_submit_proposal = Any {
-        type_url: "/cosmos.gov.v1beta1.MsgSubmitProposal".to_owned(),
-        value: msg_submit_proposal.to_bytes()?,
-    };
-
-    block(async {
-        let response = client
-            .sign_and_broadcast(vec![msg_submit_proposal], fee.clone(), "", timeout_height)
-            .await?;
-
-        dbg!(&response);
-
-        // let proposal_id: u64 = response
-        //     .pick("proposal_deposit", "proposal_id")
-        //     .to_string()
-        //     .parse()?;
-
-        let store_code_response = StoreCodeResponse { code_id: 0 };
-
-        // State::update_state_file(ctx.root()?, &|s: &State| -> State {
-        //     s.update_code_id(network, contract_name, &code_id)
-        // })?;
-        // store_code_response.log();
 
         Ok(store_code_response)
     })
