@@ -1,5 +1,4 @@
-use super::proposal::entrypoint::ProposalCmd;
-use super::{args::BaseTxArgs, config::WasmConfig};
+use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
 use anyhow::Result;
