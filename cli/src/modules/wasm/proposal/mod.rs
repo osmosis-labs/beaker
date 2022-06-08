@@ -1,5 +1,6 @@
 pub mod ops {
     use std::io::Read;
+    use std::vec;
     use std::{fs::File, future::Future, io::BufReader};
 
     use anyhow::{Context as _, Result};
@@ -35,7 +36,7 @@ pub mod ops {
         contract_name: &str,
         title: &str,
         description: &str,
-        deposit: &str,
+        deposit: Option<&str>,
         network: &str,
         fee: &Fee,
         timeout_height: &u32,
@@ -62,7 +63,11 @@ pub mod ops {
             instantiate_permission: None, // TODO: add instantitate permission
         };
 
-        let deposit = vec![deposit.parse::<CoinFromStr>()?.inner().into()];
+        let deposit = if let Some(d) = deposit {
+            vec![d.parse::<CoinFromStr>()?.inner().into()]
+        } else {
+            vec![]
+        };
 
         let msg_submit_proposal = MsgSubmitProposal {
             content: Some(Any {
@@ -88,6 +93,7 @@ pub mod ops {
                 .to_string()
                 .parse()?;
 
+            // TODO: ProposalStoreCodeResponse::from(response)
             let deposit_amount: String = response.pick("proposal_deposit", "amount").to_string();
             let deposit_amount = if deposit_amount.is_empty() {
                 "-".to_string()
@@ -166,7 +172,7 @@ pub mod entrypoint {
 
             /// Proposal decsription
             #[clap(long)]
-            deposit: String,
+            deposit: Option<String>,
 
             #[clap(flatten)]
             base_tx_args: BaseTxArgs,
@@ -197,7 +203,7 @@ pub mod entrypoint {
                     contract_name,
                     title,
                     description,
-                    deposit,
+                    deposit.as_ref().map(|s| s.as_str()),
                     network,
                     &Fee::try_from(gas_args)?,
                     timeout_height,
