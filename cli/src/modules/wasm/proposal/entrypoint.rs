@@ -28,6 +28,22 @@ pub enum ProposalCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+    Query {
+        #[clap(subcommand)]
+        cmd: ProposalQueryCmd,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum ProposalQueryCmd {
+    /// Proposal for storing .wasm on chain for later initialization
+    StoreCode {
+        /// Name of the contract to store
+        contract_name: String,
+
+        #[clap(short, long, default_value = "local")]
+        network: String,
+    },
 }
 
 pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
@@ -62,5 +78,14 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
             )?;
             Ok(())
         }
+        ProposalCmd::Query { cmd } => match cmd {
+            ProposalQueryCmd::StoreCode {
+                contract_name,
+                network,
+            } => {
+                super::ops::query_proposal(&ctx, contract_name, network)?;
+                Ok(())
+            }
+        },
     }
 }

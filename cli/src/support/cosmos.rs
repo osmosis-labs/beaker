@@ -3,9 +3,11 @@ use std::str::FromStr;
 use crate::framework::config::Network;
 use anyhow::anyhow;
 use anyhow::{Context, Result};
+use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tendermint::abci::tag::{Key, Value};
+
 use cosmrs::tx::{self, SignDoc, SignerInfo};
 use cosmrs::{dev, AccountId};
 use cosmrs::{rpc, tx::Fee, Any};
@@ -73,6 +75,54 @@ impl Client {
             .context("Account not found")?;
 
         BaseAccount::decode(res.value.as_slice()).context("Unable to decode BaseAccount")
+    }
+
+    pub async fn proposal(&self, proposal_id: &u64) -> Result<Proposal> {
+        use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
+        let grpc_endpoint = self.network.grpc_endpoint();
+
+        let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
+            .await
+            .context(format!("Unable to connect to {grpc_endpoint}"))?;
+
+        let res = c
+            .proposal(QueryProposalRequest {
+                proposal_id: *proposal_id,
+            })
+            .await?
+            .into_inner()
+            .proposal;
+
+        res.with_context(|| format!("Unable to find proposal with id {proposal_id}"))
+    }
+
+    async fn gov_params(
+        &self,
+        params_type: &str,
+    ) -> Result<cosmos_sdk_proto::cosmos::gov::v1beta1::QueryParamsResponse> {
+        use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
+        let grpc_endpoint = self.network.grpc_endpoint();
+
+        let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
+            .await
+            .context(format!("Unable to connect to {grpc_endpoint}"))?;
+
+        let res = c
+            .params(QueryParamsRequest {
+                params_type: params_type.to_string(), // voting, tallying, deposit
+            })
+            .await?
+            .into_inner();
+
+        Ok(res)
+    }
+    pub async fn gov_params_deposit(
+        &self,
+    ) -> Result<cosmos_sdk_proto::cosmos::gov::v1beta1::DepositParams> {
+        self.gov_params("deposit")
+            .await?
+            .deposit_params
+            .with_context(|| "Deposit params is not available")
     }
 }
 

@@ -27,3 +27,22 @@ macro_rules! attrs_format {
         ].concat()
     };
 }
+
+#[macro_export]
+macro_rules! vars_format {
+    ($attr:ident) => {
+        vec![format!("    └── {}: {}", stringify!($attr), $attr), "".to_string()]
+    };
+    ($fst:ident, $($attr:ident),+) => {
+        vec![
+           vec![format!("    ├── {}: {}", stringify!($fst), $fst)],
+           vars_format!($($attr),+ )
+        ].concat()
+    };
+    ($headline:expr, $($attr:ident),+) => {
+        vec![
+           vec!["".to_string(), format!("  {}", $headline), "    +".to_string()],
+           vars_format!($($attr),+ )
+        ].concat()
+    };
+}

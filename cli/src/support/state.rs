@@ -23,13 +23,13 @@ pub struct WasmRef {
 pub struct State(Map<String, Map<String, WasmRef>>);
 
 impl State {
-    pub fn get_ref(&self, chain_id: &str, contract_name: &str) -> Result<WasmRef> {
+    pub fn get_ref(&self, network: &str, contract_name: &str) -> Result<WasmRef> {
         let State(m) = self;
-        let chain_id_m = m
-            .get(chain_id)
-            .with_context(|| format!("No state found for chain id `{chain_id}`"))?;
-        chain_id_m.get(contract_name).cloned().with_context(|| {
-            format!("No state found for contract name `{contract_name}` on chain id `{chain_id}`")
+        let network_m = m
+            .get(network)
+            .with_context(|| format!("No state found for network `{network}`"))?;
+        network_m.get(contract_name).cloned().with_context(|| {
+            format!("No state found for contract name `{contract_name}` on network `{network}`")
         })
     }
 
