@@ -11,6 +11,7 @@ use crate::modules::wasm::proposal::reponse::ProposeStoreCodeResponse;
 use crate::support::coin::CoinFromStr;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::ops_response::OpResponseDisplay;
+use crate::support::state::State;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 
 pub trait MessageExt: prost::Message {
@@ -44,14 +45,13 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
 
-    let client = Client::new(
-        global_config
-            .networks()
-            .get(network)
-            .with_context(|| format!("Unable to find network config: {network}"))?
-            .to_owned(),
-    )
-    .to_signing_client(signing_key, account_prefix);
+    let network_info = global_config
+        .networks()
+        .get(network)
+        .with_context(|| format!("Unable to find network config: {network}"))?
+        .to_owned();
+
+    let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx, contract_name)?;
     let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
@@ -105,10 +105,13 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
             deposit_amount,
         };
 
-        // TODO: Update state
-        // State::update_state_file(ctx.root()?, &|s: &State| -> State {
-        //     s.update_code_id(network, contract_name, &code_id)
-        // })?;
+        State::update_state_file(
+            network_info.network_variant(),
+            ctx.root()?,
+            &|s: &State| -> State {
+                s.update_proposal_store_code_id(network, contract_name, &proposal_id)
+            },
+        )?;
         propose_store_code_response.log();
 
         Ok(propose_store_code_response)

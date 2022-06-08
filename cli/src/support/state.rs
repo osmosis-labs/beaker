@@ -15,6 +15,7 @@ pub const STATE_FILE_SHARED: &str = "state.json";
 #[get = "pub"]
 pub struct WasmRef {
     code_id: Option<u64>,
+    proposal_store_code_id: Option<u64>,
     addresses: Map<String, String>,
 }
 
@@ -114,6 +115,7 @@ impl State {
                     .or_insert_with(|| WasmRef {
                         code_id: Some(*code_id),
                         addresses: Map::new(),
+                        proposal_store_code_id: None,
                     });
             })
             .or_insert_with(|| {
@@ -121,6 +123,46 @@ impl State {
                     contract_name.to_string(),
                     WasmRef {
                         code_id: Some(*code_id),
+                        addresses: Map::new(),
+                        proposal_store_code_id: None,
+                    },
+                )])
+            });
+
+        State(m)
+    }
+
+    pub fn update_proposal_store_code_id(
+        &self,
+        network: &str,
+        contract_name: &str,
+        proposal_store_code_id: &u64,
+    ) -> Self {
+        let State(m) = self;
+        let mut m = m.clone();
+
+        m.entry(network.to_string())
+            .and_modify(|contracts| {
+                contracts
+                    .entry(contract_name.to_string())
+                    .and_modify(|wasm_ref| {
+                        *wasm_ref = WasmRef {
+                            proposal_store_code_id: Some(*proposal_store_code_id),
+                            ..wasm_ref.clone()
+                        };
+                    })
+                    .or_insert_with(|| WasmRef {
+                        code_id: None,
+                        proposal_store_code_id: Some(*proposal_store_code_id),
+                        addresses: Map::new(),
+                    });
+            })
+            .or_insert_with(|| {
+                Map::from([(
+                    contract_name.to_string(),
+                    WasmRef {
+                        proposal_store_code_id: Some(*proposal_store_code_id),
+                        code_id: None,
                         addresses: Map::new(),
                     },
                 )])
@@ -175,6 +217,7 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(1),
+                        proposal_store_code_id: None,
                         addresses: Map::new(),
                     },
                 )]),
@@ -212,6 +255,7 @@ mod tests {
                         "counter".to_string(),
                         WasmRef {
                             code_id: Some(1),
+                            proposal_store_code_id: None,
                             addresses: Map::new(),
                         },
                     ),
@@ -219,6 +263,7 @@ mod tests {
                         "multiplier".to_string(),
                         WasmRef {
                             code_id: Some(5),
+                            proposal_store_code_id: None,
                             addresses: Map::new(),
                         },
                     )
@@ -239,6 +284,7 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(1),
+                        proposal_store_code_id: None,
                         addresses: Map::new(),
                     },
                 ),
@@ -246,6 +292,7 @@ mod tests {
                     "multiplier".to_string(),
                     WasmRef {
                         code_id: Some(5),
+                        proposal_store_code_id: None,
                         addresses: Map::new(),
                     },
                 ),
@@ -269,6 +316,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
+                    proposal_store_code_id: None,
                     addresses: Map::new(),
                 },
             )]),
@@ -283,6 +331,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(99),
+                    proposal_store_code_id: None,
                     addresses: Map::new(),
                 },
             )]),
@@ -298,6 +347,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(112),
+                    proposal_store_code_id: None,
                     addresses: Map::new(),
                 },
             )]),
@@ -314,6 +364,7 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(112),
+                        proposal_store_code_id: None,
                         addresses: Map::new(),
                     },
                 ),
@@ -321,6 +372,88 @@ mod tests {
                     "multiplier".to_string(),
                     WasmRef {
                         code_id: Some(666),
+                        proposal_store_code_id: None,
+                        addresses: Map::new(),
+                    },
+                ),
+            ]),
+        )]));
+
+        assert_eq!(updated_state, state);
+    }
+
+    #[test]
+    fn update_proposal_id_test() {
+        let empty_state = State(Map::new());
+        let updated_state =
+            empty_state.update_proposal_store_code_id("localosmosis", "counter", &1);
+
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: None,
+                    proposal_store_code_id: Some(1),
+                    addresses: Map::new(),
+                },
+            )]),
+        )]));
+
+        assert_eq!(updated_state, state);
+
+        let updated_state =
+            empty_state.update_proposal_store_code_id("localosmosis", "counter", &99);
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: None,
+                    proposal_store_code_id: Some(99),
+                    addresses: Map::new(),
+                },
+            )]),
+        )]));
+
+        assert_eq!(updated_state, state);
+
+        // update existing
+        let updated_state =
+            updated_state.update_proposal_store_code_id("localosmosis", "counter", &112);
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([(
+                "counter".to_string(),
+                WasmRef {
+                    code_id: None,
+                    proposal_store_code_id: Some(112),
+                    addresses: Map::new(),
+                },
+            )]),
+        )]));
+
+        assert_eq!(updated_state, state);
+
+        // update with new contract but same chain id
+        let updated_state =
+            updated_state.update_proposal_store_code_id("localosmosis", "multiplier", &666);
+        let state = State(Map::from([(
+            "localosmosis".to_string(),
+            Map::from([
+                (
+                    "counter".to_string(),
+                    WasmRef {
+                        code_id: None,
+                        proposal_store_code_id: Some(112),
+                        addresses: Map::new(),
+                    },
+                ),
+                (
+                    "multiplier".to_string(),
+                    WasmRef {
+                        code_id: None,
+                        proposal_store_code_id: Some(666),
                         addresses: Map::new(),
                     },
                 ),
@@ -358,6 +491,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
+                    proposal_store_code_id: None,
                     addresses: Map::from([(
                         "default".to_string(),
                         "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85"
@@ -381,6 +515,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
+                    proposal_store_code_id: None,
                     addresses: Map::from([
                         (
                             "default".to_string(),
@@ -412,6 +547,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
+                    proposal_store_code_id: None,
                     addresses: Map::from([
                         (
                             "default".to_string(),
