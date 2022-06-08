@@ -147,7 +147,10 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let state = State::load_by_network(network_info.clone(), ctx.root()?)?;
-    let code_id = *state.get_ref(network, contract_name)?.code_id();
+    let code_id = state
+        .get_ref(network, contract_name)?
+        .code_id()
+        .with_context(|| format!("Unable to retrieve code_id for {contract_name}"))?;
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),

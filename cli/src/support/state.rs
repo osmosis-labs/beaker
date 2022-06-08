@@ -14,7 +14,7 @@ pub const STATE_FILE_SHARED: &str = "state.json";
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default, Getters)]
 #[get = "pub"]
 pub struct WasmRef {
-    code_id: u64,
+    code_id: Option<u64>,
     addresses: Map<String, String>,
 }
 
@@ -107,12 +107,12 @@ impl State {
                     .entry(contract_name.to_string())
                     .and_modify(|wasm_ref| {
                         *wasm_ref = WasmRef {
-                            code_id: *code_id,
+                            code_id: Some(*code_id),
                             ..wasm_ref.clone()
                         };
                     })
                     .or_insert_with(|| WasmRef {
-                        code_id: *code_id,
+                        code_id: Some(*code_id),
                         addresses: Map::new(),
                     });
             })
@@ -120,7 +120,7 @@ impl State {
                 Map::from([(
                     contract_name.to_string(),
                     WasmRef {
-                        code_id: *code_id,
+                        code_id: Some(*code_id),
                         addresses: Map::new(),
                     },
                 )])
@@ -174,7 +174,7 @@ mod tests {
                 Map::from([(
                     "counter".to_string(),
                     WasmRef {
-                        code_id: 1,
+                        code_id: Some(1),
                         addresses: Map::new(),
                     },
                 )]),
@@ -211,14 +211,14 @@ mod tests {
                     (
                         "counter".to_string(),
                         WasmRef {
-                            code_id: 1,
+                            code_id: Some(1),
                             addresses: Map::new(),
                         },
                     ),
                     (
                         "multiplier".to_string(),
                         WasmRef {
-                            code_id: 5,
+                            code_id: Some(5),
                             addresses: Map::new(),
                         },
                     )
@@ -238,14 +238,14 @@ mod tests {
                 (
                     "counter".to_string(),
                     WasmRef {
-                        code_id: 1,
+                        code_id: Some(1),
                         addresses: Map::new(),
                     },
                 ),
                 (
                     "multiplier".to_string(),
                     WasmRef {
-                        code_id: 5,
+                        code_id: Some(5),
                         addresses: Map::new(),
                     },
                 ),
@@ -268,7 +268,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 1,
+                    code_id: Some(1),
                     addresses: Map::new(),
                 },
             )]),
@@ -282,7 +282,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 99,
+                    code_id: Some(99),
                     addresses: Map::new(),
                 },
             )]),
@@ -297,7 +297,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 112,
+                    code_id: Some(112),
                     addresses: Map::new(),
                 },
             )]),
@@ -313,14 +313,14 @@ mod tests {
                 (
                     "counter".to_string(),
                     WasmRef {
-                        code_id: 112,
+                        code_id: Some(112),
                         addresses: Map::new(),
                     },
                 ),
                 (
                     "multiplier".to_string(),
                     WasmRef {
-                        code_id: 666,
+                        code_id: Some(666),
                         addresses: Map::new(),
                     },
                 ),
@@ -357,7 +357,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 1,
+                    code_id: Some(1),
                     addresses: Map::from([(
                         "default".to_string(),
                         "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85"
@@ -380,7 +380,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 1,
+                    code_id: Some(1),
                     addresses: Map::from([
                         (
                             "default".to_string(),
@@ -411,7 +411,7 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: 1,
+                    code_id: Some(1),
                     addresses: Map::from([
                         (
                             "default".to_string(),
