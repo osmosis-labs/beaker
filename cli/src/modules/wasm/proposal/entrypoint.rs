@@ -21,9 +21,21 @@ pub enum ProposalCmd {
         #[clap(short, long)]
         description: String,
 
-        /// Proposal decsription
+        /// Proposal deposit to activate voting
         #[clap(long)]
         deposit: Option<String>,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
+    /// Vote for proposal
+    Vote {
+        /// Name of the contract to store
+        contract_name: String,
+
+        /// Vote option, one of: yes, no, no_with_veto, abstain
+        #[clap(short, long)]
+        option: String,
 
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
@@ -87,5 +99,28 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 Ok(())
             }
         },
+        ProposalCmd::Vote {
+            contract_name,
+            option,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+            }: &BaseTxArgs = base_tx_args;
+
+            super::ops::vote(
+                &ctx,
+                contract_name,
+                &option,
+                network,
+                &Fee::try_from(gas_args)?,
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+            )?;
+            Ok(())
+        }
     }
 }
