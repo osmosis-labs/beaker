@@ -1,8 +1,13 @@
-use std::io::Read;
-use std::time::Duration;
-use std::vec;
-use std::{fs::File, future::Future, io::BufReader};
-
+use crate::modules::wasm::proposal::reponse::ProposeStoreCodeResponse;
+use crate::support::coin::CoinFromStr;
+use crate::support::cosmos::ResponseValuePicker;
+use crate::support::future::block;
+use crate::support::ops_response::OpResponseDisplay;
+use crate::support::proto::MessageExt;
+use crate::support::state::State;
+use crate::support::wasm::read_wasm;
+use crate::vars_format;
+use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::{Context as _, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     MsgSubmitProposal, Proposal, ProposalStatus, TallyResult,
@@ -10,30 +15,8 @@ use cosmos_sdk_proto::cosmos::gov::v1beta1::{
 use cosmrs::bip32::secp256k1::pkcs8::der::DateTime;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::{tx::Fee, Any};
-
-use crate::modules::wasm::proposal::reponse::ProposeStoreCodeResponse;
-use crate::support::coin::CoinFromStr;
-use crate::support::cosmos::ResponseValuePicker;
-use crate::support::ops_response::OpResponseDisplay;
-use crate::support::state::State;
-use crate::vars_format;
-use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
-
-pub trait MessageExt: prost::Message {
-    /// Serialize this protobuf message as a byte vector.
-    fn to_bytes(&self) -> Result<Vec<u8>>;
-}
-
-impl<M> MessageExt for M
-where
-    M: prost::Message,
-{
-    fn to_bytes(&self) -> Result<Vec<u8>> {
-        let mut bytes = Vec::new();
-        prost::Message::encode(self, &mut bytes)?;
-        Ok(bytes)
-    }
-}
+use std::time::Duration;
+use std::vec;
 
 #[allow(clippy::too_many_arguments)]
 pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
@@ -58,7 +41,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
-    let wasm = read_wasm(ctx, contract_name)?;
+    let wasm = read_wasm(ctx.root()?, contract_name)?;
     let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
         title: title.to_string(),
         description: description.to_string(),
@@ -259,33 +242,4 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
 
         Ok(res)
     })
-}
-
-// TODO: Refactor this to share module
-fn block<F: Future>(future: F) -> F::Output {
-    tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(future)
-}
-fn read_wasm<'a, Ctx: Context<'a, WasmConfig>>(
-    ctx: &Ctx,
-    contract_name: &str,
-) -> Result<Vec<u8>, anyhow::Error> {
-    let wasm_path = ctx
-        .root()?
-        .as_path()
-        .join("artifacts")
-        .join(format!("{contract_name}.wasm"));
-    let wasm_path_str = &wasm_path.as_os_str().to_string_lossy();
-    let f = File::open(&wasm_path).with_context(|| {
-        format!(
-        "`{wasm_path_str}` not found, please build and optimize the contract before store code`"
-    )
-    })?;
-    let mut reader = BufReader::new(f);
-    let mut wasm = Vec::new();
-    reader.read_to_end(&mut wasm)?;
-    Ok(wasm)
 }
