@@ -22,6 +22,42 @@ pub struct WasmRef {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct State(Map<String, Map<String, WasmRef>>);
 
+macro_rules! impl_update {
+    (fn $fn:ident($key:ident)) => {
+        pub fn $fn(&self, network: &str, contract_name: &str, $key: &u64) -> Self {
+            let State(m) = self;
+            let mut m = m.clone();
+
+            m.entry(network.to_string())
+                .and_modify(|contracts| {
+                    contracts
+                        .entry(contract_name.to_string())
+                        .and_modify(|wasm_ref| {
+                            *wasm_ref = WasmRef {
+                                $key: Some(*$key),
+                                ..wasm_ref.clone()
+                            };
+                        })
+                        .or_insert_with(|| WasmRef {
+                            $key: Some(*$key),
+                            ..Default::default()
+                        });
+                })
+                .or_insert_with(|| {
+                    Map::from([(
+                        contract_name.to_string(),
+                        WasmRef {
+                            $key: Some(*$key),
+                            ..Default::default()
+                        },
+                    )])
+                });
+
+            State(m)
+        }
+    };
+}
+
 impl State {
     pub fn get_ref(&self, network: &str, contract_name: &str) -> Result<WasmRef> {
         let State(m) = self;
@@ -76,14 +112,14 @@ impl State {
 
     pub fn update_address(
         &self,
-        chain_id: &str,
+        network: &str,
         contract_name: &str,
         label: &str,
         address: &str,
     ) -> Self {
         let State(m) = self;
         let mut m = m.clone();
-        m.entry(chain_id.to_string()).and_modify(|contracts| {
+        m.entry(network.to_string()).and_modify(|contracts| {
             contracts
                 .entry(contract_name.to_string())
                 .and_modify(|wasm_ref| {
@@ -98,78 +134,8 @@ impl State {
         State(m)
     }
 
-    pub fn update_code_id(&self, network: &str, contract_name: &str, code_id: &u64) -> Self {
-        let State(m) = self;
-        let mut m = m.clone();
-
-        m.entry(network.to_string())
-            .and_modify(|contracts| {
-                contracts
-                    .entry(contract_name.to_string())
-                    .and_modify(|wasm_ref| {
-                        *wasm_ref = WasmRef {
-                            code_id: Some(*code_id),
-                            ..wasm_ref.clone()
-                        };
-                    })
-                    .or_insert_with(|| WasmRef {
-                        code_id: Some(*code_id),
-                        addresses: Map::new(),
-                        proposal_store_code_id: None,
-                    });
-            })
-            .or_insert_with(|| {
-                Map::from([(
-                    contract_name.to_string(),
-                    WasmRef {
-                        code_id: Some(*code_id),
-                        addresses: Map::new(),
-                        proposal_store_code_id: None,
-                    },
-                )])
-            });
-
-        State(m)
-    }
-
-    pub fn update_proposal_store_code_id(
-        &self,
-        network: &str,
-        contract_name: &str,
-        proposal_store_code_id: &u64,
-    ) -> Self {
-        let State(m) = self;
-        let mut m = m.clone();
-
-        m.entry(network.to_string())
-            .and_modify(|contracts| {
-                contracts
-                    .entry(contract_name.to_string())
-                    .and_modify(|wasm_ref| {
-                        *wasm_ref = WasmRef {
-                            proposal_store_code_id: Some(*proposal_store_code_id),
-                            ..wasm_ref.clone()
-                        };
-                    })
-                    .or_insert_with(|| WasmRef {
-                        code_id: None,
-                        proposal_store_code_id: Some(*proposal_store_code_id),
-                        addresses: Map::new(),
-                    });
-            })
-            .or_insert_with(|| {
-                Map::from([(
-                    contract_name.to_string(),
-                    WasmRef {
-                        proposal_store_code_id: Some(*proposal_store_code_id),
-                        code_id: None,
-                        addresses: Map::new(),
-                    },
-                )])
-            });
-
-        State(m)
-    }
+    impl_update! { fn update_code_id(code_id) }
+    impl_update! { fn update_proposal_store_code_id(proposal_store_code_id) }
 }
 
 #[cfg(test)]
