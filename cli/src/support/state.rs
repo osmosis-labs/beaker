@@ -29,7 +29,7 @@ pub struct WasmRef {
 pub struct State(Map<String, Map<String, WasmRef>>);
 
 macro_rules! impl_update {
-    (fn $fn:ident($val:ident) ~ { $key:ident : $expr:expr }) => {
+    (fn $fn:ident(.., $val:ident) ~ { $key:ident : $expr:expr }) => {
         pub fn $fn(&self, network: &str, contract_name: &str, $val: &u64) -> Self {
             let State(m) = self;
             let mut m = m.clone();
@@ -140,8 +140,8 @@ impl State {
         State(m)
     }
 
-    impl_update! { fn update_code_id(code_id) ~ { code_id: Some(*code_id) } }
-    impl_update! { fn update_proposal_store_code_id(id) ~ { proposal: Proposal { store_code: Some(*id) }}}
+    impl_update! { fn update_code_id(.., code_id) ~ { code_id: Some(*code_id) } }
+    impl_update! { fn update_proposal_store_code_id(.., id) ~ { proposal: Proposal { store_code: Some(*id) }}}
 }
 
 #[cfg(test)]
