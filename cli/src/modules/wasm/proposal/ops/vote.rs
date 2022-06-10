@@ -36,7 +36,8 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
     let state = State::load_by_network(network_info, ctx.root()?)?;
     let proposal_id = state
         .get_ref(network, contract_name)?
-        .proposal_store_code_id()
+        .proposal()
+        .store_code()
         .with_context(|| format!("Unable to retrieve proposal_id for {contract_name}"))?;
 
     let option = option.parse::<VoteOptionImpl>()?;

@@ -13,18 +13,24 @@ pub const STATE_FILE_SHARED: &str = "state.json";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default, Getters)]
 #[get = "pub"]
+pub struct Proposal {
+    store_code: Option<u64>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default, Getters)]
+#[get = "pub"]
 pub struct WasmRef {
     code_id: Option<u64>,
-    proposal_store_code_id: Option<u64>,
-    addresses: Map<String, String>,
+    addresses: Map<String, String>, // TODO: considering removing this since it could be retrive from chain
+    proposal: Proposal,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct State(Map<String, Map<String, WasmRef>>);
 
 macro_rules! impl_update {
-    (fn $fn:ident($key:ident)) => {
-        pub fn $fn(&self, network: &str, contract_name: &str, $key: &u64) -> Self {
+    (fn $fn:ident($val:ident) ~ { $key:ident : $expr:expr }) => {
+        pub fn $fn(&self, network: &str, contract_name: &str, $val: &u64) -> Self {
             let State(m) = self;
             let mut m = m.clone();
 
@@ -34,12 +40,12 @@ macro_rules! impl_update {
                         .entry(contract_name.to_string())
                         .and_modify(|wasm_ref| {
                             *wasm_ref = WasmRef {
-                                $key: Some(*$key),
+                                $key: $expr,
                                 ..wasm_ref.clone()
                             };
                         })
                         .or_insert_with(|| WasmRef {
-                            $key: Some(*$key),
+                            $key: $expr,
                             ..Default::default()
                         });
                 })
@@ -47,7 +53,7 @@ macro_rules! impl_update {
                     Map::from([(
                         contract_name.to_string(),
                         WasmRef {
-                            $key: Some(*$key),
+                            $key: $expr,
                             ..Default::default()
                         },
                     )])
@@ -134,8 +140,8 @@ impl State {
         State(m)
     }
 
-    impl_update! { fn update_code_id(code_id) }
-    impl_update! { fn update_proposal_store_code_id(proposal_store_code_id) }
+    impl_update! { fn update_code_id(code_id) ~ { code_id: Some(*code_id) } }
+    impl_update! { fn update_proposal_store_code_id(id) ~ { proposal: Proposal { store_code: Some(*id) }}}
 }
 
 #[cfg(test)]
@@ -168,7 +174,8 @@ mod tests {
             "localosmosis": {
                 "counter": {
                     "code_id": 1,
-                    "addresses": {}
+                    "addresses": {},
+                    "proposal": {}
                 }
             }
         }
@@ -183,8 +190,7 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(1),
-                        proposal_store_code_id: None,
-                        addresses: Map::new(),
+                        ..Default::default()
                     },
                 )]),
             )]))
@@ -201,11 +207,13 @@ mod tests {
             "localosmosis": {
                 "counter": {
                     "code_id": 1,
-                    "addresses": {}
+                    "addresses": {},
+                    "proposal": {}
                 },
                 "multiplier": {
                     "code_id": 5,
-                    "addresses": {}
+                    "addresses": {},
+                    "proposal": {}
                 }
             }
         }
@@ -221,16 +229,14 @@ mod tests {
                         "counter".to_string(),
                         WasmRef {
                             code_id: Some(1),
-                            proposal_store_code_id: None,
-                            addresses: Map::new(),
+                            ..Default::default()
                         },
                     ),
                     (
                         "multiplier".to_string(),
                         WasmRef {
                             code_id: Some(5),
-                            proposal_store_code_id: None,
-                            addresses: Map::new(),
+                            ..Default::default()
                         },
                     )
                 ]),
@@ -250,16 +256,14 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(1),
-                        proposal_store_code_id: None,
-                        addresses: Map::new(),
+                        ..Default::default()
                     },
                 ),
                 (
                     "multiplier".to_string(),
                     WasmRef {
                         code_id: Some(5),
-                        proposal_store_code_id: None,
-                        addresses: Map::new(),
+                        ..Default::default()
                     },
                 ),
             ]),
@@ -282,8 +286,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
-                    proposal_store_code_id: None,
-                    addresses: Map::new(),
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -297,8 +300,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(99),
-                    proposal_store_code_id: None,
-                    addresses: Map::new(),
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -313,8 +315,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(112),
-                    proposal_store_code_id: None,
-                    addresses: Map::new(),
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -330,16 +331,14 @@ mod tests {
                     "counter".to_string(),
                     WasmRef {
                         code_id: Some(112),
-                        proposal_store_code_id: None,
-                        addresses: Map::new(),
+                        ..Default::default()
                     },
                 ),
                 (
                     "multiplier".to_string(),
                     WasmRef {
                         code_id: Some(666),
-                        proposal_store_code_id: None,
-                        addresses: Map::new(),
+                        ..Default::default()
                     },
                 ),
             ]),
@@ -359,9 +358,10 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: None,
-                    proposal_store_code_id: Some(1),
-                    addresses: Map::new(),
+                    proposal: Proposal {
+                        store_code: Some(1),
+                    },
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -375,9 +375,10 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: None,
-                    proposal_store_code_id: Some(99),
-                    addresses: Map::new(),
+                    proposal: Proposal {
+                        store_code: Some(99),
+                    },
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -392,9 +393,10 @@ mod tests {
             Map::from([(
                 "counter".to_string(),
                 WasmRef {
-                    code_id: None,
-                    proposal_store_code_id: Some(112),
-                    addresses: Map::new(),
+                    proposal: Proposal {
+                        store_code: Some(112),
+                    },
+                    ..Default::default()
                 },
             )]),
         )]));
@@ -410,17 +412,19 @@ mod tests {
                 (
                     "counter".to_string(),
                     WasmRef {
-                        code_id: None,
-                        proposal_store_code_id: Some(112),
-                        addresses: Map::new(),
+                        proposal: Proposal {
+                            store_code: Some(112),
+                        },
+                        ..Default::default()
                     },
                 ),
                 (
                     "multiplier".to_string(),
                     WasmRef {
-                        code_id: None,
-                        proposal_store_code_id: Some(666),
-                        addresses: Map::new(),
+                        proposal: Proposal {
+                            store_code: Some(666),
+                        },
+                        ..Default::default()
                     },
                 ),
             ]),
@@ -457,7 +461,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
-                    proposal_store_code_id: None,
+                    proposal: Proposal { store_code: None },
                     addresses: Map::from([(
                         "default".to_string(),
                         "osmo1252netaxc2c0n4g4zm428d75gkl0dplrksd32g35yfylldu66nzqjtjn85"
@@ -481,7 +485,6 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
-                    proposal_store_code_id: None,
                     addresses: Map::from([
                         (
                             "default".to_string(),
@@ -494,6 +497,7 @@ mod tests {
                                 .to_string(),
                         ),
                     ]),
+                    proposal: Proposal { store_code: None },
                 },
             )]),
         )]));
@@ -513,7 +517,7 @@ mod tests {
                 "counter".to_string(),
                 WasmRef {
                     code_id: Some(1),
-                    proposal_store_code_id: None,
+                    proposal: Proposal { store_code: None },
                     addresses: Map::from([
                         (
                             "default".to_string(),

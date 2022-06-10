@@ -28,7 +28,7 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let res = client
-            .proposal(&wasm_ref.proposal_store_code_id().with_context(|| {
+            .proposal(&wasm_ref.proposal().store_code().with_context(|| {
                 format!(
             "Proposal store code not found for contract `{contract_name}` on network `{network}`"
         )
