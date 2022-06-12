@@ -114,7 +114,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
             super::ops::vote(
                 &ctx,
                 contract_name,
-                &option,
+                option,
                 network,
                 &Fee::try_from(gas_args)?,
                 timeout_height,

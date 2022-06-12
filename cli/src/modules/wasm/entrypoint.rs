@@ -22,9 +22,9 @@ pub enum WasmCmd {
     },
     /// Build .wasm for storing contract code on the blockchain
     Build {
-        /// If set, the contract(s) will not be optimized after build
-        #[clap(short, long)]
-        no_optimize: bool,
+        /// If set, the contract(s) will not be optimized by wasm-opt after build (only use in dev)
+        #[clap(long)]
+        no_wasm_opt: bool,
         /// Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
         #[clap(short, long)]
         aarch64: bool,
@@ -33,6 +33,10 @@ pub enum WasmCmd {
     StoreCode {
         /// Name of the contract to store
         contract_name: String,
+
+        /// If set, use non wasm-opt optimized wasm to store code (only use in dev)
+        #[clap(long)]
+        no_wasm_opt: bool,
 
         // TODO: implement --all flag
         #[clap(flatten)]
@@ -70,6 +74,10 @@ pub enum WasmCmd {
         #[clap(long)]
         no_rebuild: bool,
 
+        /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
+        #[clap(long)]
+        no_wasm_opt: bool,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -91,11 +99,12 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
             WasmCmd::Build {
-                no_optimize,
+                no_wasm_opt,
                 aarch64,
-            } => ops::build(&ctx, no_optimize, aarch64), // TODO: change optimize -> no-optimize
+            } => ops::build(&ctx, no_wasm_opt, aarch64), // TODO: change optimize -> no-optimize
             WasmCmd::StoreCode {
                 contract_name,
+                no_wasm_opt,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -109,6 +118,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     &ctx,
                     contract_name,
                     network,
+                    no_wasm_opt,
                     &Fee::try_from(gas_args)?,
                     timeout_height,
                     signer_args.private_key(&ctx.global_config()?)?,
@@ -145,6 +155,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 label,
                 raw,
                 no_rebuild,
+                no_wasm_opt,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -164,6 +175,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args.private_key(&ctx.global_config()?)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                     no_rebuild,
+                    no_wasm_opt,
                 )?;
                 Ok(())
             }

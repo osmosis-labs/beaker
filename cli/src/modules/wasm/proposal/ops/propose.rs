@@ -27,6 +27,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 ) -> Result<ProposeStoreCodeResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
+    let no_wasm_opt = &false;
 
     let network_info = global_config
         .networks()
@@ -36,7 +37,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
-    let wasm = read_wasm(ctx.root()?, contract_name)?;
+    let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
     let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
         title: title.to_string(),
         description: description.to_string(),

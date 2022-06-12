@@ -4,7 +4,7 @@ use std::{env, process::Command};
 
 pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
-    no_optimize: &bool,
+    no_wasm_opt: &bool,
     aarch64: &bool,
 ) -> Result<()> {
     let root = ctx.root()?;
@@ -16,14 +16,15 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     let root_dir_str = root.to_str().unwrap();
 
     let _build = Command::new("cargo")
-        .env(" RUSTFLAGS", "-C link-arg=-s")
+        .env("RUSTFLAGS", "-C link-arg=-s")
         .arg("build")
         .arg("--release")
-        .arg("--target=wasm32-unknown-unknown")
+        .arg("--target")
+        .arg("wasm32-unknown-unknown")
         .spawn()?
         .wait()?;
 
-    if !*no_optimize {
+    if !*no_wasm_opt {
         println!("Optimizing wasm...");
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };

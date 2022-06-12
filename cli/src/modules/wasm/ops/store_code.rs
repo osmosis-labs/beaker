@@ -20,6 +20,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
     network: &str,
+    no_wasm_opt: &bool,
     fee: &Fee,
     timeout_height: &u32,
     signing_key: SigningKey,
@@ -35,7 +36,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
-    let wasm = read_wasm(ctx.root()?, contract_name)?;
+    let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
     let msg_store_code = MsgStoreCode {
         sender: client.signer_account_id(),
         wasm_byte_code: wasm,
