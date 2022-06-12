@@ -82,7 +82,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 contract_name,
                 title,
                 description,
-                deposit.as_ref().map(|s| s.as_str()),
+                deposit.as_ref().map(|s| s.as_str()).try_into()?,
                 network,
                 &Fee::try_from(gas_args)?,
                 timeout_height,

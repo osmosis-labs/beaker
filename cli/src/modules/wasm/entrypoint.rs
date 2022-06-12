@@ -101,7 +101,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::Build {
                 no_wasm_opt,
                 aarch64,
-            } => ops::build(&ctx, no_wasm_opt, aarch64), // TODO: change optimize -> no-optimize
+            } => ops::build(&ctx, no_wasm_opt, aarch64),
             WasmCmd::StoreCode {
                 contract_name,
                 no_wasm_opt,
@@ -193,8 +193,8 @@ mod tests {
     use serial_test::serial;
     use std::{env, fs, path::Path};
 
-    struct CWContext {}
-    impl<'a> Context<'a, WasmConfig> for CWContext {}
+    struct WasmContext {}
+    impl<'a> Context<'a, WasmConfig> for WasmContext {}
 
     #[test]
     #[serial]
@@ -208,7 +208,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 version: None,
@@ -223,7 +223,7 @@ mod tests {
         env::set_current_dir(temp.to_path_buf().join(PathBuf::from("contracts"))).unwrap();
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
@@ -249,7 +249,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
@@ -261,7 +261,7 @@ mod tests {
             .assert(predicate::path::exists());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
@@ -287,7 +287,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
@@ -300,7 +300,7 @@ mod tests {
         assert_version(Path::new("contracts/counter-1/Cargo.toml"), "0.16");
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
@@ -328,7 +328,7 @@ mod tests {
             .assert(predicate::path::missing());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-1".to_string(),
                 target_dir: Some("custom-path".into()),
@@ -340,7 +340,7 @@ mod tests {
             .assert(predicate::path::exists());
 
         WasmModule::execute(
-            CWContext {},
+            WasmContext {},
             &WasmCmd::New {
                 contract_name: "counter-2".to_string(),
                 target_dir: Some("custom-path".into()),

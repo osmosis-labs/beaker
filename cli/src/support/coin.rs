@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, vec};
 
 use anyhow::Context;
 use cosmrs::Coin;
@@ -40,6 +40,45 @@ impl FromStr for CoinFromStr {
         };
 
         Ok(CoinFromStr { inner: c })
+    }
+}
+
+pub struct Coins(Vec<Coin>);
+
+impl FromStr for Coins {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let coins: Vec<Coin> = s
+            .split(',')
+            .map(|s| CoinFromStr::from_str(s).map(|c| c.inner().to_owned()))
+            .collect::<Result<Vec<Coin>, anyhow::Error>>()?;
+
+        Ok(Coins(coins))
+    }
+}
+
+impl TryFrom<Option<&str>> for Coins {
+    type Error = anyhow::Error;
+    fn try_from(os: Option<&str>) -> Result<Self, Self::Error> {
+        match os {
+            Some(s) => s.parse(),
+            None => Ok(Coins(vec![])),
+        }
+    }
+}
+
+impl From<Coins> for Vec<Coin> {
+    fn from(coins: Coins) -> Self {
+        let Coins(v) = coins;
+        v
+    }
+}
+
+impl From<Coins> for Vec<cosmrs::proto::cosmos::base::v1beta1::Coin> {
+    fn from(coins: Coins) -> Self {
+        let Coins(v) = coins;
+        v.iter().map(|c| c.into()).collect()
     }
 }
 

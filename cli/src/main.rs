@@ -35,13 +35,13 @@ pub enum Commands {
 }
 
 context!(
-    CWContext, config = { cw: WasmConfig };
+    WasmContext, config = { wasm: WasmConfig };
     WorkspaceContext, config = { workspace: WorkspaceConfig }
 );
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::Wasm { cmd } => WasmModule::execute(CWContext {}, cmd),
+        Commands::Wasm { cmd } => WasmModule::execute(WasmContext {}, cmd),
         Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext {}, cmd),
     }
 }
@@ -83,7 +83,7 @@ mod tests {
         env::set_current_dir(&path).unwrap();
 
         let conf = r#"
-[cw]
+[wasm]
 contract_dir = "whatever""#;
 
         path.push(Path::new("Beaker.toml"));

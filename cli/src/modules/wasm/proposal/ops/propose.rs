@@ -1,5 +1,5 @@
 use crate::attrs_format;
-use crate::support::coin::CoinFromStr;
+use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::ops_response::OpResponseDisplay;
@@ -19,7 +19,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     title: &str,
     description: &str,
-    deposit: Option<&str>,
+    deposit: Coins,
     network: &str,
     fee: &Fee,
     timeout_height: &u32,
@@ -46,18 +46,12 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
         instantiate_permission: None, // TODO: add instantitate permission
     };
 
-    let deposit = if let Some(d) = deposit {
-        vec![d.parse::<CoinFromStr>()?.inner().into()]
-    } else {
-        vec![]
-    };
-
     let msg_submit_proposal = MsgSubmitProposal {
         content: Some(Any {
             type_url: "/cosmwasm.wasm.v1.StoreCodeProposal".to_owned(),
             value: store_code_proposal.to_bytes()?,
         }),
-        initial_deposit: deposit,
+        initial_deposit: deposit.into(),
         proposer: client.signer_account_id().to_string(),
     };
 

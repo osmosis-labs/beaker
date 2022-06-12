@@ -26,6 +26,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 
     if !*no_wasm_opt {
         println!("Optimizing wasm...");
+        let optimizer_version = ctx.config()?.optimizer_version;
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };
 
@@ -39,7 +40,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
                 format!("type=volume,source={wp_name}_cache,target=/code/target").as_str(),
                 "--mount",
                 "type=volume,source=registry_cache,target=/usr/local/cargo/registry",
-                format!("cosmwasm/workspace-optimizer{arch_suffix}:0.12.6").as_str(), // TODO: Extract version & check for architecture
+                format!("cosmwasm/workspace-optimizer{arch_suffix}:{optimizer_version}").as_str(),
             ])
             .spawn()?
             .wait()?;
