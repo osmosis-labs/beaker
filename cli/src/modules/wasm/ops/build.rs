@@ -4,7 +4,7 @@ use std::{env, process::Command};
 
 pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
-    optimize: &bool,
+    no_optimize: &bool,
     aarch64: &bool,
 ) -> Result<()> {
     let root = ctx.root()?;
@@ -23,7 +23,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
         .spawn()?
         .wait()?;
 
-    if *optimize {
+    if !*no_optimize {
         println!("Optimizing wasm...");
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };

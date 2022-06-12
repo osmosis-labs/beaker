@@ -22,9 +22,9 @@ pub enum WasmCmd {
     },
     /// Build .wasm for storing contract code on the blockchain
     Build {
-        /// If set, the contract(s) will be optimized after build
+        /// If set, the contract(s) will not be optimized after build
         #[clap(short, long)]
-        optimize: bool,
+        no_optimize: bool,
         /// Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
         #[clap(short, long)]
         aarch64: bool,
@@ -90,7 +90,10 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
-            WasmCmd::Build { optimize, aarch64 } => ops::build(&ctx, optimize, aarch64), // TODO: change optimize -> no-optimize
+            WasmCmd::Build {
+                no_optimize,
+                aarch64,
+            } => ops::build(&ctx, no_optimize, aarch64), // TODO: change optimize -> no-optimize
             WasmCmd::StoreCode {
                 contract_name,
                 base_tx_args,
