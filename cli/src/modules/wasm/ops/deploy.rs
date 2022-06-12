@@ -1,5 +1,6 @@
 use crate::framework::Context;
 use crate::modules::wasm::WasmConfig;
+use crate::support::coin::Coins;
 use anyhow::Result;
 
 use cosmrs::crypto::secp256k1::SigningKey;
@@ -16,6 +17,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    funds: Coins,
     network: &str,
     timeout_height: &u32,
     fee: &Fee,
@@ -41,6 +43,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         label,
         raw,
+        funds,
         network,
         timeout_height,
         fee,

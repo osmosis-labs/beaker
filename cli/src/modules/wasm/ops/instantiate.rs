@@ -1,5 +1,6 @@
 use crate::attrs_format;
 use crate::modules::wasm::config::WasmConfig;
+use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::ops_response::OpResponseDisplay;
@@ -18,6 +19,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    funds: Coins,
     network: &str,
     timeout_height: &u32,
     fee: &Fee,
@@ -61,7 +63,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
                     })
                     .map(|s| s.as_bytes().to_vec())
             })?,
-        funds: vec![], // TODO: Add options for adding funds
+        funds: funds.into(),
     };
 
     block(async {

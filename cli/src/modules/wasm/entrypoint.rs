@@ -54,6 +54,10 @@ pub enum WasmCmd {
         #[clap(short, long)]
         raw: Option<String>,
 
+        /// Funds to send to instantiated contract
+        #[clap(short, long)]
+        funds: Option<String>,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -69,6 +73,10 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
+
+        /// Funds to send to instantiated contract
+        #[clap(short, long)]
+        funds: Option<String>,
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
@@ -130,6 +138,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
+                funds,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -143,6 +152,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
                     &Fee::try_from(gas_args)?,
@@ -154,6 +164,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
+                funds,
                 no_rebuild,
                 no_wasm_opt,
                 base_tx_args,
@@ -169,6 +180,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
                     &Fee::try_from(gas_args)?,
