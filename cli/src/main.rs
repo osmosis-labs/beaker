@@ -2,7 +2,7 @@ mod framework;
 mod modules;
 mod support;
 
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use framework::{Context, Module};
@@ -10,6 +10,7 @@ use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
 use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -32,17 +33,49 @@ pub enum Commands {
         #[clap(subcommand)]
         cmd: WasmCmd,
     },
+    Console {
+        #[clap(short, long, default_value = "local")]
+        network: String,
+    },
+}
+
+#[derive(Serialize, Deserialize, Default)]
+struct ConsoleConfig {}
+
+fn console(network: &str) -> Result<()> {
+    let ctx = ConsoleContext {};
+    let npx = Command::new("npx")
+        .arg("beaker-console")
+        .arg(ctx.root()?.as_os_str())
+        .arg(network)
+        .spawn();
+
+    match npx {
+        Ok(mut npx) => {
+            npx.wait()?;
+            Ok(())
+        }
+        Err(e) => {
+            if let std::io::ErrorKind::NotFound = e.kind() {
+                bail!("`npx`, which pre-bundled with npm >= 5.2.0, is required for console but not found. Please install `npm` or check your path.")
+            } else {
+                Err(e).with_context(|| "beaker-console error")
+            }
+        }
+    }
 }
 
 context!(
     WasmContext, config = { wasm: WasmConfig };
-    WorkspaceContext, config = { workspace: WorkspaceConfig }
+    WorkspaceContext, config = { workspace: WorkspaceConfig };
+    ConsoleContext, config = { console: ConsoleConfig }
 );
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
         Commands::Wasm { cmd } => WasmModule::execute(WasmContext {}, cmd),
         Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext {}, cmd),
+        Commands::Console { network } => console(network),
     }
 }
 

@@ -1,13 +1,16 @@
-const path = require('path')
+const path = require("path");
 
-const getState = (mode) => {
-	switch (mode) {
-		case "local":
-			return require(path.join(__dirname, 'state.local.json'))
-		default:
-			return require(path.join(__dirname, 'state.json'))
-	}
-}
+const requireOrEmpty = (p) => {
+  try {
+    return require(path.join(__dirname, p));
+  } catch (_e) {
+    return {};
+  }
+};
 
+const getState = () => ({
+  ...requireOrEmpty("state.json"),
+  ...requireOrEmpty("state.local.json"),
+});
 
 module.exports = { getState };
