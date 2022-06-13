@@ -1,0 +1,6 @@
+{
+  "name": "beaker-state",
+  "version": "1.0.0",
+  "description": "Package containing Beaker related state for further reference",
+  "main": "index.js"
+}
