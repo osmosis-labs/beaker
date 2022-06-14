@@ -32,7 +32,12 @@ async function run() {
       hdPaths: [stringToPath(conf.global.derivation_path)],
     };
     const wallet = await Secp256k1HdWallet.fromMnemonic(mnemonic, options);
-    return (await wallet.getAccounts())[0];
+    const signingClient = await SigningCosmWasmClient.connectWithSigner(
+      conf.global.networks[network].rpc_endpoint,
+      wallet,
+      { gasPrice: conf.global.gas_price },
+    );
+    return signingClient;
   };
 
   const accountName = Object.keys(conf.global.accounts);
