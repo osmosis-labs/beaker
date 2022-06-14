@@ -68,6 +68,7 @@
   "homepage": "https://github.com/osmosis-labs/beaker#readme",
   "dependencies": {
     "chalk": "^5.0.1",
+    "cosmwasm": "^1.1.1",
     "pretty-repl": "^3.1.1"
   }
 }

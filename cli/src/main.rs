@@ -43,11 +43,21 @@ pub enum Commands {
 struct ConsoleConfig {}
 
 fn console(network: &str) -> Result<()> {
-    let ctx = ConsoleContext {};
+    let console_ctx = ConsoleContext {};
+    let wasm_ctx = WasmContext {};
+    let workspace_ctx = WorkspaceContext {};
+
+    let conf = serde_json::json!({
+        "global": console_ctx.global_config()?,
+        "wasm": wasm_ctx.config()?,
+        "workspace": workspace_ctx.config()?,
+    });
+
     let npx = Command::new("npx")
         .arg("beaker-console")
-        .arg(ctx.root()?.as_os_str())
+        .arg(console_ctx.root()?.as_os_str())
         .arg(network)
+        .arg(serde_json::to_string(&conf)?)
         .spawn();
 
     match npx {
