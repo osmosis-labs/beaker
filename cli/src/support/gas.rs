@@ -11,11 +11,11 @@ use super::coin::CoinFromStr;
 #[get = "pub"]
 pub struct GasArgs {
     /// Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
-    #[clap(long, default_value = "auto")]
-    gas: String,
+    #[clap(long)]
+    gas: Option<String>,
     /// Limit to how much gas amount allowed to be consumed
-    #[clap(long, default_value = "0")]
-    gas_limit: u64,
+    #[clap(long)]
+    gas_limit: Option<u64>,
 }
 
 impl TryFrom<GasArgs> for Fee {
@@ -31,8 +31,18 @@ impl TryFrom<&GasArgs> for Fee {
     type Error = Error;
 
     fn try_from(value: &GasArgs) -> Result<Self, Self::Error> {
-        let amount = value.gas.parse::<CoinFromStr>()?.inner().to_owned();
-        Ok(Fee::from_amount_and_gas(amount, value.gas_limit))
+        let error_msg = "`gas` and `gas_limit` must be specified if either of them is specified. Neglect both to estimate fee automatically.";
+        let amount = value
+            .gas
+            .as_ref()
+            .with_context(|| error_msg)?
+            .parse::<CoinFromStr>()?
+            .inner()
+            .to_owned();
+        Ok(Fee::from_amount_and_gas(
+            amount,
+            value.gas_limit.with_context(|| error_msg)?,
+        ))
     }
 }
 
@@ -81,7 +91,7 @@ pub enum Gas {
 
 impl Gas {
     pub fn from_args(args: &GasArgs, gas_price: &str, gas_adjustment: &f32) -> Result<Self> {
-        if args.gas() == "auto" {
+        if args.gas_limit.is_none() && args.gas.is_none() {
             Ok(Self::Auto {
                 gas_price: gas_price.parse()?,
                 gas_adjustment: gas_adjustment.to_owned(),
