@@ -9,13 +9,12 @@ use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tendermint::abci::tag::{Key, Value};
 
-use cosmrs::tx::{self, Raw, SignDoc, SignerInfo};
-use cosmrs::{dev, AccountId, Coin, Denom};
+use cosmrs::tx::{self, SignDoc, SignerInfo};
+use cosmrs::{dev, AccountId, Coin};
 use cosmrs::{rpc, tx::Fee, Any};
 use prost::Message;
-use regex::Regex;
 
-use super::gas::GasArgs;
+use super::gas::Gas;
 
 pub type TxCommitResponse = rpc::endpoint::broadcast::tx_commit::Response;
 
@@ -81,6 +80,7 @@ impl Client {
         BaseAccount::decode(res.value.as_slice()).context("Unable to decode BaseAccount")
     }
 
+    #[allow(deprecated)]
     pub async fn simulate(&self, tx_bytes: Vec<u8>) -> Result<GasInfo> {
         use cosmos_sdk_proto::cosmos::tx::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
@@ -157,105 +157,61 @@ pub struct SigningClient {
     signing_key: SigningKey,
 }
 
-pub struct GasPrice {
-    amount: u64,
-    denom: Denom,
-}
-
-impl FromStr for GasPrice {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let re = Regex::new(r"^(\d+)(.+)$").unwrap();
-        let caps = re
-            .captures(s)
-            .with_context(|| format!("Unable to parse `{s}` as Coin."))?;
-
-        let gas_price = GasPrice {
-            amount: caps
-                .get(1)
-                .with_context(|| format!("`{s}` does not contain valid amount"))?
-                .as_str()
-                .parse()
-                .unwrap(),
-            denom: caps
-                .get(2)
-                .with_context(|| format!("`{s}` does not contain valid denom"))?
-                .as_str()
-                .parse()
-                .unwrap(),
-        };
-
-        Ok(gas_price)
-    }
-}
-
-pub enum Gas {
-    Specified(Fee),
-    Auto {
-        gas_price: GasPrice,
-        gas_adjustment: f32,
-    },
-}
-
-impl Gas {
-    pub fn auto(gas_price: &str, gas_adjustment: f32) -> Result<Self> {
-        Ok(Gas::Auto {
-            gas_price: gas_price.parse()?,
-            gas_adjustment,
-        })
-    }
-}
-
-impl TryFrom<&GasArgs> for Gas {
-    type Error = anyhow::Error;
-    fn try_from(args: &GasArgs) -> Result<Self> {
-        Ok(Self::Specified(Fee::try_from(args)?))
-    }
-}
-
-impl TryFrom<GasArgs> for Gas {
-    type Error = anyhow::Error;
-    fn try_from(args: GasArgs) -> Result<Self> {
-        TryFrom::try_from(&args)
-    }
-}
-
-impl Gas {
-    pub async fn calculate_fee(self, client: Client, tx_raw: Raw) -> Result<Fee> {
-        match self {
-            Gas::Specified(fee) => Ok(fee),
-            Gas::Auto {
-                gas_price,
-                gas_adjustment,
-            } => {
-                let gas_info = client.simulate(tx_raw.to_bytes().unwrap()).await?;
-                let gas_limit: u64 = gas_info.gas_used.into();
-
-                let amount = Coin {
-                    denom: gas_price.denom,
-                    amount: ((((gas_limit as f64) * (gas_adjustment as f64))
-                        * (gas_price.amount as f64))
-                        .ceil() as u64)
-                        .into(),
-                };
-
-                Ok(Fee::from_amount_and_gas(amount, gas_limit))
-            }
-        }
-    }
-}
-
 impl SigningClient {
     pub fn signer_account_id(&self) -> AccountId {
         let signer_pub = self.signing_key.public_key();
         signer_pub.account_id(self.account_prefix.as_str()).unwrap()
     }
 
+    pub async fn estimate_fee(
+        &self,
+        gas: Gas,
+        account: &BaseAccount,
+        tx_body: tx::Body,
+    ) -> Result<Fee> {
+        match gas {
+            Gas::Specified(fee) => Ok(fee),
+            Gas::Auto {
+                gas_price,
+                gas_adjustment,
+            } => {
+                let signer_info = SignerInfo::single_direct(
+                    Some(self.signing_key.public_key()),
+                    account.sequence,
+                );
+                let auth_info = signer_info.auth_info(Fee::from_amount_and_gas(
+                    Coin {
+                        denom: gas_price.denom.clone(),
+                        amount: 0u8.into(),
+                    },
+                    0u64,
+                ));
+                let sign_doc = SignDoc::new(
+                    &tx_body,
+                    &auth_info,
+                    &self.inner.network.chain_id().parse().unwrap(),
+                    account.account_number,
+                )
+                .unwrap();
+                let tx_raw = sign_doc.sign(&self.signing_key).unwrap();
+                let gas_info = self.inner.simulate(tx_raw.to_bytes().unwrap()).await?;
+                let gas_limit: u64 = gas_info.gas_used.into();
+                let gas_limit = ((gas_limit as f64) * (gas_adjustment as f64)).ceil();
+
+                let amount = Coin {
+                    denom: gas_price.denom,
+                    amount: (((gas_limit as f64) * (gas_price.amount as f64)).ceil() as u64).into(),
+                };
+
+                Ok(Fee::from_amount_and_gas(amount, gas_limit as u64))
+            }
+        }
+    }
+
     pub async fn sign_and_broadcast(
         &self,
         msgs: Vec<Any>,
-        fee: Fee,
+        gas: &Gas,
         memo: &str,
         timeout_height: &u32,
     ) -> Result<TxCommitResponse> {
@@ -265,11 +221,16 @@ impl SigningClient {
             .await
             .with_context(|| "Account can't be initialized")?;
 
-        // === Contract and Sign Tx (Invariant)
         let tx_body = tx::Body::new(msgs, memo, *timeout_height);
+
+        let fee = self
+            .estimate_fee(gas.clone(), &acc, tx_body.clone())
+            .await?;
+
         let auth_info =
             SignerInfo::single_direct(Some(self.signing_key.public_key()), acc.sequence)
                 .auth_info(fee.clone());
+
         let sign_doc = SignDoc::new(
             &tx_body,
             &auth_info,
@@ -279,14 +240,11 @@ impl SigningClient {
         .unwrap();
         let tx_raw = sign_doc.sign(&self.signing_key).unwrap();
 
-        // === Poll for first block (Invariant)
         let rpc_client = rpc::HttpClient::new(self.inner.network.rpc_endpoint().as_str()).unwrap();
         dev::poll_for_first_block(&rpc_client).await;
 
-        // === Broadcast (Invariant)
         let tx_commit_response = tx_raw.broadcast_commit(&rpc_client).await.unwrap();
 
-        // === Check Tx (Invariant)
         if tx_commit_response.check_tx.code.is_err() {
             return Err(anyhow!(
                 "check_tx failed: {:?}",
@@ -294,7 +252,6 @@ impl SigningClient {
             ));
         }
 
-        // === Deliver Tx (Invariant)
         if tx_commit_response.deliver_tx.code.is_err() {
             return Err(anyhow!(
                 "deliver_tx failed: {:?}",

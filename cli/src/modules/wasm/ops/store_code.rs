@@ -2,6 +2,7 @@ use crate::attrs_format;
 use crate::modules::wasm::WasmConfig;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
+use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use anyhow::Context as _;
 
@@ -14,14 +15,14 @@ use anyhow::Result;
 use cosmrs::cosmwasm::MsgStoreCode;
 
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::tx::{Fee, Msg};
+use cosmrs::tx::Msg;
 
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
     network: &str,
     no_wasm_opt: &bool,
-    fee: &Fee,
+    gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
 ) -> Result<StoreCodeResponse> {
@@ -47,7 +48,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client
-            .sign_and_broadcast(vec![msg_store_code], fee.clone(), "", timeout_height)
+            .sign_and_broadcast(vec![msg_store_code], gas, "", timeout_height)
             .await?;
 
         let code_id: u64 = response.pick("store_code", "code_id").to_string().parse()?;

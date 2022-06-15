@@ -1,10 +1,10 @@
 use crate::framework::Context;
 use crate::modules::wasm::WasmConfig;
 use crate::support::coin::Coins;
+use crate::support::gas::Gas;
 use anyhow::Result;
 
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::tx::Fee;
 
 use super::build;
 use super::instantiate;
@@ -20,7 +20,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     funds: Coins,
     network: &str,
     timeout_height: &u32,
-    fee: &Fee,
+    gas: &Gas,
     store_code_signing_key: SigningKey,
     instantiate_signing_key: SigningKey,
     no_rebuild: &bool,
@@ -34,7 +34,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         network,
         no_wasm_opt,
-        fee,
+        gas,
         timeout_height,
         store_code_signing_key,
     )?;
@@ -46,7 +46,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         funds,
         network,
         timeout_height,
-        fee,
+        gas,
         instantiate_signing_key,
     )
 }

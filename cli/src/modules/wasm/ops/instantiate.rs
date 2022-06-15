@@ -3,6 +3,7 @@ use crate::modules::wasm::config::WasmConfig;
 use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
+use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
@@ -10,7 +11,7 @@ use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::cosmwasm::MsgInstantiateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::tx::{Fee, Msg};
+use cosmrs::tx::Msg;
 use std::fs;
 
 #[allow(clippy::too_many_arguments)]
@@ -22,7 +23,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     funds: Coins,
     network: &str,
     timeout_height: &u32,
-    fee: &Fee,
+    gas: &Gas,
     signing_key: SigningKey,
 ) -> Result<InstantiateResponse> {
     let global_config = ctx.global_config()?;
@@ -70,7 +71,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         let response = client
             .sign_and_broadcast(
                 vec![msg_instantiate_contract.to_any().unwrap()],
-                fee.clone(),
+                gas,
                 "",
                 timeout_height,
             )

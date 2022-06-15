@@ -2,6 +2,7 @@ use crate::attrs_format;
 use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
+use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::proto::MessageExt;
 use crate::support::state::State;
@@ -10,7 +11,7 @@ use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Clie
 use anyhow::{Context as _, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::MsgSubmitProposal;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::{tx::Fee, Any};
+use cosmrs::Any;
 use std::vec;
 
 #[allow(clippy::too_many_arguments)]
@@ -21,7 +22,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     description: &str,
     deposit: Coins,
     network: &str,
-    fee: &Fee,
+    gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
 ) -> Result<ProposeStoreCodeResponse> {
@@ -62,7 +63,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client
-            .sign_and_broadcast(vec![msg_submit_proposal], fee.clone(), "", timeout_height)
+            .sign_and_broadcast(vec![msg_submit_proposal], gas, "", timeout_height)
             .await?;
 
         let proposal_id: u64 = response

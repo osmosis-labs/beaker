@@ -1,9 +1,9 @@
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
+use crate::support::gas::Gas;
 use anyhow::Result;
 use clap::Subcommand;
-use cosmrs::tx::Fee;
 use derive_new::new;
 use std::path::PathBuf;
 
@@ -127,7 +127,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     network,
                     no_wasm_opt,
-                    &Fee::try_from(gas_args)?,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
                     timeout_height,
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
@@ -155,7 +162,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
-                    &Fee::try_from(gas_args)?,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
                 Ok(())
@@ -183,7 +197,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
-                    &Fee::try_from(gas_args)?,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
                     signer_args.private_key(&ctx.global_config()?)?,
                     signer_args.private_key(&ctx.global_config()?)?,
                     no_rebuild,

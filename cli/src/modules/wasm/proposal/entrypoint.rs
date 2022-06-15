@@ -1,9 +1,9 @@
 use clap::Subcommand;
-use cosmrs::tx::Fee;
 
 use crate::{
     framework::Context,
     modules::wasm::{args::BaseTxArgs, WasmConfig},
+    support::gas::Gas,
 };
 
 #[derive(Subcommand, Debug)]
@@ -84,7 +84,14 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 description,
                 deposit.as_ref().map(|s| s.as_str()).try_into()?,
                 network,
-                &Fee::try_from(gas_args)?,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
             )?;
@@ -116,7 +123,14 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 contract_name,
                 option,
                 network,
-                &Fee::try_from(gas_args)?,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
             )?;
