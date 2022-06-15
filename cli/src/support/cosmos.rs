@@ -1,17 +1,21 @@
 use std::str::FromStr;
 
 use crate::framework::config::Network;
-use anyhow::anyhow;
+use anyhow::{anyhow, Ok};
 use anyhow::{Context, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
+use cosmrs::abci::GasInfo;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tendermint::abci::tag::{Key, Value};
 
-use cosmrs::tx::{self, SignDoc, SignerInfo};
-use cosmrs::{dev, AccountId};
+use cosmrs::tx::{self, Raw, SignDoc, SignerInfo};
+use cosmrs::{dev, AccountId, Coin, Denom};
 use cosmrs::{rpc, tx::Fee, Any};
 use prost::Message;
+use regex::Regex;
+
+use super::gas::GasArgs;
 
 pub type TxCommitResponse = rpc::endpoint::broadcast::tx_commit::Response;
 
@@ -77,6 +81,27 @@ impl Client {
         BaseAccount::decode(res.value.as_slice()).context("Unable to decode BaseAccount")
     }
 
+    pub async fn simulate(&self, tx_bytes: Vec<u8>) -> Result<GasInfo> {
+        use cosmos_sdk_proto::cosmos::tx::v1beta1::*;
+        let grpc_endpoint = self.network.grpc_endpoint();
+
+        let mut c = service_client::ServiceClient::connect(self.network.grpc_endpoint().clone())
+            .await
+            .context(format!("Unable to connect to {grpc_endpoint}"))?;
+
+        let res = c
+            .simulate(SimulateRequest { tx: None, tx_bytes })
+            .await?
+            .into_inner()
+            .gas_info;
+
+        let gas_info = res.with_context(|| "Unable to extract gas info")?;
+
+        gas_info
+            .try_into()
+            .map_err(|e: cosmrs::ErrorReport| anyhow!(e))
+    }
+
     pub async fn proposal(&self, proposal_id: &u64) -> Result<Proposal> {
         use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
@@ -130,6 +155,95 @@ pub struct SigningClient {
     inner: Client,
     account_prefix: String,
     signing_key: SigningKey,
+}
+
+pub struct GasPrice {
+    amount: u64,
+    denom: Denom,
+}
+
+impl FromStr for GasPrice {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let re = Regex::new(r"^(\d+)(.+)$").unwrap();
+        let caps = re
+            .captures(s)
+            .with_context(|| format!("Unable to parse `{s}` as Coin."))?;
+
+        let gas_price = GasPrice {
+            amount: caps
+                .get(1)
+                .with_context(|| format!("`{s}` does not contain valid amount"))?
+                .as_str()
+                .parse()
+                .unwrap(),
+            denom: caps
+                .get(2)
+                .with_context(|| format!("`{s}` does not contain valid denom"))?
+                .as_str()
+                .parse()
+                .unwrap(),
+        };
+
+        Ok(gas_price)
+    }
+}
+
+pub enum Gas {
+    Specified(Fee),
+    Auto {
+        gas_price: GasPrice,
+        gas_adjustment: f32,
+    },
+}
+
+impl Gas {
+    pub fn auto(gas_price: &str, gas_adjustment: f32) -> Result<Self> {
+        Ok(Gas::Auto {
+            gas_price: gas_price.parse()?,
+            gas_adjustment,
+        })
+    }
+}
+
+impl TryFrom<&GasArgs> for Gas {
+    type Error = anyhow::Error;
+    fn try_from(args: &GasArgs) -> Result<Self> {
+        Ok(Self::Specified(Fee::try_from(args)?))
+    }
+}
+
+impl TryFrom<GasArgs> for Gas {
+    type Error = anyhow::Error;
+    fn try_from(args: GasArgs) -> Result<Self> {
+        TryFrom::try_from(&args)
+    }
+}
+
+impl Gas {
+    pub async fn calculate_fee(self, client: Client, tx_raw: Raw) -> Result<Fee> {
+        match self {
+            Gas::Specified(fee) => Ok(fee),
+            Gas::Auto {
+                gas_price,
+                gas_adjustment,
+            } => {
+                let gas_info = client.simulate(tx_raw.to_bytes().unwrap()).await?;
+                let gas_limit: u64 = gas_info.gas_used.into();
+
+                let amount = Coin {
+                    denom: gas_price.denom,
+                    amount: ((((gas_limit as f64) * (gas_adjustment as f64))
+                        * (gas_price.amount as f64))
+                        .ceil() as u64)
+                        .into(),
+                };
+
+                Ok(Fee::from_amount_and_gas(amount, gas_limit))
+            }
+        }
+    }
 }
 
 impl SigningClient {
@@ -188,7 +302,7 @@ impl SigningClient {
             ));
         }
 
-        dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
+        // dev::poll_for_tx(&rpc_client, tx_commit_response.hash).await;
 
         Ok(tx_commit_response)
     }

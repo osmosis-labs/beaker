@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct GlobalConfig {
     name: String,
     gas_price: String,
+    gas_adjustment: f32,
     account_prefix: String,
     derivation_path: String,
     networks: Map<String, Network>,
@@ -41,6 +42,7 @@ impl Default for GlobalConfig {
         Self {
             name: Default::default(),
             gas_price: "0.025uosmo".to_string(),
+            gas_adjustment: 1.3,
             account_prefix: "osmo".to_string(),
             derivation_path: "m/44'/118'/0'/0/0".to_string(),
             networks: Map::from([
