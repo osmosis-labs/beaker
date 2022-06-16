@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 const { CosmWasmClient } = require('cosmwasm');
-
 const { getContracts, getAccounts, extendWith } = require('../dist');
+
+const CONSOLE_HISTORY_FILE = '.beaker_console_history';
 
 const networkColor = (network) =>
   ({
@@ -47,6 +48,11 @@ async function run() {
   });
 
   initializeContext(r.context);
+
+  r.setupHistory(
+    path.join(require('os').homedir(), CONSOLE_HISTORY_FILE),
+    (e) => e,
+  );
 
   r.on('reset', initializeContext);
 }
