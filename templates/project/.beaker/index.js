@@ -1,8 +1,13 @@
 const path = require("path");
 
+const requireUncached = (module) => {
+  delete require.cache[require.resolve(module)];
+  return require(module);
+};
+
 const requireOrEmpty = (p) => {
   try {
-    return require(path.join(__dirname, p));
+    return requireUncached(path.join(__dirname, p));
   } catch (_e) {
     return {};
   }
