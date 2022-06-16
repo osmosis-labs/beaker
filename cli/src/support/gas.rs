@@ -85,12 +85,12 @@ pub enum Gas {
     Specified(Fee),
     Auto {
         gas_price: GasPrice,
-        gas_adjustment: f32,
+        gas_adjustment: f64,
     },
 }
 
 impl Gas {
-    pub fn from_args(args: &GasArgs, gas_price: &str, gas_adjustment: &f32) -> Result<Self> {
+    pub fn from_args(args: &GasArgs, gas_price: &str, gas_adjustment: &f64) -> Result<Self> {
         if args.gas_limit.is_none() && args.gas.is_none() {
             Ok(Self::Auto {
                 gas_price: gas_price.parse()?,

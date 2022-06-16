@@ -24,6 +24,11 @@ macro_rules! config_impl {
 macro_rules! context {
     ($ctx:ident, config={ $key:ident: $cfg:ident }) => {
         struct $ctx {}
+        impl $ctx {
+            fn new() -> Self {
+                $ctx {}
+            }
+        }
         impl<'a> Context<'a, $cfg> for $ctx {
             framework::macros::config_impl!($key, $cfg);
         }

@@ -43,8 +43,8 @@ async function run() {
     state,
     conf,
     client,
-    account,
-    contract,
+    ...(conf.console.account_namespace ? { account } : account),
+    ...(conf.console.contract_namespace ? { contract } : contract),
   });
 
   initializeContext(r.context);

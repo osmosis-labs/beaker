@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct GlobalConfig {
     name: String,
     gas_price: String,
-    gas_adjustment: f32,
+    gas_adjustment: f64,
     account_prefix: String,
     derivation_path: String,
     networks: Map<String, Network>,

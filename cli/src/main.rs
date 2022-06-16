@@ -33,24 +33,43 @@ pub enum Commands {
         #[clap(subcommand)]
         cmd: WasmCmd,
     },
+    /// Launch interactive console for interacting with the project
     Console {
         #[clap(short, long, default_value = "local")]
         network: String,
     },
 }
 
-#[derive(Serialize, Deserialize, Default)]
-struct ConsoleConfig {}
+#[derive(Serialize, Deserialize)]
+struct ConsoleConfig {
+    /// Set account namespace in console context if set true.
+    /// All accounts will be available in console context if set false
+    account_namespace: bool,
+
+    /// Set contract namespace in console context if set true.
+    /// All contracts will be available in console context if set false
+    contract_namespace: bool,
+}
+
+impl Default for ConsoleConfig {
+    fn default() -> Self {
+        Self {
+            account_namespace: true,
+            contract_namespace: true,
+        }
+    }
+}
 
 fn console(network: &str) -> Result<()> {
-    let console_ctx = ConsoleContext {};
-    let wasm_ctx = WasmContext {};
-    let workspace_ctx = WorkspaceContext {};
+    let console_ctx = ConsoleContext::new();
+    let wasm_ctx = WasmContext::new();
+    let workspace_ctx = WorkspaceContext::new();
 
     let conf = serde_json::json!({
         "global": console_ctx.global_config()?,
         "wasm": wasm_ctx.config()?,
         "workspace": workspace_ctx.config()?,
+        "console": console_ctx.config()?
     });
 
     let npx = Command::new("npx")
@@ -83,8 +102,8 @@ context!(
 
 pub fn execute(cmd: &Commands) -> Result<()> {
     match cmd {
-        Commands::Wasm { cmd } => WasmModule::execute(WasmContext {}, cmd),
-        Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext {}, cmd),
+        Commands::Wasm { cmd } => WasmModule::execute(WasmContext::new(), cmd),
+        Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext::new(), cmd),
         Commands::Console { network } => console(network),
     }
 }
