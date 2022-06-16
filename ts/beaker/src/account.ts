@@ -1,6 +1,6 @@
 import { stringToPath } from '@cosmjs/crypto';
 import type { HttpEndpoint } from '@cosmjs/tendermint-rpc';
-import { Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
+import { Coin, Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
 
 type Config = {
   global: {
@@ -15,6 +15,7 @@ type Config = {
 export type Account = {
   signingClient: SigningCosmWasmClient;
   wallet: Secp256k1HdWallet;
+  getBalance: (denom: string) => Promise<Coin>;
 };
 
 export const fromMnemonic = async (
@@ -38,7 +39,20 @@ export const fromMnemonic = async (
     wallet,
     { gasPrice: conf.global.gas_price },
   );
-  return { signingClient, wallet };
+  return {
+    signingClient,
+    wallet,
+    async getBalance(denom) {
+      const accounts = await wallet.getAccounts();
+      const address = accounts[0]?.address;
+
+      if (!address) {
+        throw Error(`No account not found from: ${accounts}`);
+      }
+
+      return await signingClient.getBalance(address, denom);
+    },
+  };
 };
 
 export const getAccounts = async (conf: Config, network: string) => {

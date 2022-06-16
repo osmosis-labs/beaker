@@ -1,5 +1,5 @@
 import type { HttpEndpoint } from '@cosmjs/tendermint-rpc';
-import { Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
+import { Coin, Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
 declare type Config = {
     global: {
         account_prefix: any;
@@ -18,6 +18,7 @@ declare type Config = {
 export declare type Account = {
     signingClient: SigningCosmWasmClient;
     wallet: Secp256k1HdWallet;
+    getBalance: (denom: string) => Promise<Coin>;
 };
 export declare const fromMnemonic: (conf: Config, network: string | number, mnemonic: string) => Promise<Account>;
 export declare const getAccounts: (conf: Config, network: string) => Promise<{

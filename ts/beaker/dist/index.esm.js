@@ -90,7 +90,29 @@ var fromMnemonic = function (conf, network, mnemonic) { return __awaiter(void 0,
                 return [4 /*yield*/, SigningCosmWasmClient.connectWithSigner(networkInfo.rpc_endpoint, wallet, { gasPrice: conf.global.gas_price })];
             case 2:
                 signingClient = _a.sent();
-                return [2 /*return*/, { signingClient: signingClient, wallet: wallet }];
+                return [2 /*return*/, {
+                        signingClient: signingClient,
+                        wallet: wallet,
+                        getBalance: function (denom) {
+                            var _a;
+                            return __awaiter(this, void 0, void 0, function () {
+                                var accounts, address;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, wallet.getAccounts()];
+                                        case 1:
+                                            accounts = _b.sent();
+                                            address = (_a = accounts[0]) === null || _a === void 0 ? void 0 : _a.address;
+                                            if (!address) {
+                                                throw Error("No account not found from: ".concat(accounts));
+                                            }
+                                            return [4 /*yield*/, signingClient.getBalance(address, denom)];
+                                        case 2: return [2 /*return*/, _b.sent()];
+                                    }
+                                });
+                            });
+                        },
+                    }];
         }
     });
 }); };
@@ -121,17 +143,39 @@ var mapValues = function (o, g) { return mapObject(o, id, g); };
 var extendWith = function (properties) { return function (context) {
     Object.entries(properties).forEach(function (_a) {
         var k = _a[0], v = _a[1];
-        Object.defineProperty(context, k, {
-            configurable: true,
-            enumerable: true,
-            value: v,
-        });
+        // @ts-ignore
+        context[k] = v;
+        // Object.defineProperty(context, k, {
+        //   configurable: true,
+        //   enumerable: true,
+        //   value: v,
+        // });
     });
 }; };
 
 var getContracts = function (client, state) {
     var getContract = function (address) { return ({
         address: address,
+        getInfo: function () {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, client.getContract(address)];
+                });
+            });
+        },
+        getCode: function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            _b = (_a = client).getCodeDetails;
+                            return [4 /*yield*/, this.getInfo()];
+                        case 1: return [2 /*return*/, _b.apply(_a, [(_c.sent()).codeId])];
+                    }
+                });
+            });
+        },
         query: function (qmsg) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {

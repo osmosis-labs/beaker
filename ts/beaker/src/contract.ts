@@ -6,6 +6,12 @@ type Msg = Record<string, unknown>;
 export const getContracts = (client: CosmWasmClient, state: Object) => {
   const getContract = (address: string) => ({
     address,
+    async getInfo() {
+      return client.getContract(address);
+    },
+    async getCode() {
+      return client.getCodeDetails((await this.getInfo()).codeId);
+    },
     async query(qmsg: Msg) {
       return await client.queryContractSmart(address, qmsg);
     },
