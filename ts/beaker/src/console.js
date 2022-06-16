@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { CosmWasmClient } = require('cosmwasm');
+const { execSync } = require('child_process');
 const { getContracts, getAccounts, extendWith } = require('../dist');
 
 const CONSOLE_HISTORY_FILE = '.beaker_console_history';
@@ -20,14 +21,14 @@ async function run() {
   const [_node, _beakerConsole, root, network, confStr] = process.argv;
   const conf = JSON.parse(confStr);
 
-  const { getState } = require(path.join(root, '.beaker'));
-  const state = getState()[network] || {};
+  const state = () => {
+    const { getState } = require(path.join(root, '.beaker'));
+    return getState()[network] || {};
+  };
 
   const client = await CosmWasmClient.connect(
     conf.global.networks[network].rpc_endpoint,
   );
-
-  const contract = getContracts(client, state);
 
   const options = {
     prompt: chalk.green(
@@ -35,19 +36,68 @@ async function run() {
     ),
   };
 
-  const account = await getAccounts(conf, network);
-
   const r = repl.start(options);
 
-  const initializeContext = extendWith({
-    state,
-    conf,
-    client,
-    ...(conf.console.account_namespace ? { account } : account),
-    ...(conf.console.contract_namespace ? { contract } : contract),
+  const initializeContext = async (ctx) => {
+    const _state = state();
+    const account = await getAccounts(conf, network);
+    const contract = getContracts(client, _state);
+    return extendWith({
+      state: _state,
+      conf,
+      client,
+      ...(conf.console.account_namespace ? { account } : account),
+      ...(conf.console.contract_namespace ? { contract } : contract),
+    })(ctx);
+  };
+
+  await initializeContext(r.context);
+
+  const beakerCommand = async (replServer, prefixCmd, args) => {
+    replServer.clearBufferedCommand();
+    const [contract, options] = args.split(' -- ');
+
+    const cmd = `${prefixCmd} ${contract || ''} ${options || ''}`;
+
+    console.log('command: ', cmd);
+
+    try {
+      execSync(cmd, { stdio: 'inherit' });
+    } catch (e) {
+      console.error(e);
+    }
+
+    await initializeContext(replServer.context);
+    replServer.displayPrompt();
+  };
+
+  r.defineCommand('build', {
+    help: 'Build contract without leaving console (use only for development)',
+    async action(args) {
+      await beakerCommand(this, 'beaker wasm build --no-wasm-opt', args);
+    },
   });
 
-  initializeContext(r.context);
+  r.defineCommand('storeCode', {
+    help: 'Store code without leaving console (use only for development)',
+    async action(args) {
+      await beakerCommand(this, 'beaker wasm store-code --no-wasm-opt', args);
+    },
+  });
+
+  r.defineCommand('instanitate', {
+    help: 'Instantiate contract without leaving console (use only for development)',
+    async action(args) {
+      await beakerCommand(this, 'beaker wasm instantiate', args);
+    },
+  });
+
+  r.defineCommand('deploy', {
+    help: 'Deploy contract without leaving console',
+    async action(args) {
+      await beakerCommand(this, 'beaker wasm deploy --no-wasm-opt', args);
+    },
+  });
 
   r.setupHistory(
     path.join(require('os').homedir(), CONSOLE_HISTORY_FILE),

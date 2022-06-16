@@ -122,7 +122,7 @@ var extendWith = function (properties) { return function (context) {
     Object.entries(properties).forEach(function (_a) {
         var k = _a[0], v = _a[1];
         Object.defineProperty(context, k, {
-            configurable: false,
+            configurable: true,
             enumerable: true,
             value: v,
         });

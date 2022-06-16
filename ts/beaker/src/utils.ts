@@ -7,10 +7,12 @@ export const mapValues = (o: Object, g: Function) => mapObject(o, id, g);
 
 export const extendWith = (properties: Object) => (context: Object) => {
   Object.entries(properties).forEach(([k, v]) => {
-    Object.defineProperty(context, k, {
-      configurable: false,
-      enumerable: true,
-      value: v,
-    });
+    // @ts-ignore
+    context[k] = v;
+    // Object.defineProperty(context, k, {
+    //   configurable: true,
+    //   enumerable: true,
+    //   value: v,
+    // });
   });
 };
