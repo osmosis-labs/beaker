@@ -16,7 +16,7 @@
 CosmWasm development tooling.
 ![crates.io](https://img.shields.io/crates/v/beaker.svg)
 
-Beaker makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, and a sample front-end at the ready.
+[Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, and a sample front-end at the ready.
 
 ## Getting Started
 
