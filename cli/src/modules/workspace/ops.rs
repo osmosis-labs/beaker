@@ -35,7 +35,7 @@ pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(
         frontend_dir.join(".env.local.example"),
         frontend_dir.join(".env.local"),
     )
-    .with_context(|| format!("Unable to rename `.env.local.example` to `.env.local`"))?;
+    .with_context(|| "Unable to rename `.env.local.example` to `.env.local`")?;
 
     // symlink .beaker to frontend
     std::env::set_current_dir(root_dir.join("frontend"))?;
