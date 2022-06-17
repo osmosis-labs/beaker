@@ -1,3 +1,14 @@
 /target
 Cargo.lock
 1
+target
+.DS_Store
+.idea
+*.iml
+*.ipynb_checkpoints
+*.pyc
+*.sage.py
+params
+*.swp
+*.swo
+.vscode
