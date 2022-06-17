@@ -82,7 +82,7 @@ await contract.counter.query({ "get_count": {}})
 
 You can remove `contract` and/or `account` namespace by changing config.
 
-```toml
+```
 # Beaker.toml
 
 [console]
