@@ -1,13 +1,13 @@
 use anyhow::Context;
 use anyhow::Result;
 use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
+use clap::Parser;
 use derive_new::new;
 use getset::Getters;
 use serde::Deserialize;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::{env, fs};
-use structopt::StructOpt;
 
 #[derive(Clone, Deserialize, Serialize, Getters, new)]
 #[get = "pub"]
@@ -67,7 +67,7 @@ impl Template {
             argv
         };
 
-        let CargoGen::Generate(args) = CargoGen::from_iter(argv.iter());
+        let CargoGen::Generate(args) = CargoGen::parse_from(argv.iter());
 
         let name = &self.name;
         let repo = &self.repo;

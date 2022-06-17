@@ -1,25 +1,24 @@
 [package]
 edition = "2021"
 name = "beaker"
-version = "0.1.0"
+version = "0.0.1-rc1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.57"
 base64 = "0.13.0"
-cargo-generate = {version = "0.13.1", features = ["vendored-openssl"]}
-clap = {version = "3.1.15", features = ["derive"]}
+cargo-generate = {version = "0.15.2", features = ["vendored-openssl"]}
+clap = {version = "3.2.5", features = ["derive"]}
 config = "0.13.1"
 cosmos-sdk-proto = {version = "0.12.3", features = ["cosmwasm"]}
 cosmrs = {version = "0.7.1", features = ["dev", "cosmwasm"]}
 derive-new = "0.5.9"
 getset = "0.1.2"
 prost = "0.10.3"
-regex = "1.5"
+regex = "1.5.6"
 serde = "1.0.137"
 serde_json = "1.0.81"
-structopt = "0.3.26"
 tokio = {version = "1.18.2", features = ["full"]}
 
 [dev_dependencies]

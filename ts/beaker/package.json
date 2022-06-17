@@ -1,6 +1,6 @@
 {
   "name": "beaker",
-  "version": "0.0.1",
+  "version": "0.0.1-rc1",
   "description": "",
   "cdn": "dist/index.umd.js",
   "main": "dist/index.js",
