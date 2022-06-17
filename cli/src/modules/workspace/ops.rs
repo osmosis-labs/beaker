@@ -26,5 +26,21 @@ pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(
         root_dir.join::<PathBuf>(default_config_file_name.into()),
         root_dir.join::<PathBuf>(config_file_name.clone().into()),
     )
-    .with_context(|| format!("Unable to rename {default_config_file_name} to {config_file_name}"))
+    .with_context(|| {
+        format!("Unable to rename {default_config_file_name} to {config_file_name}")
+    })?;
+
+    let frontend_dir = root_dir.join("frontend");
+    fs::rename(
+        frontend_dir.join(".env.local.example"),
+        frontend_dir.join(".env.local"),
+    )
+    .with_context(|| format!("Unable to rename `.env.local.example` to `.env.local`"))?;
+
+    // symlink .beaker to frontend
+    std::env::set_current_dir(root_dir.join("frontend"))?;
+    std::os::unix::fs::symlink("../.beaker", ".beaker")
+        .with_context(|| "Currently not support symbolic link on non-unix system, if you are on windows, please consider using wsl.")?;
+
+    Ok(())
 }

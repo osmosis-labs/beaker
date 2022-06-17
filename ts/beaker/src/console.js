@@ -16,14 +16,19 @@ const networkColor = (network) =>
 async function run() {
   const repl = require('pretty-repl');
   const path = require('path');
+  const fs = require('fs');
   const chalk = (await import('chalk')).default;
 
   const [_node, _beakerConsole, root, network, confStr] = process.argv;
   const conf = JSON.parse(confStr);
 
   const state = () => {
-    const { getState } = require(path.join(root, '.beaker'));
-    return getState()[network] || {};
+    const local = fs.readFileSync(
+      path.join(root, '.beaker', 'state.local.json'),
+    );
+    const shared = fs.readFileSync(path.join(root, '.beaker', 'state.json'));
+    const _state = { ...JSON.parse(local), ...JSON.parse(shared) };
+    return _state[network] || {};
   };
 
   const client = await CosmWasmClient.connect(
