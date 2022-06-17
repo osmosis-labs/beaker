@@ -12,7 +12,7 @@ impl Default for WasmConfig {
     fn default() -> Self {
         Self {
             contract_dir: "contracts".to_string(),
-            template_repo: "InterWasm/cw-template".to_string(),
+            template_repo: "https://github.com/InterWasm/cw-template.git".to_string(),
             optimizer_version: "0.12.6".to_string(),
         }
     }
