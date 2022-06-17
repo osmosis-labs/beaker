@@ -36,7 +36,11 @@ beaker wasm new counter
 
 ### Deploy contract on LocalOsmosis
 
-Make sure LocalOsmosis has been started (see: https://github.com/osmosis-labs/LocalOsmosis).
+Make sure LocalOsmosis has been started (see: https://github.com/osmosis-labs/LocalOsmosis) or simply use the official installer and select option 3:
+
+```sh
+curl -sL https://get.osmosis.zone/install > i.py && python3 i.py
+```
 
 After that, `counter` contract can be deployed (build + store-code + instantiate) using the following command:
 
