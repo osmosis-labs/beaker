@@ -4,57 +4,82 @@ beaker
 
 ## Table of contents
 
-### Type aliases
-
-- [NumberParseable](README.md#numberparseable)
-
 ### Functions
 
-- [isNumberParseable](README.md#isnumberparseable)
-
-## Type aliases
-
-### NumberParseable
-
-Ƭ **NumberParseable**: `number` \| `string` \| `boolean` & { `isNumberParseble`: unique `symbol`  }
-
-A Branded Type for values parseable to number.
-
-#### Defined in
-
-[index.ts:4](https://github.com/VitorLuizC/typescript-library-boilerplate/blob/e351731/src/index.ts#L4)
+- [extendWith](README.md#extendwith)
+- [getAccounts](README.md#getaccounts)
+- [getContracts](README.md#getcontracts)
 
 ## Functions
 
-### isNumberParseable
+### extendWith
 
-▸ **isNumberParseable**(`value`): value is NumberParseable
-
-Check if value is parseable to number.
-
-**`example`**
-```js
-isNumberParseable('AAAA');
-//=> false
-
-isNumberParseable('100');
-//=> true
-
-if (!isNumberParseable(value))
-  throw new Error('Value can\'t be parseable to `Number`.')
-return Number(value);
-```
+▸ **extendWith**(`properties`): (`context`: `Record`<`string`, `unknown`\>) => `void`
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `value` | `unknown` | An `unknown` value to be checked. |
+| Name | Type |
+| :------ | :------ |
+| `properties` | `Record`<`string`, `unknown`\> |
 
 #### Returns
 
-value is NumberParseable
+`fn`
+
+▸ (`context`): `void`
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `context` | `Record`<`string`, `unknown`\> |
+
+##### Returns
+
+`void`
 
 #### Defined in
 
-[index.ts:24](https://github.com/VitorLuizC/typescript-library-boilerplate/blob/e351731/src/index.ts#L24)
+[src/utils.ts:15](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/utils.ts#L15)
+
+___
+
+### getAccounts
+
+▸ **getAccounts**(`conf`, `network`): `Promise`<{ `[k: string]`: `T`;  }\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `conf` | `Config` |
+| `network` | `string` |
+
+#### Returns
+
+`Promise`<{ `[k: string]`: `T`;  }\>
+
+#### Defined in
+
+[src/account.ts:67](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/account.ts#L67)
+
+___
+
+### getContracts
+
+▸ **getContracts**(`client`, `state`): `Record`<`string`, `unknown`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `client` | `CosmWasmClient` |
+| `state` | `Record`<`string`, `unknown`\> |
+
+#### Returns
+
+`Record`<`string`, `unknown`\>
+
+#### Defined in
+
+[src/contract.ts:6](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/contract.ts#L6)

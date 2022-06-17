@@ -2,14 +2,14 @@ import type { HttpEndpoint } from '@cosmjs/tendermint-rpc';
 import { Coin, Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
 declare type Config = {
     global: {
-        account_prefix: any;
+        account_prefix: string;
         derivation_path: string;
         networks: {
             [x: string]: {
                 rpc_endpoint: string | HttpEndpoint;
             };
         };
-        gas_price: any;
+        gas_price: string;
         accounts: Record<string, {
             mnemonic: string;
         }>;

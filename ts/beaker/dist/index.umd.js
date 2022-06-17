@@ -1,7 +1,7 @@
 /*!
- * beaker v0.0.1
+ * beaker-console v 0.0.1-rc1
  * (c) Supanat Potiwarakorn
- * Released under the Apache-2.0 License.
+ * Released under the MIT OR Apache-2.0 License.
  */
 
 (function (global, factory) {
@@ -79,6 +79,9 @@
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (typeof conf.global.account_prefix !== 'string') {
+                        throw Error('`account_prefix` must be string');
+                    }
                     options = {
                         prefix: conf.global.account_prefix,
                         hdPaths: [crypto.stringToPath(conf.global.derivation_path)],
@@ -90,7 +93,7 @@
                     if (!networkInfo) {
                         throw Error("network info for ".concat(network, " not found in the config"));
                     }
-                    return [4 /*yield*/, cosmwasm.SigningCosmWasmClient.connectWithSigner(networkInfo.rpc_endpoint, wallet, { gasPrice: conf.global.gas_price })];
+                    return [4 /*yield*/, cosmwasm.SigningCosmWasmClient.connectWithSigner(networkInfo.rpc_endpoint, wallet, { gasPrice: cosmwasm.GasPrice.fromString(conf.global.gas_price) })];
                 case 2:
                     signingClient = _a.sent();
                     return [2 /*return*/, {
@@ -135,6 +138,7 @@
         });
     }); };
 
+    /* eslint-disable */
     var id = function (x) { return x; };
     var mapObject = function (o, f, g) {
         return Object.fromEntries(Object.entries(o).map(function (_a) {
@@ -142,19 +146,23 @@
             return [f(k), g(v)];
         }));
     };
-    var mapValues = function (o, g) { return mapObject(o, id, g); };
-    var extendWith = function (properties) { return function (context) {
-        Object.entries(properties).forEach(function (_a) {
-            var k = _a[0], v = _a[1];
-            // @ts-ignore
-            context[k] = v;
-            // Object.defineProperty(context, k, {
-            //   configurable: true,
-            //   enumerable: true,
-            //   value: v,
-            // });
-        });
-    }; };
+    var mapValues = function (o, g) {
+        return mapObject(o, id, g);
+    };
+    var extendWith = function (properties) {
+        return function (context) {
+            Object.entries(properties).forEach(function (_a) {
+                var k = _a[0], v = _a[1];
+                // @ts-ignore
+                context[k] = v;
+                // Object.defineProperty(context, k, {
+                //   configurable: true,
+                //   enumerable: true,
+                //   value: v,
+                // });
+            });
+        };
+    };
 
     var getContracts = function (client, state) {
         var getContract = function (address) { return ({
@@ -223,9 +231,8 @@
             var addresses = contractInfo.addresses;
             var prefixLabel = function (label) { return "$".concat(label); };
             var contracts = mapObject(addresses, prefixLabel, getContract);
-            // @ts-ignore
-            if (contracts.$default) {
-                contracts = __assign(__assign({}, contracts), contracts.$default);
+            if (typeof contracts['$default'] === 'object' && contracts['$default']) {
+                contracts = __assign(__assign({}, contracts), contracts['$default']);
             }
             return contracts;
         });

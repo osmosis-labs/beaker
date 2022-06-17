@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable */
+
 const { CosmWasmClient } = require('cosmwasm');
 const { execSync } = require('child_process');
 const { getContracts, getAccounts, extendWith } = require('../dist');

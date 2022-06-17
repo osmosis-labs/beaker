@@ -1,13 +1,18 @@
 import { stringToPath } from '@cosmjs/crypto';
 import type { HttpEndpoint } from '@cosmjs/tendermint-rpc';
-import { Coin, Secp256k1HdWallet, SigningCosmWasmClient } from 'cosmwasm';
+import {
+  Coin,
+  GasPrice,
+  Secp256k1HdWallet,
+  SigningCosmWasmClient,
+} from 'cosmwasm';
 
 type Config = {
   global: {
-    account_prefix: any;
+    account_prefix: string;
     derivation_path: string;
     networks: { [x: string]: { rpc_endpoint: string | HttpEndpoint } };
-    gas_price: any;
+    gas_price: string;
     accounts: Record<string, { mnemonic: string }>;
   };
 };
@@ -23,6 +28,10 @@ export const fromMnemonic = async (
   network: string | number,
   mnemonic: string,
 ): Promise<Account> => {
+  if (typeof conf.global.account_prefix !== 'string') {
+    throw Error('`account_prefix` must be string');
+  }
+
   const options = {
     prefix: conf.global.account_prefix,
     hdPaths: [stringToPath(conf.global.derivation_path)],
@@ -37,7 +46,7 @@ export const fromMnemonic = async (
   const signingClient = await SigningCosmWasmClient.connectWithSigner(
     networkInfo.rpc_endpoint,
     wallet,
-    { gasPrice: conf.global.gas_price },
+    { gasPrice: GasPrice.fromString(conf.global.gas_price) },
   );
   return {
     signingClient,

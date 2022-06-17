@@ -3,7 +3,10 @@ import type { Account } from './account';
 import { mapObject, mapValues } from './utils';
 
 type Msg = Record<string, unknown>;
-export const getContracts = (client: CosmWasmClient, state: Object) => {
+export const getContracts = (
+  client: CosmWasmClient,
+  state: Record<string, unknown>,
+) => {
   const getContract = (address: string) => ({
     address,
     async getInfo() {
@@ -47,12 +50,10 @@ export const getContracts = (client: CosmWasmClient, state: Object) => {
       const prefixLabel = (label: string) => `$${label}`;
       let contracts = mapObject(addresses, prefixLabel, getContract);
 
-      // @ts-ignore
-      if (contracts.$default) {
+      if (typeof contracts['$default'] === 'object' && contracts['$default']) {
         contracts = {
           ...contracts,
-          // @ts-ignore
-          ...contracts.$default,
+          ...contracts['$default'],
         };
       }
       return contracts;
