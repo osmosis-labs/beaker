@@ -48,7 +48,7 @@ impl Default for GlobalConfig {
             networks: Map::from([
                 (
                     "local".into(),
-                    Network { 
+                    Network {
                         chain_id: "localosmosis".into(),
                         network_variant: NetworkVariant::Local,
                         grpc_endpoint: "http://localhost:9090".into(),
