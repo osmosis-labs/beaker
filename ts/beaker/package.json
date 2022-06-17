@@ -61,7 +61,7 @@
   "author": {
     "name": "Supanat Potiwarakorn"
   },
-  "license": "Apache-2.0",
+  "license": "MIT OR Apache-2.0",
   "bugs": {
     "url": "https://github.com/osmosis-labs/beaker/issues"
   },
