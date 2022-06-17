@@ -20,27 +20,98 @@ Beaker makes it easy to scaffold a new cosmwasm app, with all of the dependencie
 
 ## Getting Started
 
-Install beaker with `cargo install beaker`
+Install beaker with `cargo install beaker`.
 
-```bash
-$ beaker new counter-dapp
-$ cd counter-dapp
-```
+Then create new project with
 
-```bash
-$ beaker wasm new counter
+```sh
+beaker new counter-dapp
 ```
 
-```bash
-$ mkdir contracts/counter/instantiate-msgs
-$ echo '{ "count": 0 }' > contracts/counter/instantiate-msgs/default.json
-$ beaker wasm deploy counter --signer-account test1 --no-wasm-opt
+After that we can create new contract (the command uses template from [cw-template](https://github.com/InterWasm/cw-template))
+```sh
+cd counter-dapp
+beaker wasm new counter
 ```
-```bash
-$ npx create-next-app@latest --ts 
-$ mkdir counter-frontend/beaker-state
-$ ln -s "$(pwd)"/.beaker/state*.json counter-frontend/beaker-state
+
+### Deploy contract on LocalOsmosis
+
+Make sure LocalOsmosis has been started (see: https://github.com/osmosis-labs/LocalOsmosis).
+
+After that, `counter` contract can be deployed (build + store-code + instantiate) using the following command:
+
+```sh
+beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
 ```
+The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration. For mainnet deployment, use:
+
+```sh
+beaker wasm deploy counter --signer-account <ACCOUNT> --raw '{ "count": 0 }' --network mainnet
+```
+
+Instantiate message can be stored for later use:
+
+```sh
+mkdir contracts/counter/instantiate-msgs
+echo '{ "count": 0 }' > contracts/counter/instantiate-msgs/default.json
+beaker wasm deploy counter --signer-account test1 --no-wasm-opt
+```
+
+### Console
+
+After deployed, you can play with the deployed contract using:
+
+```sh
+beaker console
+```
+
+This will launch custom node repl, where `contract`, `account` are available. 
+`contract` contains deployed contract.
+`account` contains [pre-defined accounts in localosmosis](https://github.com/osmosis-labs/LocalOsmosis#accounts).
+
+So you can interact with the recently deployed contract like this:
+
+```js
+await contract.counter.execute({ "increment": {}}).by(account.test1)
+await contract.counter.query({ "get_count": {}})
+```
+
+You can remove `contract` and/or `account` namespace by changing config.
+
+```toml
+# Beaker.toml
+
+[console]
+account_namespace = false
+contract_namespace = false
+```
+
+```js
+await counter.execute({ "increment": {}}).by(test1)
+await counter.query({ "get_count": {}})
+```
+
+Beaker console is also allowed to deploy contract, so that you don't another terminal tab to do so.
+
+```js
+.deploy counter -- --signer-account test1 --raw '{ "count": 999 }'
+```
+
+
+### Frontend
+
+Beaker project template also come with frontend template.
+
+```sh
+cd frontend
+yarn && yarn dev
+```
+
+Then open `http://localhost:3000/` in the browser.
+
+To interact, you need to [add LocalOsmosis to keplr](https://github.com/osmosis-labs/LocalOsmosis/tree/main/localKeplr).
+
+---
 
 ## License
 
