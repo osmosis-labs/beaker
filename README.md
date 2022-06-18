@@ -1,20 +1,20 @@
-<a href="https://docs.osmosis.zone/developing/dapps/get_started/">
-    <img src="assets/beaker.png" alt="Beaker logo" title="Beaker" align="right" height="60" />
-</a>
-
 # Beaker
 
-
-<p style="text-align: center;">
-    <img src="https://github.com/osmosis-labs/beaker/workflows/CI/badge.svg?branch=main">
-    <a href="https://github.com/osmosis-labs/beaker/blob/main/LICENSE-APACHE"><img src="https://img.shields.io/badge/license-APACHE-blue.svg"></a>
-    <a href="https://github.com/osmosis-labs/beaker/blob/main/LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-    <a href="https://deps.rs/repo/github/osmosis-labs/beaker"><img src="https://deps.rs/repo/github/osmosis-labs/beaker/status.svg"></a>
+<p align="center">
+<a href="https://docs.osmosis.zone/developing/dapps/get_started/">
+    <img src="assets/beaker.png" alt="Beaker logo" title="Beaker" align="center" height="150" />
+</a>
 </p>
 
 
-CosmWasm development tooling.
-![crates.io](https://img.shields.io/crates/v/beaker.svg)
+<p align="center" width="100%">
+    <img  height="20" src="https://github.com/osmosis-labs/beaker/actions/workflows/doctest.yml/badge.svg">
+    <img height="20" src="https://github.com/osmosis-labs/beaker/actions/workflows/lint.yml/badge.svg">
+    <a href="https://github.com/osmosis-labs/beaker/blob/main/LICENSE-APACHE"><img height="20" src="https://img.shields.io/badge/license-APACHE-blue.svg"></a>
+    <a href="https://github.com/osmosis-labs/beaker/blob/main/LICENSE-MIT"><img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+    <a href="https://deps.rs/repo/github/osmosis-labs/beaker"><img height="20" src="https://deps.rs/repo/github/osmosis-labs/beaker/status.svg"></a>
+    <a href="https://crates.io/crates/beaker"><img height="20" src="https://img.shields.io/crates/v/beaker.svg"></a>
+</p>
 
 [Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, and a sample front-end at the ready.
 
