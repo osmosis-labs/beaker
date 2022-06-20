@@ -80,6 +80,7 @@ mod tests {
             .assert(predicate::path::exists());
 
         // with custom config file name
+        env::set_current_dir(&temp).unwrap();
         WorkspaceModule::execute(
             RandomWorkspaceContext {},
             &WorkspaceCmd::New {
@@ -121,6 +122,7 @@ mod tests {
             .assert(predicate::path::exists());
 
         // with custom config file name
+        env::set_current_dir(&temp).unwrap();
         WorkspaceModule::execute(
             RandomWorkspaceContext {},
             &WorkspaceCmd::New {
