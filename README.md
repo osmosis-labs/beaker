@@ -6,7 +6,6 @@
 </a>
 </p>
 
-
 <p align="center" width="100%">
     <img  height="20" src="https://github.com/osmosis-labs/beaker/actions/workflows/doctest.yml/badge.svg">
     <img height="20" src="https://github.com/osmosis-labs/beaker/actions/workflows/lint.yml/badge.svg">
@@ -16,7 +15,7 @@
     <a href="https://crates.io/crates/beaker"><img height="20" src="https://img.shields.io/crates/v/beaker.svg"></a>
 </p>
 
-[Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, and a sample front-end at the ready.
+[Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
 
 ## Getting Started
 
@@ -29,6 +28,7 @@ beaker new counter-dapp
 ```
 
 After that we can create new contract (the command uses template from [cw-template](https://github.com/InterWasm/cw-template))
+
 ```sh
 cd counter-dapp
 beaker wasm new counter
@@ -47,6 +47,7 @@ After that, `counter` contract can be deployed (build + store-code + instantiate
 ```sh
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
 ```
+
 The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration. For mainnet deployment, use:
 
 ```sh
@@ -69,15 +70,15 @@ After deployed, you can play with the deployed contract using:
 beaker console
 ```
 
-This will launch custom node repl, where `contract`, `account` are available. 
+This will launch custom node repl, where `contract`, `account` are available.
 `contract` contains deployed contract.
 `account` contains [pre-defined accounts in localosmosis](https://github.com/osmosis-labs/LocalOsmosis#accounts).
 
 So you can interact with the recently deployed contract like this:
 
 ```js
-await contract.counter.execute({ "increment": {}}).by(account.test1)
-await contract.counter.query({ "get_count": {}})
+await contract.counter.execute({ increment: {} }).by(account.test1);
+await contract.counter.query({ get_count: {} });
 ```
 
 You can remove `contract` and/or `account` namespace by changing config.
@@ -91,8 +92,8 @@ contract_namespace = false
 ```
 
 ```js
-await counter.execute({ "increment": {}}).by(test1)
-await counter.query({ "get_count": {}})
+await counter.execute({ increment: {} }).by(test1);
+await counter.query({ get_count: {} });
 ```
 
 Beaker console is also allowed to deploy contract, so that you don't another terminal tab to do so.
@@ -100,7 +101,6 @@ Beaker console is also allowed to deploy contract, so that you don't another ter
 ```js
 .deploy counter -- --signer-account test1 --raw '{ "count": 999 }'
 ```
-
 
 ### Frontend
 
