@@ -29,9 +29,71 @@ cargo install beaker
 
 Now `beaker` is ready to use!
 
+### Scaffolding your new dapp project
+
+In the directory you want your project to reside, run:
+
 ```sh
 beaker new counter-dapp
 ```
+
+This will generate new directory called `counter-dapp` which, by default, come from [this template](https://github.com/osmosis-labs/beaker/tree/main/templates/project).
+
+So what's in the template? Let's have a look...
+
+```
+.
+├── frontend
+├── contracts
+├── Cargo.toml
+├── Beaker.toml
+├── .gitignore
+└── .beaker
+```
+
+#### `frontend` and `contracts`
+
+These should be self explanatory, it's where frontend and contracts are stored. And as you might be able to guess from the name, one project can contain multiple contracts.
+
+#### `Cargo.toml`
+
+There is a `Cargo.toml` here which specifies [cargo workspace](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html).
+
+```
+[workspace]
+
+members = [
+  'contracts/*',
+]
+
+[profile.release]
+...
+```
+
+All the crates (rust packages) in contracts directory are included, with unified release profile. With this, when we have to optimize multiple contracts deterministically, we can do that with ease (see [Contracts as Workspace Members section in rust-optimizer](https://github.com/CosmWasm/rust-optimizer#contracts-as-workspace-members)).
+
+#### `Beaker.toml`
+
+This is our configuration file which we will discuss about it in detail later.
+
+#### `.beaker`
+
+Last but not least, `.beaker` might be the most unusal part. It contains 2 files:
+
+```
+├── state.json
+└── state.local.json
+```
+
+These 2 files has similar functionality, which are containing beaker related state such as `address`, `code-id`, `label` for each contract on each network for later use.
+
+While `state.json` is there for mainnet and testnet state. `state.local.json` is intended to use locally and _being gitignored_ since its state will not make any sense on other's machine.
+
+And I don't think we have to explain about `.gitingnore` don't we?
+
+---
+
+### Your first CosmWasm contract with Beaker
 
 After that we can create new contract (the command uses template from [cw-template](https://github.com/InterWasm/cw-template))
 
