@@ -19,9 +19,15 @@
 
 ## Getting Started
 
-Install beaker with `cargo install beaker`.
+### Installation
 
-Then create new project with
+Beaker is available via [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) which is a rust toolchain. Once cargo is ready on your machine, run:
+
+```sh
+cargo install beaker
+```
+
+Now `beaker` is ready to use!
 
 ```sh
 beaker new counter-dapp
