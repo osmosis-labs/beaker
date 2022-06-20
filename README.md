@@ -78,7 +78,7 @@ This is our configuration file which we will discuss about it in detail later.
 
 #### `.beaker`
 
-Last but not least, `.beaker` might be the most unusal part. It contains 2 files:
+Last but not least, `.beaker` which is the most unusal part. It contains 2 files:
 
 ```
 ├── state.json
@@ -89,7 +89,7 @@ These 2 files has similar functionality, which are containing beaker related sta
 
 While `state.json` is there for mainnet and testnet state. `state.local.json` is intended to use locally and _being gitignored_ since its state will not make any sense on other's machine.
 
-And I don't think we have to explain about `.gitingnore` don't we?
+And I don't think we have to explain about `.gitignore` don't we?
 
 ---
 
