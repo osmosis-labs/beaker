@@ -102,6 +102,17 @@ cd counter-dapp
 beaker wasm new counter
 ```
 
+Now your new contract will be avaiable on `contracts/counter`.
+
+If you want to use other contract template, you can change the configuration, for example:
+
+```
+# Beaker.toml
+
+[wasm]
+template_repo = "https://github.com/osmosis-labs/cw-tpl-osmosis.git"
+```
+
 ### Deploy contract on LocalOsmosis
 
 Make sure LocalOsmosis has been started (see: https://github.com/osmosis-labs/LocalOsmosis) or simply use the official installer and select option 3:
