@@ -224,6 +224,8 @@ Then open `http://localhost:3000/` in the browser.
 
 To interact, you need to [add LocalOsmosis to keplr](https://github.com/osmosis-labs/LocalOsmosis/tree/main/localKeplr).
 
+In frontend directory, you will see that `.beaker` is in here. It is actually symlinked to the one in the root so that frontend code can access beaker state.
+
 ---
 
 ## License
