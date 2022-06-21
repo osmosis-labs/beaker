@@ -139,6 +139,19 @@ fn build_command(
                 }
                 text.push_str(help);
             }
+            if !arg.get_default_values().is_empty() {
+                text.push_str(
+                    format!(
+                        " (default: `{}`)",
+                        arg.get_default_values()
+                            .iter()
+                            .map(|s| s.to_str().unwrap().into())
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )
+                    .as_str(),
+                );
+            }
             doc.0.push(Event::Text(text.into()));
 
             doc.0.push(Event::End(Tag::Paragraph));

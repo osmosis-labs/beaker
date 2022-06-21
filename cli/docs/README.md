@@ -54,4 +54,4 @@ Arguments:
 
 * `--version`: Print version information
 
-* `-n/--network <network>`
+* `-n/--network <network>` (default: `local`)

@@ -26,7 +26,7 @@ Arguments:
 
 * `--deposit <deposit>`: Proposal deposit to activate voting
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -38,7 +38,7 @@ Arguments:
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
 ---
 
@@ -56,7 +56,7 @@ Arguments:
 
 * `-o/--option <option>`: Vote option, one of: yes, no, no_with_veto, abstain
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -68,7 +68,7 @@ Arguments:
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
 ---
 

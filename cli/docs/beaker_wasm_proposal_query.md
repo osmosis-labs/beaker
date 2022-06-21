@@ -20,4 +20,4 @@ Arguments:
 
 * ` <contract-name>`Name of the contract to store
 
-* `-n/--network <network>`
+* `-n/--network <network>` (default: `local`)

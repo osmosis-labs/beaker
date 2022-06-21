@@ -58,7 +58,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -70,7 +70,7 @@ Arguments:
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
 ---
 
@@ -86,13 +86,13 @@ Arguments:
 
 * ` <contract-name>`Name of the contract to instantiate
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference
+* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -104,7 +104,7 @@ Arguments:
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
 ---
 
@@ -120,7 +120,7 @@ Arguments:
 
 * ` <contract-name>`Name of the contract to deploy
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference
+* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
@@ -130,7 +130,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -142,7 +142,7 @@ Arguments:
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
 ---
 
