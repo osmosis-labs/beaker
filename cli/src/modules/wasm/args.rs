@@ -4,6 +4,7 @@ use crate::support::{gas::GasArgs, signer::SignerArgs};
 
 #[derive(Debug, Parser, Clone)]
 pub struct BaseTxArgs {
+    /// Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
     #[clap(short, long, default_value = "local")]
     pub network: String,
 

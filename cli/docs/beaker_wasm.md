@@ -58,7 +58,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
 
-* `-n/--network <network>`
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -92,7 +92,7 @@ Arguments:
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
-* `-n/--network <network>`
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
@@ -130,7 +130,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
 
-* `-n/--network <network>`
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
