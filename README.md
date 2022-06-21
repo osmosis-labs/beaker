@@ -205,6 +205,12 @@ Beaker console is also allowed to deploy contract, so that you don't another ter
 .deploy counter -- --signer-account test1 --raw '{ "count": 999 }'
 ```
 
+`.build`, `.storeCode`, `.instantiate` commands are also available and has the same options as Beaker cli command, except that `--no-wasm-opt` are in by default since it is being intended to use in the development phase.
+
+`.help` to see all avaiable commands.
+
+Apart from that, in the console, you can access Beaker's state and configuration from `state` and `conf` variables accordingly.
+
 ### Frontend
 
 Beaker project template also come with frontend template.
