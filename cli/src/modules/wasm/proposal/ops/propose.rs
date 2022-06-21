@@ -99,8 +99,8 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
 #[allow(dead_code)]
 pub struct ProposeStoreCodeResponse {
-    pub(crate) proposal_id: u64,
-    pub(crate) deposit_amount: String,
+    pub proposal_id: u64,
+    pub deposit_amount: String,
 }
 
 impl OpResponseDisplay for ProposeStoreCodeResponse {

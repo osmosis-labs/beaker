@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
 pub struct WorkspaceConfig {
-    pub(crate) template: Template,
+    pub template: Template,
 }
 
 impl Default for WorkspaceConfig {
