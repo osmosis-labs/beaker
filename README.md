@@ -115,7 +115,9 @@ template_repo = "https://github.com/osmosis-labs/cw-tpl-osmosis.git"
 
 ### Deploy contract on LocalOsmosis
 
-Make sure LocalOsmosis has been started (see: https://github.com/osmosis-labs/LocalOsmosis) or simply use the official installer and select option 3:
+LocalOsmosis, as it's name suggest, is Osmosis for local development. In the upcoming release, Beaker will have more complete integration with LocalOsmosis, it has to be installed and run separately.
+
+You can install from source by following the instruction at [osmosis-labs/LocalOsmosis](https://github.com/osmosis-labs/LocalOsmosis), or use the official installer and select option 3:
 
 ```sh
 curl -sL https://get.osmosis.zone/install > i.py && python3 i.py
