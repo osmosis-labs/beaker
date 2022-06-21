@@ -227,5 +227,10 @@ fn main() -> Result<(), anyhow::Error> {
     }
     recur_gen(&app, docs_path.to_path_buf(), &[])?;
 
+    std::fs::rename(
+        docs_path.join(format!("{}.md", app.get_name())),
+        docs_path.join("index.md"),
+    )?;
+
     Ok(())
 }
