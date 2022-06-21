@@ -229,7 +229,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     std::fs::rename(
         docs_path.join(format!("{}.md", app.get_name())),
-        docs_path.join("index.md"),
+        docs_path.join("README.md"),
     )?;
 
     Ok(())
