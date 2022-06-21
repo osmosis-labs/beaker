@@ -129,9 +129,31 @@ After that, `counter` contract can be deployed (build + store-code + instantiate
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
 ```
 
-The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration. For mainnet deployment, use:
+What's happending here equivalent to the following command sequence:
 
 ```sh
+# build .wasm file
+# stored in `target/wasm32-unknown-unknown/release/<CONTRACT_NAME>.wasm`
+# `--no-wasm-opt` is suitable for development, explained below
+beaker wasm build --no-wasm-opt
+
+# read .wasm in `target/wasm32-unknown-unknown/release/<CONTRACT_NAME>.wasm` due to `--no-wasm-opt` flag
+# use `--signer-account test1` which is predefined.
+# The list of all predefined accounts are here: https://github.com/osmosis-labs/LocalOsmosis#accounts
+# `code-id` is stored in the beaker state, local by default
+beaker wasm store-code counter --signer-account test1 --no-wasm-opt
+
+# instantiate counter contract
+# with instantiate msg: '{ "count": 0 }'
+beaker wasm instanitate counter --signer-account test1 --raw '{ "count": 0 }'
+```
+
+The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration.
+
+For testnet/mainnet deployment, use:
+
+```sh
+beaker wasm deploy counter --signer-account <ACCOUNT> --raw '{ "count": 0 }' --network testnet
 beaker wasm deploy counter --signer-account <ACCOUNT> --raw '{ "count": 0 }' --network mainnet
 ```
 
