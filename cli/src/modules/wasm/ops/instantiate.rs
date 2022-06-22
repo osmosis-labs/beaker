@@ -110,11 +110,11 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
 
 #[allow(dead_code)]
 pub struct InstantiateResponse {
-    pub(crate) label: String,
-    pub(crate) contract_address: String,
-    pub(crate) code_id: u64,
-    pub(crate) creator: String,
-    pub(crate) admin: String,
+    pub label: String,
+    pub contract_address: String,
+    pub code_id: u64,
+    pub creator: String,
+    pub admin: String,
 }
 
 impl OpResponseDisplay for InstantiateResponse {

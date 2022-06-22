@@ -67,7 +67,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
 #[allow(dead_code)]
 pub struct StoreCodeResponse {
-    pub(crate) code_id: u64,
+    pub code_id: u64,
 }
 
 impl OpResponseDisplay for StoreCodeResponse {
