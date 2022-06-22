@@ -19,6 +19,8 @@
 
 ## Getting Started
 
+This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./cli/docs/README.md).
+
 ### Installation
 
 Beaker is available via [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) which is a rust toolchain. Once cargo is ready on your machine, run:
@@ -164,6 +166,8 @@ mkdir contracts/counter/instantiate-msgs
 echo '{ "count": 0 }' > contracts/counter/instantiate-msgs/default.json
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt
 ```
+
+You can find references for [`beaker wasm` subcommand here](./cli/docs/beaker_wasm.md).
 
 ### Console
 
