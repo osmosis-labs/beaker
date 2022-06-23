@@ -9,6 +9,7 @@ struct Simple {
 
     /// Length of something I'm not so sure what it's for
     /// This doc string is so long
+    /// Here is some code blocks `println!("hello");` you see?:
     #[allow(dead_code)]
     length: u64,
 }
@@ -25,7 +26,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "length".to_string(),
                 vec![
                     "Length of something I'm not so sure what it's for".to_string(),
-                    "This doc string is so long".to_string()
+                    "This doc string is so long".to_string(),
+                    "Here is some code blocks `println!(\"hello\");` you see?:".to_string()
                 ]
             )
         ]

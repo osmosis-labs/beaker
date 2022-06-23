@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{DataStruct, Field};
 
 // Generate a compile error to output struct name
@@ -22,7 +22,7 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
                     let ident = field.ident.as_ref().expect("Field has to ident");
                     let doc_strings = parse_docs(field);
 
-                    quote! { (stringify!(#ident).to_string(), vec![ #(#doc_strings.to_string()),* ]) }
+                    quote! { (stringify!(#ident).to_string(), vec![  #( #doc_strings[1..].to_string()),* ]) }
                 })
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
@@ -43,25 +43,21 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
     }
 }
 
-fn parse_docs(field: &Field) -> Vec<String> {
+fn parse_docs(field: &Field) -> Vec<proc_macro2::TokenStream> {
+    // let re = Regex::new(r#"^" (.*)"$"#).unwrap();
+
     field
         .attrs
         .iter()
         .filter(|attr| attr.path.is_ident("doc"))
         .map(|attr| {
-            let mut docs = String::new();
+            let mut docs = proc_macro2::TokenStream::new();
             for tt in attr.tokens.clone().into_iter() {
                 if let TokenTree::Literal(lit) = tt {
-                    docs.push_str(
-                        lit.to_string()
-                            .replace("\" ", "")
-                            .replace('"', "")
-                            .replace("\\'", "'")
-                            .as_str(),
-                    );
+                    lit.to_tokens(&mut docs);
                 }
             }
             docs
         })
-        .collect::<Vec<String>>()
+        .collect::<Vec<proc_macro2::TokenStream>>()
 }

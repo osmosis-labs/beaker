@@ -2,4 +2,6 @@
 
 members = [
   "cli",
+  "derive_get_docs",
+  "get_docs",
 ]
