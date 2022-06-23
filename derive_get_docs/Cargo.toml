@@ -12,5 +12,4 @@ proc-macro = true
 get_docs = {path = "../get_docs"}
 proc-macro2 = "1.0.40"
 quote = "1.0.20"
-snailquote = "0.3.1"
 syn = {version = "1.0.98", features = ["full", "extra-traits"]}

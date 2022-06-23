@@ -3,10 +3,8 @@ use proc_macro2::TokenTree;
 use quote::{quote, ToTokens};
 use syn::{DataStruct, Field};
 
-// Generate a compile error to output struct name
 #[proc_macro_derive(GetDocs)]
 pub fn derive_get_docs(tokens: TokenStream) -> TokenStream {
-    // convert the input tokens into an ast, specially from a derive
     let ast: syn::DeriveInput = syn::parse(tokens).unwrap();
 
     TokenStream::from(impl_get_docs_macro(&ast))
@@ -44,8 +42,6 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
 }
 
 fn parse_docs(field: &Field) -> Vec<proc_macro2::TokenStream> {
-    // let re = Regex::new(r#"^" (.*)"$"#).unwrap();
-
     field
         .attrs
         .iter()
