@@ -5,11 +5,13 @@ mod support;
 use anyhow::{bail, Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
-use framework::{Context, Module};
-use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
-use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
+use derive_get_docs::GetDocs;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
+
+pub use framework::{config::GlobalConfig, Context, Module};
+pub use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
+pub use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -39,8 +41,8 @@ pub enum Commands {
     },
 }
 
-#[derive(Serialize, Deserialize)]
-struct ConsoleConfig {
+#[derive(Serialize, Deserialize, GetDocs)]
+pub struct ConsoleConfig {
     /// Set account namespace in console context if set true.
     /// All accounts will be available in console context if set false
     account_namespace: bool,

@@ -1,8 +1,9 @@
 use config::Map;
+use derive_get_docs::GetDocs;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Getters, Debug)]
+#[derive(Serialize, Deserialize, Getters, Debug, GetDocs)]
 #[get = "pub"]
 pub struct GlobalConfig {
     name: String,

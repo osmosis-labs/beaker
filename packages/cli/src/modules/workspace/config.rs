@@ -1,9 +1,10 @@
 use crate::support::template::Template;
+use derive_get_docs::GetDocs;
 use serde::Deserialize;
 use serde::Serialize;
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, GetDocs)]
 pub struct WorkspaceConfig {
     pub template: Template,
 }

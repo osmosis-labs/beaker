@@ -2,6 +2,7 @@ use anyhow::Context;
 use anyhow::Result;
 use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
 use clap::Parser;
+use derive_get_docs::GetDocs;
 use derive_new::new;
 use getset::Getters;
 use serde::Deserialize;
@@ -9,12 +10,12 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::{env, fs};
 
-#[derive(Clone, Deserialize, Serialize, Getters, new)]
+#[derive(Clone, Deserialize, Serialize, Getters, new, GetDocs)]
 #[get = "pub"]
 pub struct Template {
-    /// name of the generated directory
+    /// Name of the generated directory
     name: String,
-    /// git repo to be used as a template
+    /// Git repo to be used as a template
     repo: String,
     branch: String,
     target_dir: PathBuf,

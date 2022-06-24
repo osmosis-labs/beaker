@@ -1,7 +1,8 @@
+use derive_get_docs::GetDocs;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, GetDocs)]
 pub struct WasmConfig {
     pub contract_dir: String,
     pub template_repo: String,

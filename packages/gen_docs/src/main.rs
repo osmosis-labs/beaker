@@ -1,9 +1,10 @@
+use get_docs::GetDocs;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::vec;
 
-use beaker::Cli;
+use beaker::{Cli, ConsoleConfig, GlobalConfig, WasmConfig, WorkspaceConfig};
 use clap::CommandFactory;
 use clap::{App, ArgSettings};
 use pulldown_cmark::{Event, HeadingLevel, LinkType, Tag};
@@ -185,7 +186,7 @@ pub fn app_to_md(
     app: &App<'_>,
     prefix: &[String],
     level: HeadingLevel,
-) -> Result<String, anyhow::Error> {
+) -> Result<String, Box<dyn std::error::Error>> {
     let mut document = Document(Vec::new());
     build_page(&mut document, app, level, prefix.to_vec());
     let mut result = String::new();
@@ -212,7 +213,11 @@ pub fn app_to_md(
     Ok(result)
 }
 
-fn recur_gen(cmd: &App<'_>, path: PathBuf, prefix: &[String]) -> Result<(), anyhow::Error> {
+fn recur_gen(
+    cmd: &App<'_>,
+    path: PathBuf,
+    prefix: &[String],
+) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::create_dir_all(path.as_path())?;
 
     let mut prefix = prefix.to_vec();
@@ -231,7 +236,7 @@ fn recur_gen(cmd: &App<'_>, path: PathBuf, prefix: &[String]) -> Result<(), anyh
     Ok(())
 }
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Cli::command();
 
     let docs_path = Path::new("docs");
@@ -245,5 +250,11 @@ fn main() -> Result<(), anyhow::Error> {
         docs_path.join("README.md"),
     )?;
 
+    // TODO: generate into 4 files
+    // : global, wasm, workspace, console
+    // dbg!(WasmConfig::get_struct_docs());
+    // dbg!(GlobalConfig::get_struct_docs());
+    // dbg!(WorkspaceConfig::get_struct_docs());
+    // dbg!(ConsoleConfig::get_struct_docs());
     Ok(())
 }

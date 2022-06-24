@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct StructDoc {
     pub ident: String,
@@ -45,6 +47,7 @@ impl_get_docs!(f32);
 impl_get_docs!(f64);
 impl_get_docs!(str);
 impl_get_docs!(String);
+impl_get_docs!(PathBuf);
 
 // tuple, array and slice are purposefully omitted until there is a need for it
 // impl_get_docs!(tuple);
@@ -58,6 +61,12 @@ impl<K, V> GetDocs for std::collections::HashMap<K, V> {
 }
 
 impl<T> GetDocs for Vec<T> {
+    fn get_struct_docs() -> Vec<StructDoc> {
+        vec![]
+    }
+}
+
+impl<T> GetDocs for Option<T> {
     fn get_struct_docs() -> Vec<StructDoc> {
         vec![]
     }
