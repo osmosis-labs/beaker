@@ -20,13 +20,13 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
                     let ident = field.ident.as_ref().expect("Field has to ident");
                     let doc_strings = parse_docs(field);
 
-                    quote! { (stringify!(#ident).to_string(), vec![  #( #doc_strings[1..].to_string()),* ]) }
+                    quote! { get_docs::StructDoc::new(stringify!(#ident).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], vec![]) }
                 })
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
             let q = quote! {
                 impl get_docs::GetDocs for #name {
-                    fn get_docs() -> Vec<(String, Vec<String>)> {
+                    fn get_struct_docs() -> Vec<get_docs::StructDoc> {
                         vec![ #(#docs),* ]
                     }
                 }

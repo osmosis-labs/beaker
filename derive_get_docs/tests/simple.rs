@@ -1,5 +1,5 @@
 use derive_get_docs::GetDocs;
-use get_docs::GetDocs;
+use get_docs::{GetDocs, StructDoc};
 
 #[test]
 fn test_simple_struct() {
@@ -17,19 +17,21 @@ fn test_simple_struct() {
     }
 
     assert_eq!(
-        Simple::get_docs(),
+        Simple::get_struct_docs(),
         vec![
-            (
+            StructDoc::new(
                 "name".to_string(),
-                vec!["Name for simple example".to_string()]
+                vec!["Name for simple example".to_string()],
+                vec![]
             ),
-            (
+            StructDoc::new(
                 "length".to_string(),
                 vec![
                     "Length of something I'm not so sure what it's for".to_string(),
                     "This doc string is so long".to_string(),
                     "Here is some code blocks `println!(\"hello\");` you see?:".to_string()
-                ]
+                ],
+                vec![]
             )
         ]
     );
