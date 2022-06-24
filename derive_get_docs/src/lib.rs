@@ -20,7 +20,9 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
                     let ident = field.ident.as_ref().expect("Field has to ident");
                     let doc_strings = parse_docs(field);
 
-                    quote! { get_docs::StructDoc::new(stringify!(#ident).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], vec![]) }
+                    let ty = &field.ty;
+
+                    quote! { get_docs::StructDoc::new(stringify!(#ident).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], <#ty>::get_struct_docs()) }
                 })
                 .collect::<Vec<proc_macro2::TokenStream>>();
 

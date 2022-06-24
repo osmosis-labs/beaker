@@ -13,3 +13,6 @@ get_docs = {path = "../get_docs"}
 proc-macro2 = "1.0.40"
 quote = "1.0.20"
 syn = {version = "1.0.98", features = ["full", "extra-traits"]}
+
+[dev-dependencies]
+pretty_assertions = "1.2.1"
