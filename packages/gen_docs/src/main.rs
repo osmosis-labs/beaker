@@ -1,14 +1,17 @@
-use get_docs::GetDocs;
-use std::fs::File;
+use derive_get_docs::GetDocs;
+use get_docs::{GetDocs, StructDoc};
+use serde::Serialize;
+use std::borrow::Borrow;
+use std::fs::{create_dir_all, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::vec;
+use std::{fmt, vec};
 
 use beaker::{Cli, ConsoleConfig, GlobalConfig, WasmConfig, WorkspaceConfig};
 use clap::CommandFactory;
 use clap::{App, ArgSettings};
-use pulldown_cmark::{Event, HeadingLevel, LinkType, Tag};
-use pulldown_cmark_to_cmark::{cmark_with_options, Options};
+use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, LinkType, Tag};
+use pulldown_cmark_to_cmark::{cmark_with_options, Options, State};
 
 struct Document<'a>(Vec<Event<'a>>);
 
@@ -174,26 +177,15 @@ fn increase_level(level: &HeadingLevel) -> HeadingLevel {
     }
 }
 
-/// Convert a clap App to markdown documentation
-///
-/// # Parameters
-///
-/// - `app`: A reference to a clap application definition
-/// - `level`: The level for first markdown headline. If you for example want to
-///     render this beneath a `## Usage` headline in your readme, you'd want to
-///     set `level` to `2`.
-pub fn app_to_md(
-    app: &App<'_>,
-    prefix: &[String],
-    level: HeadingLevel,
-) -> Result<String, Box<dyn std::error::Error>> {
-    let mut document = Document(Vec::new());
-    build_page(&mut document, app, level, prefix.to_vec());
-    let mut result = String::new();
-
+fn custom_cmark<'a, I, E, F>(events: I, mut formatter: F) -> Result<State<'static>, fmt::Error>
+where
+    I: Iterator<Item = E>,
+    E: Borrow<Event<'a>>,
+    F: fmt::Write,
+{
     cmark_with_options(
-        document.0.iter(),
-        &mut result,
+        events,
+        &mut formatter,
         Options {
             newlines_after_headline: 2,
             newlines_after_paragraph: 2,
@@ -209,8 +201,7 @@ pub fn app_to_md(
             emphasis_token: '*',
             strong_token: "**",
         },
-    )?;
-    Ok(result)
+    )
 }
 
 fn recur_gen(
@@ -236,6 +227,87 @@ fn recur_gen(
     Ok(())
 }
 
+/// Convert a clap App to markdown documentation
+///
+/// # Parameters
+///
+/// - `app`: A reference to a clap application definition
+/// - `level`: The level for first markdown headline. If you for example want to
+///     render this beneath a `## Usage` headline in your readme, you'd want to
+///     set `level` to `2`.
+pub fn app_to_md(
+    app: &App<'_>,
+    prefix: &[String],
+    level: HeadingLevel,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let mut document = Document(Vec::new());
+    build_page(&mut document, app, level, prefix.to_vec());
+    let mut result = String::new();
+
+    custom_cmark(document.0.iter(), &mut result)?;
+    Ok(result)
+}
+
+fn recur_config(
+    document: &mut Document,
+    struct_docs: Vec<StructDoc>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    document.0.push(Event::Start(Tag::List(None)));
+
+    for d in struct_docs {
+        document.0.push(Event::Start(Tag::Item));
+        document.0.push(Event::Code(d.ident.into()));
+        document.0.push(Event::HardBreak);
+
+        document.0.push(Event::Start(Tag::Paragraph));
+        for ds in d.desc {
+            document.0.push(Event::Text(ds.into()));
+            document.0.push(Event::HardBreak);
+        }
+
+        recur_config(document, d.sub_docs)?;
+
+        document.0.push(Event::Start(Tag::Paragraph));
+
+        document.0.push(Event::End(Tag::Item));
+    }
+    document.0.push(Event::End(Tag::List(None)));
+
+    Ok(())
+}
+
+fn config_to_md<C: GetDocs + Default + Serialize>(
+    module_name: &str,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let mut document = Document(Vec::new());
+    let mut result = String::new();
+
+    document.header(module_name.to_string(), HeadingLevel::H1);
+    recur_config(&mut document, C::get_struct_docs())?;
+
+    document.0.push(Event::Rule);
+    document.header("Default Config".into(), HeadingLevel::H2);
+
+    let s = toml::to_string_pretty(&C::default()).unwrap();
+
+    document
+        .0
+        .push(Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(
+            "toml".into(),
+        ))));
+
+    document.0.push(Event::Text(s.into()));
+
+    document
+        .0
+        .push(Event::End(Tag::CodeBlock(CodeBlockKind::Fenced(
+            "toml".into(),
+        ))));
+
+    custom_cmark(document.0.iter(), &mut result)?;
+    Ok(result)
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Cli::command();
 
@@ -243,11 +315,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if docs_path.exists() {
         std::fs::remove_dir_all(docs_path)?;
     }
-    recur_gen(&app, docs_path.to_path_buf(), &[])?;
+    let command_path = docs_path.join("commands");
+    let config_path = docs_path.join("config");
+    recur_gen(&app, command_path.clone(), &[])?;
 
     std::fs::rename(
-        docs_path.join(format!("{}.md", app.get_name())),
-        docs_path.join("README.md"),
+        command_path.join(format!("{}.md", app.get_name())),
+        command_path.join("README.md"),
     )?;
 
     // TODO: generate into 4 files
@@ -256,5 +330,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // dbg!(GlobalConfig::get_struct_docs());
     // dbg!(WorkspaceConfig::get_struct_docs());
     // dbg!(ConsoleConfig::get_struct_docs());
+
+    create_dir_all(config_path.clone())?;
+    let global_config = config_to_md::<GlobalConfig>("global")?;
+    let mut file = File::create(config_path.join("global.md"))?;
+    file.write_all(global_config.as_bytes())?;
+
+    #[derive(Serialize, Default, GetDocs)]
+    struct _Workspace {
+        workspace: WorkspaceConfig,
+    }
+    let workspace_config = config_to_md::<_Workspace>("workspace")?;
+    let mut file = File::create(config_path.join("workspace.md"))?;
+    file.write_all(workspace_config.as_bytes())?;
     Ok(())
 }
+
+// -- docs
+//   -- commands
+//     -- README.md
+//     -- beaker_wasm.md
+//   -- config
+//     -- README.md

@@ -6,12 +6,26 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Getters, Debug, GetDocs)]
 #[get = "pub"]
 pub struct GlobalConfig {
+    /// Name of the project
     name: String,
+
+    /// Gas price used for calculating fee
+    /// `fee = ceil(gas * gas_price)`
     gas_price: String,
+
+    /// Adjusting amount of gas
     gas_adjustment: f64,
+
+    /// Prefix for the address
     account_prefix: String,
+
+    /// BIP-39 derivation path
     derivation_path: String,
+
+    /// Map of the available network to interact with via beaker
     networks: Map<String, Network>,
+
+    /// Predefined account used for interacting with the chain
     accounts: Map<String, Account>,
 }
 

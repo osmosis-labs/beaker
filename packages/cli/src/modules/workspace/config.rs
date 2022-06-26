@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, GetDocs)]
 pub struct WorkspaceConfig {
+    /// Template reference for generating new project
     pub template: Template,
 }
 
