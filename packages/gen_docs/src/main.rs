@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     let config_path = docs_path.join("config");
-    gen_docs::generate_config_doc!(config_path, +create_dir, {
+    gen_docs::generate_config_doc!(config_path, {
         #[no_wrap] global: GlobalConfig,
         workspace: WorkspaceConfig,
         wasm: WasmConfig,

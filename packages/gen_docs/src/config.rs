@@ -82,15 +82,49 @@ macro_rules! generate_config_doc {
     }};
 
     ($path:expr, { $( $(#[$attr:tt])? $prefix:ident : $t:ty,)+ }) => {{
-        $(
-            gen_docs::generate_config!($path, { $(#[$attr])? $prefix: $t });
-        )+
-    }};
-
-    ($path:expr, +create_dir, { $( $(#[$attr:tt])? $prefix:ident : $t:ty,)+ }) => {{
         std::fs::create_dir_all($path.clone())?;
         $(
             gen_docs::generate_config_doc!($path, { $(#[$attr])? $prefix: $t });
         )+
+
+        let default_config = vec![$( gen_docs::default_config!($(#[$attr])? $prefix : $t), ) +].join("\n\n");
+
+        let readme = vec![
+        "# Beaker Configuration",
+        "The following list is the configuration references for beaker which can be used in `Beaker.toml`.",
+        "",
+        $( format!("- [{}](./{}.md)", stringify!($prefix), stringify!($prefix)).as_str(), ) +
+        "---",
+        "",
+        "# Default Config",
+        "```toml",
+        default_config.as_str(),
+        "```"
+        ].join("\n");
+
+        let mut file = std::fs::File::create($path.join("README.md"))?;
+        file.write_all(readme.as_bytes())?;
+    }};
+}
+
+#[macro_export]
+macro_rules! default_config {
+    (#[$attr:tt] $prefix:ident : $t:ty) => {
+        toml::to_string_pretty(&<$t>::default())?
+    };
+    ($prefix:ident : $t:ty) => {{
+        {
+            #[allow(non_camel_case_types)]
+            #[derive(Serialize, Default, GetDocs)]
+            struct $prefix {
+                $prefix: $t,
+            }
+            vec![
+                format!("# {}", stringify!($prefix)),
+                String::new(),
+                toml::to_string_pretty(&<$prefix>::default())?,
+            ]
+            .join("\n")
+        }
     }};
 }
