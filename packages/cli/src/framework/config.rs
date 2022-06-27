@@ -29,13 +29,13 @@ pub struct GlobalConfig {
     accounts: Map<String, Account>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, GetDocs)]
 pub enum NetworkVariant {
     Local,
     Shared,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, Getters, GetDocs)]
 #[get = "pub"]
 pub struct Network {
     chain_id: String,
@@ -44,7 +44,7 @@ pub struct Network {
     rpc_endpoint: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, GetDocs)]
 #[serde(untagged)]
 pub enum Account {
     FromMnemonic { mnemonic: String },

@@ -1,5 +1,6 @@
 use derive_get_docs::GetDocs;
 use get_docs::{GetDocs, StructDoc};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn test_simple_struct() {

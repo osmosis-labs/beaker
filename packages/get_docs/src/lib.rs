@@ -56,9 +56,12 @@ impl_get_docs!(PathBuf);
 // impl_get_docs!(array);
 // impl_get_docs!(slice);
 
-impl<K, V> GetDocs for std::collections::HashMap<K, V> {
+impl<K, V> GetDocs for std::collections::HashMap<K, V>
+where
+    V: GetDocs,
+{
     fn get_struct_docs() -> Vec<StructDoc> {
-        vec![]
+        V::get_struct_docs()
     }
 }
 
