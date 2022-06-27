@@ -41,12 +41,3 @@ impl<'a> Document<'a> {
         )));
     }
 }
-
-#[macro_export]
-macro_rules! document {
-    ($($e:expr),*) => {
-        $crate::document::Document::new(vec![
-            $($e),*
-        ])
-    };
-}
