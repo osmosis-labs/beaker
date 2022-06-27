@@ -1,17 +1,20 @@
 # wasm
 
-* `wasm`  
-  
-  * `contract_dir`  
-    
-    
-  * `template_repo`  
-    
-    
-  * `optimizer_version`  
-    
-    
-  
+- **`wasm`** : WasmConfig
+
+  >
+
+  - **`contract_dir`** : String
+
+    >
+
+  - **`template_repo`** : String
+
+    >
+
+  - **`optimizer_version`** : String
+
+    >
 
 ---
 

@@ -1,29 +1,48 @@
 # workspace
 
-* `workspace`  
+* **`workspace`** : WorkspaceConfig  
   
-  * `template`  
-    Template reference for generating new project  
+   > 
+  
+  * **`template`** : Template  
     
-    * `name`  
-      Name of the generated directory  
+     > 
+     > Template reference for generating new project  
+     > 
+    
+    * **`name`** : String  
       
-      
-    * `repo`  
-      Git repo to be used as a template  
-      
-      
-    * `branch`  
-      
-      
-    * `target_dir`  
-      
-      
-    * `subfolder`  
+       > 
+       > Name of the generated directory  
+       > 
       
       
     
-  
+    * **`repo`** : String  
+      
+       > 
+       > Git repo to be used as a template  
+       > 
+      
+      
+    
+    * **`branch`** : String  
+      
+       > 
+      
+      
+    
+    * **`target_dir`** : PathBuf  
+      
+       > 
+      
+      
+    
+    * **`subfolder`** : Option < String >  
+      
+       > 
+      
+      
 
 ---
 

@@ -11,10 +11,21 @@ fn recur_config<'doc>(
 
     for d in struct_docs {
         document.0.push(Event::Start(Tag::Item));
+
+        document.0.push(Event::Start(Tag::Strong));
         document.0.push(Event::Code(d.ident.into()));
+        document.0.push(Event::End(Tag::Strong));
+
+        document.0.push(Event::Text(" : ".into()));
+        document.0.push(Event::Text(
+            d.ty.replace("/*«*/ ", "").replace(" /*»*/", "").into(),
+        ));
+
         document.0.push(Event::HardBreak);
 
         document.0.push(Event::Start(Tag::Paragraph));
+
+        document.0.push(Event::Start(Tag::BlockQuote));
         for ds in d.desc {
             let mut e = pulldown_cmark::Parser::new(string_to_static_str(ds))
                 .skip_while(|e| e == &Event::Start(Tag::Paragraph))
@@ -24,11 +35,12 @@ fn recur_config<'doc>(
             document.0.append(&mut e);
             document.0.push(Event::HardBreak);
         }
+        document.0.push(Event::End(Tag::BlockQuote));
 
         let mut subdoc = recur_config(d.sub_docs)?;
         document.0.append(&mut subdoc.0);
 
-        document.0.push(Event::Start(Tag::Paragraph));
+        document.0.push(Event::End(Tag::Paragraph));
 
         document.0.push(Event::End(Tag::Item));
     }

@@ -1,18 +1,26 @@
 # console
 
-* `console`  
+* **`console`** : ConsoleConfig  
   
-  * `account_namespace`  
-    Set account namespace in console context if set true.  
-    All accounts will be available in console context if set false  
+   > 
+  
+  * **`account_namespace`** : bool  
     
-    
-  * `contract_namespace`  
-    Set contract namespace in console context if set true.  
-    All contracts will be available in console context if set false  
+     > 
+     > Set account namespace in console context if set true.  
+     > All accounts will be available in console context if set false  
+     > 
     
     
   
+  * **`contract_namespace`** : bool  
+    
+     > 
+     > Set contract namespace in console context if set true.  
+     > All contracts will be available in console context if set false  
+     > 
+    
+    
 
 ---
 
