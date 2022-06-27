@@ -3,10 +3,10 @@ use get_docs::{GetDocs, StructDoc};
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Tag};
 use serde::Serialize;
 
-fn recur_config(
-    document: &mut Document,
+fn recur_config<'doc>(
     struct_docs: Vec<StructDoc>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<Document<'doc>, Box<dyn std::error::Error>> {
+    let document = &mut Document::new(vec![]);
     document.0.push(Event::Start(Tag::List(None)));
 
     for d in struct_docs {
@@ -16,11 +16,17 @@ fn recur_config(
 
         document.0.push(Event::Start(Tag::Paragraph));
         for ds in d.desc {
-            document.0.push(Event::Text(ds.into()));
+            let mut e = pulldown_cmark::Parser::new(string_to_static_str(ds))
+                .skip_while(|e| e == &Event::Start(Tag::Paragraph))
+                .take_while(|e| e != &Event::End(Tag::Paragraph))
+                .collect::<Vec<Event<'_>>>();
+
+            document.0.append(&mut e);
             document.0.push(Event::HardBreak);
         }
 
-        recur_config(document, d.sub_docs)?;
+        let mut subdoc = recur_config(d.sub_docs)?;
+        document.0.append(&mut subdoc.0);
 
         document.0.push(Event::Start(Tag::Paragraph));
 
@@ -28,7 +34,7 @@ fn recur_config(
     }
     document.0.push(Event::End(Tag::List(None)));
 
-    Ok(())
+    Ok(document.clone())
 }
 
 pub fn config_to_md<C: GetDocs + Default + Serialize>(
@@ -38,7 +44,9 @@ pub fn config_to_md<C: GetDocs + Default + Serialize>(
     let mut result = String::new();
 
     document.header(module_name.to_string(), HeadingLevel::H1);
-    recur_config(&mut document, C::get_struct_docs())?;
+    document
+        .0
+        .append(&mut recur_config(C::get_struct_docs())?.0);
 
     document.0.push(Event::Rule);
     document.header("Default Config".into(), HeadingLevel::H2);
@@ -127,4 +135,8 @@ macro_rules! default_config {
             .join("\n")
         }
     }};
+}
+
+fn string_to_static_str(s: String) -> &'static str {
+    Box::leak(s.into_boxed_str())
 }

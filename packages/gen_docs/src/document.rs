@@ -1,8 +1,12 @@
 use pulldown_cmark::{Event, HeadingLevel, LinkType, Tag};
 
+#[derive(Clone)]
 pub struct Document<'a>(pub Vec<Event<'a>>);
 
 impl<'a> Document<'a> {
+    pub fn new(events: Vec<Event<'a>>) -> Self {
+        Document(events)
+    }
     pub fn header(&mut self, text: String, level: HeadingLevel) {
         self.0.push(Event::Start(Tag::Heading(level, None, vec![])));
         self.0.push(Event::Text(text.into()));
@@ -36,4 +40,13 @@ impl<'a> Document<'a> {
             "".into(),
         )));
     }
+}
+
+#[macro_export]
+macro_rules! document {
+    ($($e:expr),*) => {
+        $crate::document::Document::new(vec![
+            $($e),*
+        ])
+    };
 }
