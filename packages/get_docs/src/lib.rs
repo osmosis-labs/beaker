@@ -3,14 +3,16 @@ use std::path::PathBuf;
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct StructDoc {
     pub ident: String,
+    pub ty: String,
     pub desc: Vec<String>,
     pub sub_docs: Vec<StructDoc>,
 }
 
 impl StructDoc {
-    pub fn new(ident: String, desc: Vec<String>, sub_docs: Vec<StructDoc>) -> Self {
+    pub fn new(ident: String, ty: String, desc: Vec<String>, sub_docs: Vec<StructDoc>) -> Self {
         Self {
             ident,
+            ty,
             desc,
             sub_docs,
         }

@@ -21,11 +21,13 @@ fn test_simple_struct() {
         vec![
             StructDoc::new(
                 "name".to_string(),
+                "String".to_string(),
                 vec!["Name for simple example".to_string()],
                 vec![]
             ),
             StructDoc::new(
                 "length".to_string(),
+                "u64".to_string(),
                 vec![
                     "Length of something I'm not so sure what it's for".to_string(),
                     "This doc string is so long".to_string(),
