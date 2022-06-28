@@ -15,11 +15,12 @@ declare type Config = {
         }>;
     };
 };
-export declare type Account = {
+export declare class Account {
     signingClient: SigningCosmWasmClient;
     wallet: Secp256k1HdWallet;
-    getBalance: (denom: string) => Promise<Coin>;
-};
+    constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient);
+    getBalance(denom: string): Promise<Coin>;
+}
 export declare const fromMnemonic: (conf: Config, network: string | number, mnemonic: string) => Promise<Account>;
 export declare const getAccounts: (conf: Config, network: string) => Promise<{
     [k: string]: Account | undefined;

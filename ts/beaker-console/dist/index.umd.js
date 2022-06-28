@@ -74,6 +74,32 @@
         }
     }
 
+    var Account = /** @class */ (function () {
+        function Account(wallet, signingClient) {
+            this.wallet = wallet;
+            this.signingClient = signingClient;
+        }
+        Account.prototype.getBalance = function (denom) {
+            var _a;
+            return __awaiter(this, void 0, void 0, function () {
+                var accounts, address;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, this.wallet.getAccounts()];
+                        case 1:
+                            accounts = _b.sent();
+                            address = (_a = accounts[0]) === null || _a === void 0 ? void 0 : _a.address;
+                            if (!address) {
+                                throw Error("No account not found from: ".concat(accounts));
+                            }
+                            return [4 /*yield*/, this.signingClient.getBalance(address, denom)];
+                        case 2: return [2 /*return*/, _b.sent()];
+                    }
+                });
+            });
+        };
+        return Account;
+    }());
     var fromMnemonic = function (conf, network, mnemonic) { return __awaiter(void 0, void 0, void 0, function () {
         var options, wallet, networkInfo, signingClient;
         return __generator(this, function (_a) {
@@ -96,29 +122,7 @@
                     return [4 /*yield*/, cosmwasm.SigningCosmWasmClient.connectWithSigner(networkInfo.rpc_endpoint, wallet, { gasPrice: cosmwasm.GasPrice.fromString(conf.global.gas_price) })];
                 case 2:
                     signingClient = _a.sent();
-                    return [2 /*return*/, {
-                            signingClient: signingClient,
-                            wallet: wallet,
-                            getBalance: function (denom) {
-                                var _a;
-                                return __awaiter(this, void 0, void 0, function () {
-                                    var accounts, address;
-                                    return __generator(this, function (_b) {
-                                        switch (_b.label) {
-                                            case 0: return [4 /*yield*/, wallet.getAccounts()];
-                                            case 1:
-                                                accounts = _b.sent();
-                                                address = (_a = accounts[0]) === null || _a === void 0 ? void 0 : _a.address;
-                                                if (!address) {
-                                                    throw Error("No account not found from: ".concat(accounts));
-                                                }
-                                                return [4 /*yield*/, signingClient.getBalance(address, denom)];
-                                            case 2: return [2 /*return*/, _b.sent()];
-                                        }
-                                    });
-                                });
-                            },
-                        }];
+                    return [2 /*return*/, new Account(wallet, signingClient)];
             }
         });
     }); };
@@ -164,80 +168,86 @@
         };
     };
 
-    var getContracts = function (client, state) {
-        var getContract = function (address) { return ({
-            address: address,
-            getInfo: function () {
-                return __awaiter(this, void 0, void 0, function () {
-                    return __generator(this, function (_a) {
-                        return [2 /*return*/, client.getContract(address)];
-                    });
+    var Contract = /** @class */ (function () {
+        function Contract(address, client) {
+            this.address = address;
+            this.client = client;
+        }
+        Contract.prototype.getInfo = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.client.getContract(this.address)];
+                        case 1: return [2 /*return*/, _a.sent()];
+                    }
                 });
-            },
-            getCode: function () {
-                return __awaiter(this, void 0, void 0, function () {
-                    var _a, _b;
+            });
+        };
+        Contract.prototype.getCode = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            _b = (_a = this.client).getCodeDetails;
+                            return [4 /*yield*/, this.getInfo()];
+                        case 1: return [2 /*return*/, _b.apply(_a, [(_c.sent()).codeId])];
+                    }
+                });
+            });
+        };
+        Contract.prototype.query = function (qmsg) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, this.client.queryContractSmart(this.address, qmsg)];
+                });
+            });
+        };
+        Contract.prototype.execute = function (xmsg, senderAddress, fee) {
+            var _this = this;
+            if (fee === void 0) { fee = 'auto'; }
+            return {
+                by: function (account) { return __awaiter(_this, void 0, void 0, function () {
+                    var _senderAddress, _a;
+                    var _b;
                     return __generator(this, function (_c) {
                         switch (_c.label) {
                             case 0:
-                                _b = (_a = client).getCodeDetails;
-                                return [4 /*yield*/, this.getInfo()];
-                            case 1: return [2 /*return*/, _b.apply(_a, [(_c.sent()).codeId])];
-                        }
-                    });
-                });
-            },
-            query: function (qmsg) {
-                return __awaiter(this, void 0, void 0, function () {
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4 /*yield*/, client.queryContractSmart(address, qmsg)];
-                            case 1: return [2 /*return*/, _a.sent()];
-                        }
-                    });
-                });
-            },
-            execute: function (xmsg, senderAddress, fee) {
-                if (fee === void 0) { fee = 'auto'; }
-                return {
-                    by: function (account) {
-                        var _a;
-                        return __awaiter(this, void 0, void 0, function () {
-                            var _senderAddress, _b;
-                            return __generator(this, function (_c) {
-                                switch (_c.label) {
-                                    case 0:
-                                        _b = senderAddress;
-                                        if (_b) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, account.wallet.getAccounts()];
-                                    case 1:
-                                        _b = ((_a = (_c.sent())[0]) === null || _a === void 0 ? void 0 : _a.address);
-                                        _c.label = 2;
-                                    case 2:
-                                        _senderAddress = _b;
-                                        if (!_senderAddress) {
-                                            throw Error('Unable to get sender address');
-                                        }
-                                        return [4 /*yield*/, account.signingClient.execute(_senderAddress, address, xmsg, fee)];
-                                    case 3: return [2 /*return*/, _c.sent()];
+                                _a = senderAddress;
+                                if (_a) return [3 /*break*/, 2];
+                                return [4 /*yield*/, account.wallet.getAccounts()];
+                            case 1:
+                                _a = ((_b = (_c.sent())[0]) === null || _b === void 0 ? void 0 : _b.address);
+                                _c.label = 2;
+                            case 2:
+                                _senderAddress = _a;
+                                if (!_senderAddress) {
+                                    throw Error('Unable to get sender address');
                                 }
-                            });
-                        });
-                    },
-                };
-            },
-        }); };
+                                return [4 /*yield*/, account.signingClient.execute(_senderAddress, this.address, xmsg, fee)];
+                            case 3: return [2 /*return*/, _c.sent()];
+                        }
+                    });
+                }); },
+            };
+        };
+        return Contract;
+    }());
+    var getContracts = function (client, state) {
         return mapValues(state, function (contractInfo) {
             var addresses = contractInfo.addresses;
             var prefixLabel = function (label) { return "$".concat(label); };
-            var contracts = mapObject(addresses, prefixLabel, getContract);
+            var contracts = mapObject(addresses, prefixLabel, function (addr) { return new Contract(addr, client); });
             if (typeof contracts['$default'] === 'object' && contracts['$default']) {
                 contracts = __assign(__assign({}, contracts), contracts['$default']);
+                Object.setPrototypeOf(contracts, Contract.prototype);
             }
             return contracts;
         });
     };
 
+    exports.Account = Account;
+    exports.Contract = Contract;
     exports.extendWith = extendWith;
     exports.getAccounts = getAccounts;
     exports.getContracts = getContracts;

@@ -4,6 +4,11 @@ beaker
 
 ## Table of contents
 
+### Classes
+
+- [Account](classes/Account.md)
+- [Contract](classes/Contract.md)
+
 ### Functions
 
 - [extendWith](README.md#extendwith)
@@ -40,7 +45,7 @@ beaker
 
 #### Defined in
 
-[src/utils.ts:15](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/utils.ts#L15)
+[src/utils.ts:15](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/utils.ts#L15)
 
 ___
 
@@ -61,7 +66,7 @@ ___
 
 #### Defined in
 
-[src/account.ts:67](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/account.ts#L67)
+[src/account.ts:69](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/account.ts#L69)
 
 ___
 
@@ -82,4 +87,4 @@ ___
 
 #### Defined in
 
-[src/contract.ts:6](https://github.com/osmosis-labs/beaker/blob/9716da3/ts/beaker/src/contract.ts#L6)
+[src/contract.ts:53](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L53)

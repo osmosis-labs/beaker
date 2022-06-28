@@ -17,11 +17,26 @@ type Config = {
   };
 };
 
-export type Account = {
+export class Account {
   signingClient: SigningCosmWasmClient;
   wallet: Secp256k1HdWallet;
-  getBalance: (denom: string) => Promise<Coin>;
-};
+
+  constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient) {
+    this.wallet = wallet;
+    this.signingClient = signingClient;
+  }
+
+  async getBalance(denom: string): Promise<Coin> {
+    const accounts = await this.wallet.getAccounts();
+    const address = accounts[0]?.address;
+
+    if (!address) {
+      throw Error(`No account not found from: ${accounts}`);
+    }
+
+    return await this.signingClient.getBalance(address, denom);
+  }
+}
 
 export const fromMnemonic = async (
   conf: Config,
@@ -48,20 +63,7 @@ export const fromMnemonic = async (
     wallet,
     { gasPrice: GasPrice.fromString(conf.global.gas_price) },
   );
-  return {
-    signingClient,
-    wallet,
-    async getBalance(denom) {
-      const accounts = await wallet.getAccounts();
-      const address = accounts[0]?.address;
-
-      if (!address) {
-        throw Error(`No account not found from: ${accounts}`);
-      }
-
-      return await signingClient.getBalance(address, denom);
-    },
-  };
+  return new Account(wallet, signingClient);
 };
 
 export const getAccounts = async (conf: Config, network: string) => {
