@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "gen_docs"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+beaker = {path = "../cli"}
+clap = {version = "3.2.5"}
+data_doc = {path = "../data_doc"}
+data_doc_derive = {path = "../data_doc_derive"}
+pulldown-cmark = "0.9.1"
+pulldown-cmark-to-cmark = "10.0.1"
+serde = "1.0.137"
+toml = "0.5.9"

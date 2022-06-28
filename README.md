@@ -19,7 +19,7 @@
 
 ## Getting Started
 
-This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./cli/docs/README.md).
+This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./docs/commands/README.md).
 
 ### Installation
 
@@ -76,7 +76,7 @@ All the crates (rust packages) in contracts directory are included, with unified
 
 #### `Beaker.toml`
 
-This is our configuration file which we will discuss about it in detail later.
+This is our configuration file, you can find more information about it [here](./docs/config/README.md).
 
 #### `.beaker`
 
@@ -167,7 +167,7 @@ echo '{ "count": 0 }' > contracts/counter/instantiate-msgs/default.json
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt
 ```
 
-You can find references for [`beaker wasm` subcommand here](./cli/docs/beaker_wasm.md).
+You can find references for [`beaker wasm` subcommand here](./docs/commands/beaker_wasm.md).
 
 ### Console
 

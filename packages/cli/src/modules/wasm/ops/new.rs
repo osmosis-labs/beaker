@@ -16,6 +16,6 @@ pub fn new<'a, Ctx: Context<'a, WasmConfig>>(
     let target_dir =
         target_dir.unwrap_or(ctx.root()?.join(PathBuf::from(cfg.contract_dir.as_str())));
 
-    let cw_template = Template::new(name.to_string(), repo.to_owned(), version, target_dir, None);
+    let cw_template = Template::new(name.to_string(), repo.to_owned(), version, None, target_dir);
     cw_template.generate()
 }

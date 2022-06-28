@@ -1,51 +1,11 @@
+use crate::{cmark::custom_cmark, document::Document};
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::vec;
+use std::path::PathBuf;
 
-use beaker::Cli;
-use clap::CommandFactory;
 use clap::{App, ArgSettings};
-use pulldown_cmark::{Event, HeadingLevel, LinkType, Tag};
-use pulldown_cmark_to_cmark::{cmark_with_options, Options};
 
-struct Document<'a>(Vec<Event<'a>>);
-
-impl<'a> Document<'a> {
-    fn header(&mut self, text: String, level: HeadingLevel) {
-        self.0.push(Event::Start(Tag::Heading(level, None, vec![])));
-        self.0.push(Event::Text(text.into()));
-        self.0.push(Event::End(Tag::Heading(level, None, vec![])));
-    }
-
-    fn header_code(&mut self, text: String, level: HeadingLevel) {
-        self.0.push(Event::Start(Tag::Heading(level, None, vec![])));
-        self.0.push(Event::Code(text.into()));
-        self.0.push(Event::End(Tag::Heading(level, None, vec![])));
-    }
-
-    fn paragraph(&mut self, text: String) {
-        self.0.push(Event::Start(Tag::Paragraph));
-        self.0.push(Event::Text(text.into()));
-        self.0.push(Event::End(Tag::Paragraph));
-    }
-
-    fn link(&mut self, text: String, link: String) {
-        self.0.push(Event::Start(Tag::Link(
-            LinkType::Inline,
-            link.clone().into(),
-            "".into(),
-        )));
-
-        self.0.push(Event::Text(text.into()));
-
-        self.0.push(Event::End(Tag::Link(
-            LinkType::Inline,
-            link.into(),
-            "".into(),
-        )));
-    }
-}
+use pulldown_cmark::{Event, HeadingLevel, Tag};
 
 fn build_page(doc: &mut Document, app: &App, level: HeadingLevel, prefix: Vec<String>) {
     build_command(doc, &prefix, level, app, true);
@@ -173,46 +133,11 @@ fn increase_level(level: &HeadingLevel) -> HeadingLevel {
     }
 }
 
-/// Convert a clap App to markdown documentation
-///
-/// # Parameters
-///
-/// - `app`: A reference to a clap application definition
-/// - `level`: The level for first markdown headline. If you for example want to
-///     render this beneath a `## Usage` headline in your readme, you'd want to
-///     set `level` to `2`.
-pub fn app_to_md(
-    app: &App<'_>,
+fn recur_gen(
+    cmd: &App<'_>,
+    path: PathBuf,
     prefix: &[String],
-    level: HeadingLevel,
-) -> Result<String, anyhow::Error> {
-    let mut document = Document(Vec::new());
-    build_page(&mut document, app, level, prefix.to_vec());
-    let mut result = String::new();
-
-    cmark_with_options(
-        document.0.iter(),
-        &mut result,
-        Options {
-            newlines_after_headline: 2,
-            newlines_after_paragraph: 2,
-            newlines_after_codeblock: 2,
-            newlines_after_table: 2,
-            newlines_after_rule: 2,
-            newlines_after_list: 2,
-            newlines_after_blockquote: 2,
-            newlines_after_rest: 1,
-            code_block_token_count: 3,
-            code_block_token: '`',
-            list_token: '*',
-            emphasis_token: '*',
-            strong_token: "**",
-        },
-    )?;
-    Ok(result)
-}
-
-fn recur_gen(cmd: &App<'_>, path: PathBuf, prefix: &[String]) -> Result<(), anyhow::Error> {
+) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::create_dir_all(path.as_path())?;
 
     let mut prefix = prefix.to_vec();
@@ -231,19 +156,22 @@ fn recur_gen(cmd: &App<'_>, path: PathBuf, prefix: &[String]) -> Result<(), anyh
     Ok(())
 }
 
-fn main() -> Result<(), anyhow::Error> {
-    let app = Cli::command();
+fn app_to_md(
+    app: &App<'_>,
+    prefix: &[String],
+    level: HeadingLevel,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let mut document = Document(Vec::new());
+    build_page(&mut document, app, level, prefix.to_vec());
+    let mut result = String::new();
 
-    let docs_path = Path::new("docs");
-    if docs_path.exists() {
-        std::fs::remove_dir_all(docs_path)?;
-    }
-    recur_gen(&app, docs_path.to_path_buf(), &[])?;
+    custom_cmark(document.0.iter(), &mut result)?;
+    Ok(result)
+}
 
-    std::fs::rename(
-        docs_path.join(format!("{}.md", app.get_name())),
-        docs_path.join("README.md"),
-    )?;
-
-    Ok(())
+pub fn generate_command_doc(
+    cmd: &App<'_>,
+    path: PathBuf,
+) -> Result<(), Box<dyn std::error::Error>> {
+    recur_gen(cmd, path, &[])
 }

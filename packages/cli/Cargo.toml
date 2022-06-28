@@ -7,23 +7,19 @@ version = "0.0.4"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[bin]]
-name = "md"
-path = "src/bin/md.rs"
-
 [dependencies]
 anyhow = "1.0.57"
 base64 = "0.13.0"
 cargo-generate = {version = "0.15.2", features = ["vendored-openssl"]}
 clap = {version = "3.2.5", features = ["derive"]}
-config = "0.13.1"
+config = {version = "0.13.1", features = ["preserve_order"]}
 cosmos-sdk-proto = {version = "0.12.3", features = ["cosmwasm"]}
 cosmrs = {version = "0.7.1", features = ["dev", "cosmwasm"]}
+data_doc = {path = "../data_doc"}
+data_doc_derive = {path = "../data_doc_derive"}
 derive-new = "0.5.9"
 getset = "0.1.2"
 prost = "0.10.3"
-pulldown-cmark = "0.9.1"
-pulldown-cmark-to-cmark = "10.0.1"
 regex = "1.5.6"
 serde = "1.0.137"
 serde_json = "1.0.81"
