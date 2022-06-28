@@ -4,8 +4,13 @@ use serde::Serialize;
 
 #[derive(Serialize, Deserialize, GetDataDocs)]
 pub struct WasmConfig {
+    /// Directory for storing contracts
     pub contract_dir: String,
+
+    /// Reference to contract template repository
     pub template_repo: String,
+
+    /// Version of rust-optimizer
     pub optimizer_version: String,
 }
 

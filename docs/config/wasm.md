@@ -7,17 +7,23 @@
   * **`contract_dir`** : String  
     
      > 
+     > Directory for storing contracts  
+     > 
     
     
   
   * **`template_repo`** : String  
     
      > 
+     > Reference to contract template repository  
+     > 
     
     
   
   * **`optimizer_version`** : String  
     
+     > 
+     > Version of rust-optimizer  
      > 
     
     
