@@ -12,7 +12,8 @@
   
    > 
    > Gas price used for calculating fee  
-   > `fee = ceil(gas * gas_price)`  
+   > `fee = ceil(gas_limit * gas_price)`  
+   > `gas_limit` will be simulated if left unchecked  
    > 
   
   
@@ -20,7 +21,9 @@
 * **`gas_adjustment`** : f64  
   
    > 
-   > Adjusting amount of gas  
+   > Adjusting `gas_limit` from simulated gas as a safety factor to make sure gas_limit is enought for the tx.  
+   > When user doesn't specify `gas_limit`, `gas_limit = simulated_gas * gas_adjustment`,  
+   > while `simulated_gas` is simulated gas consumption for the tx.  
    > 
   
   
@@ -36,7 +39,7 @@
 * **`derivation_path`** : String  
   
    > 
-   > BIP-39 derivation path  
+   > BIP-32 derivation path used for creating account from mnemonic  
    > 
   
   
@@ -44,11 +47,13 @@
 * **`networks`** : Map < String, Network >  
   
    > 
-   > Map of the available network to interact with via beaker  
+   > Map of the available network configuration to interact with via beaker  
    > 
   
   * **`chain_id`** : String  
     
+     > 
+     > Chain id used for defining which network you are operating on  
      > 
     
     
@@ -56,9 +61,13 @@
   * **`network_variant`** : NetworkVariant  
     
      > 
+     > Network variant used to specify whether state file of the network should be tracked in vcs or not  
+     > 
     
     * **`Local`** : NetworkVariant::Local  
       
+       > 
+       > Beaker's state of the network will not be shared with collaborator via vcs  
        > 
       
       
@@ -66,17 +75,23 @@
     * **`Shared`** : NetworkVariant::Shared  
       
        > 
+       > Beaker's state of the network will be shared with collaborator via vcs  
+       > 
       
       
   
   * **`grpc_endpoint`** : String  
     
      > 
+     > Endpoint for grpc  
+     > 
     
     
   
   * **`rpc_endpoint`** : String  
     
+     > 
+     > Endpoint for rpc  
      > 
     
     
@@ -90,6 +105,10 @@
   * **`FromMnemonic`** : Account::FromMnemonic  
     
      > 
+     > Used for specifying account from mnemonic, eg.  
+     > `{ mnemonic = "satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn" }`  
+     > For testing only, for production or wallet with fair amount of coins on mainnet, don't specify these information in plain text  
+     > 
     
     * **`mnemonic`** : String  
       
@@ -99,6 +118,10 @@
   
   * **`FromPrivateKey`** : Account::FromPrivateKey  
     
+     > 
+     > Used for specifying account from private key, eg.  
+     > `{ private_key = "SNI8xBejBnTpB6JAPxCfCC2S4ZeCPQLmpCPGrrjkEgQ=" }`  
+     > For testing only, for production or wallet with fair amount of coins on mainnet, don't specify these information in plain text  
      > 
     
     * **`private_key`** : String  

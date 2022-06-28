@@ -10,19 +10,22 @@ pub struct GlobalConfig {
     name: String,
 
     /// Gas price used for calculating fee
-    /// `fee = ceil(gas * gas_price)`
+    /// `fee = ceil(gas_limit * gas_price)`
+    /// `gas_limit` will be simulated if left unchecked
     gas_price: String,
 
-    /// Adjusting amount of gas
+    /// Adjusting `gas_limit` from simulated gas as a safety factor to make sure gas_limit is enought for the tx.
+    /// When user doesn't specify `gas_limit`, `gas_limit = simulated_gas * gas_adjustment`,
+    /// while `simulated_gas` is simulated gas consumption for the tx.
     gas_adjustment: f64,
 
     /// Prefix for the address
     account_prefix: String,
 
-    /// BIP-39 derivation path
+    /// BIP-32 derivation path used for creating account from mnemonic
     derivation_path: String,
 
-    /// Map of the available network to interact with via beaker
+    /// Map of the available network configuration to interact with via beaker
     networks: Map<String, Network>,
 
     /// Predefined account used for interacting with the chain
@@ -31,23 +34,40 @@ pub struct GlobalConfig {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, GetDataDocs)]
 pub enum NetworkVariant {
+    /// Beaker's state of the network will not be shared with collaborator via vcs
     Local,
+
+    /// Beaker's state of the network will be shared with collaborator via vcs
     Shared,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters, GetDataDocs)]
 #[get = "pub"]
 pub struct Network {
+    /// Chain id used for defining which network you are operating on
     chain_id: String,
+
+    /// Network variant used to specify whether state file of the network should be tracked in vcs or not
     network_variant: NetworkVariant,
+
+    /// Endpoint for grpc
     grpc_endpoint: String,
+
+    /// Endpoint for rpc
     rpc_endpoint: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, GetDataDocs)]
 #[serde(untagged)]
 pub enum Account {
+    /// Used for specifying account from mnemonic, eg.
+    /// `{ mnemonic = "satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn" }`
+    /// For testing only, for production or wallet with fair amount of coins on mainnet, don't specify these information in plain text
     FromMnemonic { mnemonic: String },
+
+    /// Used for specifying account from private key, eg.
+    /// `{ private_key = "SNI8xBejBnTpB6JAPxCfCC2S4ZeCPQLmpCPGrrjkEgQ=" }`
+    /// For testing only, for production or wallet with fair amount of coins on mainnet, don't specify these information in plain text
     FromPrivateKey { private_key: String },
 }
 
