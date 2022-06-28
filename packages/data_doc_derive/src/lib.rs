@@ -1,7 +1,7 @@
 use core::panic;
 
 use proc_macro::TokenStream;
-use proc_macro2::TokenTree;
+use proc_macro2::{Ident, TokenTree};
 use quote::{quote, ToTokens};
 use syn::{Attribute, DataEnum, DataStruct, Field, Variant};
 
@@ -9,88 +9,39 @@ use syn::{Attribute, DataEnum, DataStruct, Field, Variant};
 pub fn derive_get_data_doc(tokens: TokenStream) -> TokenStream {
     let ast: syn::DeriveInput = syn::parse(tokens).unwrap();
 
-    TokenStream::from(impl_data_doc_macro(&ast))
+    TokenStream::from(impl_get_data_docs(&ast))
 }
 
-fn impl_data_doc_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
-    let name = &ast.ident;
+macro_rules! summarize_get_data_docs {
+    (# $data_type:ident, # $docs:ident) => {
+        quote! {
+            impl data_doc::GetDataDocs for #$data_type {
+                fn get_data_docs() -> Vec<data_doc::DataDoc> {
+                    vec![ #(#$docs),* ]
+                }
+            }
+        }
+    };
+}
+
+fn impl_get_data_docs(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
+    let data_type = &ast.ident;
     match &ast.data {
         syn::Data::Struct(DataStruct { fields, .. }) => {
             let docs = fields
                 .iter()
-                .map(|field| {
-                    let ident = field.ident.as_ref().expect("Field has no ident");
-                    let doc_strings = parse_field_docs(field);
-
-                    let ty = &field.ty;
-
-                    quote! { data_doc::DataDoc::new(stringify!(#ident).to_string(), stringify!(#ty).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], <#ty>::get_data_docs()) }
-                })
+                .map(field_to_data_doc)
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
-            let q = quote! {
-                impl data_doc::GetDataDocs for #name {
-                    fn get_data_docs() -> Vec<data_doc::DataDoc> {
-                        vec![ #(#docs),* ]
-                    }
-                }
-            };
-
-            // For debugging:
-            // panic!("{}", q);
-            q
+            summarize_get_data_docs!(#data_type, #docs)
         }
         syn::Data::Enum(DataEnum { variants, .. }) => {
             let docs = variants
                 .iter()
-                .map(|variant| {
-                    let ident = variant.ident.clone();
-                    let doc_strings = parse_variant_docs(variant);
-
-                    let docs = variant
-                        .fields
-                        .iter()
-                        .map(|field| {
-                            let ident = field.ident.as_ref().expect("Field has no ident");
-                            let doc_strings = parse_field_docs(field);
-
-                            let ty = &field.ty;
-
-                            quote! {
-                                data_doc::DataDoc::new(
-                                    stringify!(#ident).to_string(),
-                                    stringify!(#ty).to_string(),
-                                    vec![  #( #doc_strings[1..].to_string()),* ],
-                                    <#ty>::get_data_docs()
-                                )
-                            }
-                        })
-                        .collect::<Vec<proc_macro2::TokenStream>>();
-
-                    quote! {
-                        data_doc::DataDoc::new(
-                            stringify!(#ident).to_string(),
-                            format!("{}::{}", stringify!(#name), stringify!(#ident)),
-                            vec![  #( #doc_strings[1..].to_string()),* ],
-                            vec![
-                                #(#docs),*
-                            ]
-                        )
-                    }
-                })
+                .map(|variant| variant_to_data_doc(data_type, variant))
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
-            let q = quote! {
-                impl data_doc::GetDataDocs for #name {
-                    fn get_data_docs() -> Vec<data_doc::DataDoc> {
-                        vec![ #(#docs),* ]
-                    }
-                }
-            };
-
-            // For debugging:
-            // panic!("{}", q);
-            q
+            summarize_get_data_docs!(#data_type, #docs)
         }
         syn::Data::Union(_) => panic!("union type is currently unsupported"),
     }
@@ -112,10 +63,40 @@ fn parse_docs(attrs: &[Attribute]) -> Vec<proc_macro2::TokenStream> {
         .collect::<Vec<proc_macro2::TokenStream>>()
 }
 
-fn parse_field_docs(field: &Field) -> Vec<proc_macro2::TokenStream> {
-    parse_docs(&field.attrs)
+fn field_to_data_doc(field: &Field) -> proc_macro2::TokenStream {
+    let ident = field.ident.as_ref().expect("Field has no ident");
+    let doc_strings = parse_docs(&field.attrs);
+
+    let ty = &field.ty;
+
+    quote! {
+        data_doc::DataDoc::new(
+            stringify!(#ident).to_string(),
+            stringify!(#ty).to_string(),
+            vec![  #( #doc_strings[1..].to_string()),* ],
+            <#ty>::get_data_docs()
+        )
+    }
 }
 
-fn parse_variant_docs(variant: &Variant) -> Vec<proc_macro2::TokenStream> {
-    parse_docs(&variant.attrs)
+fn variant_to_data_doc(data_type: &Ident, variant: &Variant) -> proc_macro2::TokenStream {
+    let ident = &variant.ident;
+    let doc_strings = parse_docs(&variant.attrs);
+
+    let docs = variant
+        .fields
+        .iter()
+        .map(field_to_data_doc)
+        .collect::<Vec<proc_macro2::TokenStream>>();
+
+    quote! {
+        data_doc::DataDoc::new(
+            stringify!(#ident).to_string(),
+            format!("{}::{}", stringify!(#data_type), stringify!(#ident)),
+            vec![  #( #doc_strings[1..].to_string()),* ],
+            vec![
+                #(#docs),*
+            ]
+        )
+    }
 }
