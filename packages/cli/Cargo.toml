@@ -12,7 +12,7 @@ anyhow = "1.0.57"
 base64 = "0.13.0"
 cargo-generate = {version = "0.15.2", features = ["vendored-openssl"]}
 clap = {version = "3.2.5", features = ["derive"]}
-config = "0.13.1"
+config = {version = "0.13.1", features = ["preserve_order"]}
 cosmos-sdk-proto = {version = "0.12.3", features = ["cosmwasm"]}
 cosmrs = {version = "0.7.1", features = ["dev", "cosmwasm"]}
 data_doc = {path = "../data_doc"}

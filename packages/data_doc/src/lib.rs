@@ -65,6 +65,15 @@ where
     }
 }
 
+impl<K, V> GetDataDocs for indexmap::IndexMap<K, V>
+where
+    V: GetDataDocs,
+{
+    fn get_data_docs() -> Vec<DataDoc> {
+        V::get_data_docs()
+    }
+}
+
 impl<T> GetDataDocs for Vec<T> {
     fn get_data_docs() -> Vec<DataDoc> {
         vec![]
