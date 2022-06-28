@@ -34,7 +34,7 @@ Account instance with baked-in client and utility methods
 
 #### Defined in
 
-[src/account.ts:27](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L27)
+[src/account.ts:27](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L27)
 
 ## Properties
 
@@ -44,7 +44,7 @@ Account instance with baked-in client and utility methods
 
 #### Defined in
 
-[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L24)
+[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L24)
 
 ___
 
@@ -54,7 +54,7 @@ ___
 
 #### Defined in
 
-[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L25)
+[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L25)
 
 ## Methods
 
@@ -76,4 +76,4 @@ Get balances for specific denom, only support native coin
 
 #### Defined in
 
-[src/account.ts:35](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L35)
+[src/account.ts:35](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L35)

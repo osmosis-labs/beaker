@@ -18,13 +18,12 @@ export declare class Contract {
     getCode(): Promise<CodeDetails>;
     /**
      * Query the contract by passing query message
-     * @params qmsg the query message
      * @returns query result
      */
     query(qmsg: Msg): Promise<unknown>;
     /**
-     * Execute the contract
-     * usage: `contract.execute(xmsg).by(signerAccount)`
+     * Execute the contract.
+     * example usage: `contract.execute(xmsg).by(signerAccount)`
      */
     execute(xmsg: Msg, senderAddress: string | null, fee?: number | 'auto' | StdFee): {
         by: (account: Account) => Promise<ExecuteResult>;

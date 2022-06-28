@@ -38,7 +38,6 @@ export class Contract {
 
   /**
    * Query the contract by passing query message
-   * @params qmsg the query message
    * @returns query result
    */
   async query(qmsg: Msg): Promise<unknown> {
@@ -46,8 +45,8 @@ export class Contract {
   }
 
   /**
-   * Execute the contract
-   * usage: `contract.execute(xmsg).by(signerAccount)`
+   * Execute the contract.
+   * example usage: `contract.execute(xmsg).by(signerAccount)`
    */
   execute(
     xmsg: Msg,

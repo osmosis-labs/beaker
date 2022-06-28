@@ -213,7 +213,6 @@
         };
         /**
          * Query the contract by passing query message
-         * @params qmsg the query message
          * @returns query result
          */
         Contract.prototype.query = function (qmsg) {
@@ -224,8 +223,8 @@
             });
         };
         /**
-         * Execute the contract
-         * usage: `contract.execute(xmsg).by(signerAccount)`
+         * Execute the contract.
+         * example usage: `contract.execute(xmsg).by(signerAccount)`
          */
         Contract.prototype.execute = function (xmsg, senderAddress, fee) {
             var _this = this;

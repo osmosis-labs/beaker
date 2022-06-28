@@ -37,7 +37,7 @@ Contract instance with baked-in client
 
 #### Defined in
 
-[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L20)
+[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L20)
 
 ## Properties
 
@@ -47,7 +47,7 @@ Contract instance with baked-in client
 
 #### Defined in
 
-[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L17)
+[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L17)
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L18)
+[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L18)
 
 ## Methods
 
@@ -65,8 +65,8 @@ ___
 
 ▸ **execute**(`xmsg`, `senderAddress`, `fee?`): `Object`
 
-Execute the contract
-usage: `contract.execute(xmsg).by(signerAccount)`
+Execute the contract.
+example usage: `contract.execute(xmsg).by(signerAccount)`
 
 #### Parameters
 
@@ -86,7 +86,7 @@ usage: `contract.execute(xmsg).by(signerAccount)`
 
 #### Defined in
 
-[src/contract.ts:52](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L52)
+[src/contract.ts:51](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L51)
 
 ___
 
@@ -102,7 +102,7 @@ Get code details
 
 #### Defined in
 
-[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L35)
+[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L35)
 
 ___
 
@@ -118,7 +118,7 @@ Get contract info
 
 #### Defined in
 
-[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L28)
+[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L28)
 
 ___
 
@@ -127,8 +127,6 @@ ___
 ▸ **query**(`qmsg`): `Promise`<`unknown`\>
 
 Query the contract by passing query message
-
-**`params`** qmsg the query message
 
 #### Parameters
 
@@ -144,4 +142,4 @@ query result
 
 #### Defined in
 
-[src/contract.ts:44](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L44)
+[src/contract.ts:43](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L43)
