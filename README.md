@@ -188,6 +188,11 @@ await contract.counter.execute({ increment: {} }).by(account.test1);
 await contract.counter.query({ get_count: {} });
 ```
 
+You can find avaialable methods here:
+
+- [Account](./ts/beaker-console/docs/classes//Account.md)
+- [Contract](./ts/beaker-console/docs/classes//Contract.md)
+
 You can remove `contract` and/or `account` namespace by changing config.
 
 ```
