@@ -7,8 +7,8 @@
   * **`account_namespace`** : bool  
     
      > 
-     > Set account namespace in console context if set true.  
-     > All accounts will be available in console context if set false  
+     > Put all accounts under `account` namespace in console context if set true.  
+     > Otherwise, they will be available in global namespace  
      > 
     
     
@@ -16,8 +16,8 @@
   * **`contract_namespace`** : bool  
     
      > 
-     > Set contract namespace in console context if set true.  
-     > All contracts will be available in console context if set false  
+     > Put all contracts under `contract` namespace in console context if set true.  
+     > Otherwise, they will be available in global namespace  
      > 
     
     

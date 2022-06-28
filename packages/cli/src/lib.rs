@@ -43,12 +43,12 @@ pub enum Commands {
 
 #[derive(Serialize, Deserialize, GetDataDocs)]
 pub struct ConsoleConfig {
-    /// Set account namespace in console context if set true.
-    /// All accounts will be available in console context if set false
+    /// Put all accounts under `account` namespace in console context if set true.
+    /// Otherwise, they will be available in global namespace
     account_namespace: bool,
 
-    /// Set contract namespace in console context if set true.
-    /// All contracts will be available in console context if set false
+    /// Put all contracts under `contract` namespace in console context if set true.
+    /// Otherwise, they will be available in global namespace
     contract_namespace: bool,
 }
 
