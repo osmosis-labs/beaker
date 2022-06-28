@@ -15,10 +15,16 @@ declare type Config = {
         }>;
     };
 };
+/**
+ * Account instance with baked-in client and utility methods
+ */
 export declare class Account {
     signingClient: SigningCosmWasmClient;
     wallet: Secp256k1HdWallet;
     constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient);
+    /**
+     * Get balances for specific denom, only support native coin
+     */
     getBalance(denom: string): Promise<Coin>;
 }
 export declare const fromMnemonic: (conf: Config, network: string | number, mnemonic: string) => Promise<Account>;

@@ -71,11 +71,17 @@ function __generator(thisArg, body) {
     }
 }
 
+/**
+ * Account instance with baked-in client and utility methods
+ */
 var Account = /** @class */ (function () {
     function Account(wallet, signingClient) {
         this.wallet = wallet;
         this.signingClient = signingClient;
     }
+    /**
+     * Get balances for specific denom, only support native coin
+     */
     Account.prototype.getBalance = function (denom) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
@@ -165,11 +171,17 @@ var extendWith = function (properties) {
     };
 };
 
+/**
+ * Contract instance with baked-in client
+ */
 var Contract = /** @class */ (function () {
     function Contract(address, client) {
         this.address = address;
         this.client = client;
     }
+    /**
+     * Get contract info
+     */
     Contract.prototype.getInfo = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -180,6 +192,9 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Get code details
+     */
     Contract.prototype.getCode = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -193,6 +208,11 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Query the contract by passing query message
+     * @params qmsg the query message
+     * @returns query result
+     */
     Contract.prototype.query = function (qmsg) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -200,6 +220,10 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Execute the contract
+     * usage: `contract.execute(xmsg).by(signerAccount)`
+     */
     Contract.prototype.execute = function (xmsg, senderAddress, fee) {
         var _this = this;
         if (fee === void 0) { fee = 'auto'; }

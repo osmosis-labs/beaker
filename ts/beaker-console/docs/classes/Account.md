@@ -2,6 +2,8 @@
 
 # Class: Account
 
+Account instance with baked-in client and utility methods
+
 ## Table of contents
 
 ### Constructors
@@ -32,7 +34,7 @@
 
 #### Defined in
 
-[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/account.ts#L24)
+[src/account.ts:27](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L27)
 
 ## Properties
 
@@ -42,7 +44,7 @@
 
 #### Defined in
 
-[src/account.ts:21](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/account.ts#L21)
+[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L24)
 
 ___
 
@@ -52,13 +54,15 @@ ___
 
 #### Defined in
 
-[src/account.ts:22](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/account.ts#L22)
+[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L25)
 
 ## Methods
 
 ### getBalance
 
 ▸ **getBalance**(`denom`): `Promise`<`Coin`\>
+
+Get balances for specific denom, only support native coin
 
 #### Parameters
 
@@ -72,4 +76,4 @@ ___
 
 #### Defined in
 
-[src/account.ts:29](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/account.ts#L29)
+[src/account.ts:35](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/account.ts#L35)

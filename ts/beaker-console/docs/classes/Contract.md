@@ -2,6 +2,8 @@
 
 # Class: Contract
 
+Contract instance with baked-in client
+
 ## Table of contents
 
 ### Constructors
@@ -35,7 +37,7 @@
 
 #### Defined in
 
-[src/contract.ts:11](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L11)
+[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L20)
 
 ## Properties
 
@@ -45,7 +47,7 @@
 
 #### Defined in
 
-[src/contract.ts:8](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L8)
+[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L17)
 
 ___
 
@@ -55,13 +57,16 @@ ___
 
 #### Defined in
 
-[src/contract.ts:9](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L9)
+[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L18)
 
 ## Methods
 
 ### execute
 
 ▸ **execute**(`xmsg`, `senderAddress`, `fee?`): `Object`
+
+Execute the contract
+usage: `contract.execute(xmsg).by(signerAccount)`
 
 #### Parameters
 
@@ -81,7 +86,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L28)
+[src/contract.ts:52](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L52)
 
 ___
 
@@ -89,13 +94,15 @@ ___
 
 ▸ **getCode**(): `Promise`<`CodeDetails`\>
 
+Get code details
+
 #### Returns
 
 `Promise`<`CodeDetails`\>
 
 #### Defined in
 
-[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L20)
+[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L35)
 
 ___
 
@@ -103,19 +110,25 @@ ___
 
 ▸ **getInfo**(): `Promise`<`Contract`\>
 
+Get contract info
+
 #### Returns
 
 `Promise`<`Contract`\>
 
 #### Defined in
 
-[src/contract.ts:16](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L16)
+[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L28)
 
 ___
 
 ### query
 
-▸ **query**(`qmsg`): `Promise`<`any`\>
+▸ **query**(`qmsg`): `Promise`<`unknown`\>
+
+Query the contract by passing query message
+
+**`params`** qmsg the query message
 
 #### Parameters
 
@@ -125,8 +138,10 @@ ___
 
 #### Returns
 
-`Promise`<`any`\>
+`Promise`<`unknown`\>
+
+query result
 
 #### Defined in
 
-[src/contract.ts:24](https://github.com/osmosis-labs/beaker/blob/fd6d200/ts/beaker-console/src/contract.ts#L24)
+[src/contract.ts:44](https://github.com/osmosis-labs/beaker/blob/e6fd0d1/ts/beaker-console/src/contract.ts#L44)

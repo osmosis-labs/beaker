@@ -17,6 +17,9 @@ type Config = {
   };
 };
 
+/**
+ * Account instance with baked-in client and utility methods
+ */
 export class Account {
   signingClient: SigningCosmWasmClient;
   wallet: Secp256k1HdWallet;
@@ -26,6 +29,9 @@ export class Account {
     this.signingClient = signingClient;
   }
 
+  /**
+   * Get balances for specific denom, only support native coin
+   */
   async getBalance(denom: string): Promise<Coin> {
     const accounts = await this.wallet.getAccounts();
     const address = accounts[0]?.address;

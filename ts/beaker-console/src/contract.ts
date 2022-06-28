@@ -10,6 +10,9 @@ import { mapObject, mapValues } from './utils';
 
 type Msg = Record<string, unknown>;
 
+/**
+ * Contract instance with baked-in client
+ */
 export class Contract {
   address: string;
   client: CosmWasmClient;
@@ -19,18 +22,33 @@ export class Contract {
     this.client = client;
   }
 
+  /**
+   * Get contract info
+   */
   async getInfo(): Promise<ContractInfo> {
     return await this.client.getContract(this.address);
   }
 
+  /**
+   * Get code details
+   */
   async getCode(): Promise<CodeDetails> {
     return this.client.getCodeDetails((await this.getInfo()).codeId);
   }
 
+  /**
+   * Query the contract by passing query message
+   * @params qmsg the query message
+   * @returns query result
+   */
   async query(qmsg: Msg): Promise<unknown> {
     return this.client.queryContractSmart(this.address, qmsg);
   }
 
+  /**
+   * Execute the contract
+   * usage: `contract.execute(xmsg).by(signerAccount)`
+   */
   execute(
     xmsg: Msg,
     senderAddress: string | null,
