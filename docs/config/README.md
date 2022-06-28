@@ -71,8 +71,8 @@ mnemonic = 'prefer forget visit mistake mixture feel eyebrow autumn shop pair ad
 name = 'workspace-template'
 repo = 'https://github.com/osmosis-labs/beaker.git'
 branch = 'main'
-target_dir = '.'
 subfolder = 'templates/project'
+target_dir = '.'
 
 
 # wasm

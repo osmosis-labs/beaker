@@ -21,7 +21,7 @@
     * **`repo`** : String  
       
        > 
-       > Git repo to be used as a template  
+       > Git repo url to be used as template  
        > 
       
       
@@ -29,17 +29,23 @@
     * **`branch`** : String  
       
        > 
-      
-      
-    
-    * **`target_dir`** : PathBuf  
-      
+       > Brance of the repo to be used as template  
        > 
       
       
     
     * **`subfolder`** : Option < String >  
       
+       > 
+       > Subfolder of the repo to be used as template, use root of the repo if not specified  
+       > 
+      
+      
+    
+    * **`target_dir`** : PathBuf  
+      
+       > 
+       > Target directory for generating code from template to take place  
        > 
       
       
@@ -53,6 +59,6 @@
 name = 'workspace-template'
 repo = 'https://github.com/osmosis-labs/beaker.git'
 branch = 'main'
-target_dir = '.'
 subfolder = 'templates/project'
+target_dir = '.'
 ```

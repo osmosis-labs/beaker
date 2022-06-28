@@ -17,8 +17,8 @@ impl Default for WorkspaceConfig {
                 "workspace-template".to_string(),
                 "https://github.com/osmosis-labs/beaker.git".to_string(),
                 "main".to_string(),
-                PathBuf::from("."),
                 Some("templates/project".to_string()),
+                PathBuf::from("."),
             ),
         }
     }

@@ -15,11 +15,18 @@ use std::{env, fs};
 pub struct Template {
     /// Name of the generated directory
     name: String,
-    /// Git repo to be used as a template
+
+    /// Git repo url to be used as template
     repo: String,
+
+    /// Brance of the repo to be used as template
     branch: String,
-    target_dir: PathBuf,
+
+    /// Subfolder of the repo to be used as template, use root of the repo if not specified
     subfolder: Option<String>,
+
+    /// Target directory for generating code from template to take place
+    target_dir: PathBuf,
 }
 
 impl Template {
