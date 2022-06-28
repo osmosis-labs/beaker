@@ -15,9 +15,9 @@ clap = {version = "3.2.5", features = ["derive"]}
 config = "0.13.1"
 cosmos-sdk-proto = {version = "0.12.3", features = ["cosmwasm"]}
 cosmrs = {version = "0.7.1", features = ["dev", "cosmwasm"]}
+data_doc = {path = "../data_doc"}
+data_doc_derive = {path = "../data_doc_derive"}
 derive-new = "0.5.9"
-derive_get_docs = {path = "../derive_get_docs"}
-get_docs = {path = "../get_docs"}
 getset = "0.1.2"
 prost = "0.10.3"
 regex = "1.5.6"

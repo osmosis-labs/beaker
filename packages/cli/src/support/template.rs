@@ -2,7 +2,7 @@ use anyhow::Context;
 use anyhow::Result;
 use cargo_generate::{generate as cargo_generate, Cli as CargoGen};
 use clap::Parser;
-use derive_get_docs::GetDocs;
+use data_doc_derive::GetDataDocs;
 use derive_new::new;
 use getset::Getters;
 use serde::Deserialize;
@@ -10,7 +10,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::{env, fs};
 
-#[derive(Clone, Deserialize, Serialize, Getters, new, GetDocs)]
+#[derive(Clone, Deserialize, Serialize, Getters, new, GetDataDocs)]
 #[get = "pub"]
 pub struct Template {
     /// Name of the generated directory

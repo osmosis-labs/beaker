@@ -1,10 +1,10 @@
 use crate::support::template::Template;
-use derive_get_docs::GetDocs;
+use data_doc_derive::GetDataDocs;
 use serde::Deserialize;
 use serde::Serialize;
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, GetDocs)]
+#[derive(Serialize, Deserialize, GetDataDocs)]
 pub struct WorkspaceConfig {
     /// Template reference for generating new project
     pub template: Template,

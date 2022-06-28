@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 
 #[derive(Default, Debug, PartialEq, Eq)]
-pub struct StructDoc {
+pub struct DataDoc {
     pub ident: String,
     pub ty: String,
     pub desc: Vec<String>,
-    pub sub_docs: Vec<StructDoc>,
+    pub sub_docs: Vec<DataDoc>,
 }
 
-impl StructDoc {
-    pub fn new(ident: String, ty: String, desc: Vec<String>, sub_docs: Vec<StructDoc>) -> Self {
+impl DataDoc {
+    pub fn new(ident: String, ty: String, desc: Vec<String>, sub_docs: Vec<DataDoc>) -> Self {
         Self {
             ident,
             ty,
@@ -19,14 +19,14 @@ impl StructDoc {
     }
 }
 
-pub trait GetDocs {
-    fn get_struct_docs() -> Vec<StructDoc>;
+pub trait GetDataDocs {
+    fn get_data_docs() -> Vec<DataDoc>;
 }
 
 macro_rules! impl_get_docs {
     ($ty:ty) => {
-        impl GetDocs for $ty {
-            fn get_struct_docs() -> Vec<StructDoc> {
+        impl GetDataDocs for $ty {
+            fn get_data_docs() -> Vec<DataDoc> {
                 vec![]
             }
         }
@@ -56,23 +56,23 @@ impl_get_docs!(PathBuf);
 // impl_get_docs!(array);
 // impl_get_docs!(slice);
 
-impl<K, V> GetDocs for std::collections::HashMap<K, V>
+impl<K, V> GetDataDocs for std::collections::HashMap<K, V>
 where
-    V: GetDocs,
+    V: GetDataDocs,
 {
-    fn get_struct_docs() -> Vec<StructDoc> {
-        V::get_struct_docs()
+    fn get_data_docs() -> Vec<DataDoc> {
+        V::get_data_docs()
     }
 }
 
-impl<T> GetDocs for Vec<T> {
-    fn get_struct_docs() -> Vec<StructDoc> {
+impl<T> GetDataDocs for Vec<T> {
+    fn get_data_docs() -> Vec<DataDoc> {
         vec![]
     }
 }
 
-impl<T> GetDocs for Option<T> {
-    fn get_struct_docs() -> Vec<StructDoc> {
+impl<T> GetDataDocs for Option<T> {
+    fn get_data_docs() -> Vec<DataDoc> {
         vec![]
     }
 }

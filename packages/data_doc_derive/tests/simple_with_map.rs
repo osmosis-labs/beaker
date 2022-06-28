@@ -1,11 +1,11 @@
-use derive_get_docs::GetDocs;
-use get_docs::{GetDocs, StructDoc};
+use data_doc::{DataDoc, GetDataDocs};
+use data_doc_derive::GetDataDocs;
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
 
 #[test]
 fn test_simple_struct_with_map() {
-    #[derive(GetDocs)]
+    #[derive(GetDataDocs)]
     struct Simple {
         /// Name for simple example
         #[allow(dead_code)]
@@ -18,7 +18,7 @@ fn test_simple_struct_with_map() {
         length: u64,
     }
 
-    #[derive(GetDocs)]
+    #[derive(GetDataDocs)]
     struct SimpleMap {
         /// Map for simple struct
         #[allow(dead_code)]
@@ -26,19 +26,19 @@ fn test_simple_struct_with_map() {
     }
 
     assert_eq!(
-        SimpleMap::get_struct_docs(),
-        vec![StructDoc::new(
+        SimpleMap::get_data_docs(),
+        vec![DataDoc::new(
             "simple".to_string(),
             "HashMap < String, Simple >".to_string(),
             vec!["Map for simple struct".to_string()],
             vec![
-                StructDoc::new(
+                DataDoc::new(
                     "name".to_string(),
                     "String".to_string(),
                     vec!["Name for simple example".to_string()],
                     vec![]
                 ),
-                StructDoc::new(
+                DataDoc::new(
                     "length".to_string(),
                     "u64".to_string(),
                     vec![

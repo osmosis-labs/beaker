@@ -1,10 +1,10 @@
-use derive_get_docs::GetDocs;
-use get_docs::{GetDocs, StructDoc};
+use data_doc::{DataDoc, GetDataDocs};
+use data_doc_derive::GetDataDocs;
 use pretty_assertions::assert_eq;
 
 #[test]
 fn test_simple_struct() {
-    #[derive(GetDocs)]
+    #[derive(GetDataDocs)]
     struct Simple {
         /// Name for simple example
         #[allow(dead_code)]
@@ -18,15 +18,15 @@ fn test_simple_struct() {
     }
 
     assert_eq!(
-        Simple::get_struct_docs(),
+        Simple::get_data_docs(),
         vec![
-            StructDoc::new(
+            DataDoc::new(
                 "name".to_string(),
                 "String".to_string(),
                 vec!["Name for simple example".to_string()],
                 vec![]
             ),
-            StructDoc::new(
+            DataDoc::new(
                 "length".to_string(),
                 "u64".to_string(),
                 vec![

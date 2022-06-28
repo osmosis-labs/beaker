@@ -5,7 +5,7 @@ mod support;
 use anyhow::{bail, Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
-use derive_get_docs::GetDocs;
+use data_doc_derive::GetDataDocs;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 
@@ -41,7 +41,7 @@ pub enum Commands {
     },
 }
 
-#[derive(Serialize, Deserialize, GetDocs)]
+#[derive(Serialize, Deserialize, GetDataDocs)]
 pub struct ConsoleConfig {
     /// Set account namespace in console context if set true.
     /// All accounts will be available in console context if set false

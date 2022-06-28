@@ -1,10 +1,10 @@
 use crate::document::Document;
-use get_docs::{GetDocs, StructDoc};
+use data_doc::{DataDoc, GetDataDocs};
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Tag};
 use serde::Serialize;
 
 fn recur_config<'doc>(
-    struct_docs: Vec<StructDoc>,
+    struct_docs: Vec<DataDoc>,
 ) -> Result<Document<'doc>, Box<dyn std::error::Error>> {
     let document = &mut Document::new(vec![]);
     document.0.push(Event::Start(Tag::List(None)));
@@ -49,16 +49,14 @@ fn recur_config<'doc>(
     Ok(document.clone())
 }
 
-pub fn config_to_md<C: GetDocs + Default + Serialize>(
+pub fn config_to_md<C: GetDataDocs + Default + Serialize>(
     module_name: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
     let mut document = Document(Vec::new());
     let mut result = String::new();
 
     document.header(module_name.to_string(), HeadingLevel::H1);
-    document
-        .0
-        .append(&mut recur_config(C::get_struct_docs())?.0);
+    document.0.append(&mut recur_config(C::get_data_docs())?.0);
 
     document.0.push(Event::Rule);
     document.header("Default Config".into(), HeadingLevel::H2);
@@ -92,7 +90,7 @@ macro_rules! generate_config_doc {
     }};
     ($path:expr, { $prefix:ident : $t:ty }) => {{
         #[allow(non_camel_case_types)]
-        #[derive(Serialize, Default, GetDocs)]
+        #[derive(Serialize, Default, data_doc_derive::GetDataDocs)]
         struct $prefix {
             $prefix: $t,
         }
@@ -135,7 +133,7 @@ macro_rules! default_config {
     ($prefix:ident : $t:ty) => {{
         {
             #[allow(non_camel_case_types)]
-            #[derive(Serialize, Default, GetDocs)]
+            #[derive(Serialize, Default, data_doc_derive::GetDataDocs)]
             struct $prefix {
                 $prefix: $t,
             }

@@ -5,14 +5,14 @@ use proc_macro2::TokenTree;
 use quote::{quote, ToTokens};
 use syn::{Attribute, DataEnum, DataStruct, Field, Variant};
 
-#[proc_macro_derive(GetDocs)]
-pub fn derive_get_docs(tokens: TokenStream) -> TokenStream {
+#[proc_macro_derive(GetDataDocs)]
+pub fn derive_get_data_doc(tokens: TokenStream) -> TokenStream {
     let ast: syn::DeriveInput = syn::parse(tokens).unwrap();
 
-    TokenStream::from(impl_get_docs_macro(&ast))
+    TokenStream::from(impl_data_doc_macro(&ast))
 }
 
-fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
+fn impl_data_doc_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let name = &ast.ident;
     match &ast.data {
         syn::Data::Struct(DataStruct { fields, .. }) => {
@@ -24,13 +24,13 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
 
                     let ty = &field.ty;
 
-                    quote! { get_docs::StructDoc::new(stringify!(#ident).to_string(), stringify!(#ty).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], <#ty>::get_struct_docs()) }
+                    quote! { data_doc::DataDoc::new(stringify!(#ident).to_string(), stringify!(#ty).to_string(), vec![  #( #doc_strings[1..].to_string()),* ], <#ty>::get_data_docs()) }
                 })
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
             let q = quote! {
-                impl get_docs::GetDocs for #name {
-                    fn get_struct_docs() -> Vec<get_docs::StructDoc> {
+                impl data_doc::GetDataDocs for #name {
+                    fn get_data_docs() -> Vec<data_doc::DataDoc> {
                         vec![ #(#docs),* ]
                     }
                 }
@@ -57,18 +57,18 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
                             let ty = &field.ty;
 
                             quote! {
-                                get_docs::StructDoc::new(
+                                data_doc::DataDoc::new(
                                     stringify!(#ident).to_string(),
                                     stringify!(#ty).to_string(),
                                     vec![  #( #doc_strings[1..].to_string()),* ],
-                                    <#ty>::get_struct_docs()
+                                    <#ty>::get_data_docs()
                                 )
                             }
                         })
                         .collect::<Vec<proc_macro2::TokenStream>>();
 
                     quote! {
-                        get_docs::StructDoc::new(
+                        data_doc::DataDoc::new(
                             stringify!(#ident).to_string(),
                             format!("{}::{}", stringify!(#name), stringify!(#ident)),
                             vec![  #( #doc_strings[1..].to_string()),* ],
@@ -81,8 +81,8 @@ fn impl_get_docs_macro(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
                 .collect::<Vec<proc_macro2::TokenStream>>();
 
             let q = quote! {
-                impl get_docs::GetDocs for #name {
-                    fn get_struct_docs() -> Vec<get_docs::StructDoc> {
+                impl data_doc::GetDataDocs for #name {
+                    fn get_data_docs() -> Vec<data_doc::DataDoc> {
                         vec![ #(#docs),* ]
                     }
                 }

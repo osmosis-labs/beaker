@@ -1,10 +1,10 @@
-use derive_get_docs::GetDocs;
-use get_docs::{GetDocs, StructDoc};
+use data_doc::{DataDoc, GetDataDocs};
+use data_doc_derive::GetDataDocs;
 use pretty_assertions::assert_eq;
 
 #[test]
 fn test_nested_struct() {
-    #[derive(GetDocs)]
+    #[derive(GetDataDocs)]
     struct Simple {
         /// Name for simple example
         #[allow(dead_code)]
@@ -17,7 +17,7 @@ fn test_nested_struct() {
         length: u64,
     }
 
-    #[derive(GetDocs)]
+    #[derive(GetDataDocs)]
     struct Nested {
         /// This looks simple, but we can make it more complicated
         /// You will see it soon
@@ -33,9 +33,9 @@ fn test_nested_struct() {
     }
 
     assert_eq!(
-        Nested::get_struct_docs(),
+        Nested::get_data_docs(),
         vec![
-            StructDoc::new(
+            DataDoc::new(
                 "simple".to_string(),
                 "Simple".to_string(),
                 vec![
@@ -43,13 +43,13 @@ fn test_nested_struct() {
                     "You will see it soon".to_string()
                 ],
                 vec![
-                    StructDoc::new(
+                    DataDoc::new(
                         "name".to_string(),
                         "String".to_string(),
                         vec!["Name for simple example".to_string()],
                         vec![]
                     ),
-                    StructDoc::new(
+                    DataDoc::new(
                         "length".to_string(),
                         "u64".to_string(),
                         vec![
@@ -61,8 +61,8 @@ fn test_nested_struct() {
                     )
                 ]
             ),
-            StructDoc::new("no_doc".to_string(), "String".to_string(), vec![], vec![]),
-            StructDoc::new(
+            DataDoc::new("no_doc".to_string(), "String".to_string(), vec![], vec![]),
+            DataDoc::new(
                 "with_doc".to_string(),
                 "String".to_string(),
                 vec!["Doesn't really matter that much, please ignore".to_string()],

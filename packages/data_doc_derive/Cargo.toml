@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "derive_get_docs"
+name = "data_doc_derive"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,7 +9,7 @@ version = "0.1.0"
 proc-macro = true
 
 [dependencies]
-get_docs = {path = "../get_docs"}
+data_doc = {path = "../data_doc"}
 proc-macro2 = "1.0.40"
 quote = "1.0.20"
 syn = {version = "1.0.98", features = ["full", "extra-traits"]}

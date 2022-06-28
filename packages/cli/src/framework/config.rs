@@ -1,9 +1,9 @@
 use config::Map;
-use derive_get_docs::GetDocs;
+use data_doc_derive::GetDataDocs;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Getters, Debug, GetDocs)]
+#[derive(Serialize, Deserialize, Getters, Debug, GetDataDocs)]
 #[get = "pub"]
 pub struct GlobalConfig {
     /// Name of the project
@@ -29,13 +29,13 @@ pub struct GlobalConfig {
     accounts: Map<String, Account>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, GetDocs)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, GetDataDocs)]
 pub enum NetworkVariant {
     Local,
     Shared,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Getters, GetDocs)]
+#[derive(Serialize, Deserialize, Clone, Debug, Getters, GetDataDocs)]
 #[get = "pub"]
 pub struct Network {
     chain_id: String,
@@ -44,7 +44,7 @@ pub struct Network {
     rpc_endpoint: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, GetDocs)]
+#[derive(Serialize, Deserialize, Debug, GetDataDocs)]
 #[serde(untagged)]
 pub enum Account {
     FromMnemonic { mnemonic: String },

@@ -1,6 +1,5 @@
 use beaker::{Cli, ConsoleConfig, GlobalConfig, WasmConfig, WorkspaceConfig};
 use clap::CommandFactory;
-use derive_get_docs::GetDocs;
 use serde::Serialize;
 use std::io::Write;
 use std::path::Path;

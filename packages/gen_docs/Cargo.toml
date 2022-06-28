@@ -8,8 +8,8 @@ version = "0.1.0"
 [dependencies]
 beaker = {path = "../cli"}
 clap = {version = "3.2.5"}
-derive_get_docs = {path = "../derive_get_docs"}
-get_docs = {path = "../get_docs"}
+data_doc = {path = "../data_doc"}
+data_doc_derive = {path = "../data_doc_derive"}
 pulldown-cmark = "0.9.1"
 pulldown-cmark-to-cmark = "10.0.1"
 serde = "1.0.137"
