@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://docs.osmosis.zone/developing/dapps/get_started/">
-    <img src="assets/beaker.png" alt="Beaker logo" title="Beaker" align="center" height="150" />
+    <img src="https://raw.githubusercontent.com/osmosis-labs/beaker/main/assets/beaker.png" alt="Beaker logo" title="Beaker" align="center" height="150" />
 </a>
 </p>
 
@@ -236,6 +236,20 @@ To interact, you need to [add LocalOsmosis to keplr](https://github.com/osmosis-
 In frontend directory, you will see that `.beaker` is in here. It is actually symlinked to the one in the root so that frontend code can access beaker state.
 
 ---
+
+### Customization
+
+If you would like to use another contract template, feel free to change the configuration
+
+```toml
+# In Beaker.toml, change the template_repo to whatever you want.
+[wasm]
+template_repo = "https://github.com/osmosis-labs/osmosis-bindings.git"
+```
+
+### Specified flag commands
+
+Some useful flag commands are located below. For more, please see [further documentation](https://github.com/xBalbinus/beaker/tree/main/docs/commands) 
 
 ## License
 
