@@ -70,5 +70,8 @@
     "chalk": "^5.0.1",
     "cosmwasm": "^1.1.1",
     "pretty-repl": "^3.1.1"
+  },
+  "overrides": {
+    "emphasize": "4.2.0"
   }
 }
