@@ -20,6 +20,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    admin: Option<&String>,
     funds: Coins,
     network: &str,
     timeout_height: &u32,
@@ -45,7 +46,11 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),
-        admin: None, // TODO: Fix this when working on migration
+        admin: if admin == Some(&"signer".to_string()) {
+            Some(client.signer_account_id())
+        } else {
+            None
+        },
         code_id,
         label: Some(label.to_string()),
         msg: raw

@@ -43,6 +43,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         label,
         raw,
+        None, // TODO: fix this
         funds,
         network,
         timeout_height,
