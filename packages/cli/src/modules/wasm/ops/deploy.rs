@@ -17,6 +17,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    admin: Option<&String>,
     funds: Coins,
     network: &str,
     timeout_height: &u32,
@@ -43,7 +44,7 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         label,
         raw,
-        None, // TODO: fix this
+        admin,
         funds,
         network,
         timeout_height,

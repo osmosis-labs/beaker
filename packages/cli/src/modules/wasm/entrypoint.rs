@@ -55,9 +55,9 @@ pub enum WasmCmd {
         #[clap(short, long)]
         raw: Option<String>,
 
-        /// Specifying admin required for contract migration
-        /// use "signer" for setting tx signer as admin
-        /// use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+        /// Specifying admin required for contract migration.
+        /// Use "signer" for setting tx signer as admin.
+        /// Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin.
         #[clap(long)]
         admin: Option<String>,
 
@@ -80,6 +80,12 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
+
+        /// Specifying admin required for contract migration.
+        /// Use "signer" for setting tx signer as admin.
+        /// Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin.
+        #[clap(long)]
+        admin: Option<String>,
 
         /// Funds to send to instantiated contract
         #[clap(short, long)]
@@ -187,6 +193,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
+                admin,
                 funds,
                 no_rebuild,
                 no_wasm_opt,
@@ -203,6 +210,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    admin.as_ref(),
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
