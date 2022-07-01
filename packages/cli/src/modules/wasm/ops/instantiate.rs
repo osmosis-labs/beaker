@@ -7,12 +7,15 @@ use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
+use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::cosmwasm::MsgInstantiateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
+use cosmrs::AccountId;
 use std::fs;
+use std::str::FromStr;
 
 #[allow(clippy::too_many_arguments)]
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
@@ -48,6 +51,8 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
         sender: client.signer_account_id(),
         admin: if admin == Some(&"signer".to_string()) {
             Some(client.signer_account_id())
+        } else if let Some(addr) = admin {
+            Some(AccountId::from_str(addr).map_err(|e: cosmrs::ErrorReport| anyhow!(e))?)
         } else {
             None
         },
