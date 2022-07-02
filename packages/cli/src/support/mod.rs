@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod coin;
 pub mod cosmos;
 pub mod future;

@@ -1,5 +1,6 @@
 use crate::attrs_format;
 use crate::modules::wasm::config::WasmConfig;
+use crate::support::admin::compute_admin;
 use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
@@ -20,6 +21,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    admin: Option<&String>,
     funds: Coins,
     network: &str,
     timeout_height: &u32,
@@ -45,7 +47,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),
-        admin: None, // TODO: Fix this when working on migration
+        admin: compute_admin(admin, client.signer_account_id())?,
         code_id,
         label: Some(label.to_string()),
         msg: raw
