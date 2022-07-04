@@ -90,6 +90,8 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
+* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
@@ -123,6 +125,8 @@ Arguments:
 * `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
+
+* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
