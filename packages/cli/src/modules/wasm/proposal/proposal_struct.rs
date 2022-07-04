@@ -49,10 +49,11 @@ impl StoreCodeProposal {
     pub fn description_with_metadata(&self) -> Result<String> {
         Ok(vec![
             self.description.trim(),
-            "\n",
-            "[METADATA]",
-            serde_yaml::to_string::<Code>(&self.code)?.as_str(),
-            "[/METADATA]",
+            "",
+            "---",
+            "",
+            "[metadata]",
+            toml::to_string::<Code>(&self.code)?.as_str().trim(),
         ]
         .join("\n"))
     }
