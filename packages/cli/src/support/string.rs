@@ -1,3 +1,4 @@
+#[cfg(test)]
 pub fn trim_indent(s: &str) -> String {
     let it = s.split('\n');
     let first = it.clone().find(|s| !s.is_empty());
