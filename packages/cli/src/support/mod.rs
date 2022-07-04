@@ -7,5 +7,6 @@ pub mod ops_response;
 pub mod proto;
 pub mod signer;
 pub mod state;
+pub mod string;
 pub mod template;
 pub mod wasm;
