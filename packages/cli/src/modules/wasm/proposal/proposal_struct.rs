@@ -66,6 +66,25 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
+    fn proposal_fixture() -> StoreCodeProposal {
+        StoreCodeProposal {
+            title: "Proposal to allow DappName to be enabled in Osmosis".to_string(),
+            description: trim_indent(
+                r#"
+            A lengthy proposal description
+            goes here
+            we expect this to be many lines...
+            "#,
+            ),
+            deposit: Some("1000uosmo".to_string()),
+            code: Code {
+                repo: "https://github.com/osmosis-labs/beaker/templates/project".to_string(),
+                rust_flags: Some("-C link-arg=-s".to_string()),
+                optimizer: Some("workspace-optimizer:0.12.6".to_string()),
+            },
+        }
+    }
+
     #[test]
     fn store_code_proposal_yaml() {
         let yaml = &trim_indent(
@@ -85,24 +104,32 @@ mod tests {
 
         let prop: StoreCodeProposal = serde_yaml::from_str(yaml).unwrap();
 
-        assert_eq!(
-            prop,
-            StoreCodeProposal {
-                title: "Proposal to allow DappName to be enabled in Osmosis".to_string(),
-                description: trim_indent(
-                    r#"
-                    A lengthy proposal description
-                    goes here
-                    we expect this to be many lines...
-                    "#
-                ),
-                deposit: Some("1000uosmo".to_string()),
-                code: Code {
-                    repo: "https://github.com/osmosis-labs/beaker/templates/project".to_string(),
-                    rust_flags: Some("-C link-arg=-s".to_string()),
-                    optimizer: Some("workspace-optimizer:0.12.6".to_string()),
-                }
-            }
+        assert_eq!(prop, proposal_fixture());
+    }
+
+    #[test]
+    fn store_code_proposal_toml() {
+        let toml_str = &trim_indent(
+            r#"
+                title = "Proposal to allow DappName to be enabled in Osmosis"
+
+                description = '''
+                A lengthy proposal description
+                goes here
+                we expect this to be many lines...
+                '''
+
+                deposit = "1000uosmo"
+
+                [code]
+                repo = "https://github.com/osmosis-labs/beaker/templates/project"
+                rust_flags = "-C link-arg=-s"
+                optimizer = "workspace-optimizer:0.12.6"
+            "#,
         );
+
+        let prop: StoreCodeProposal = toml::from_str(toml_str).unwrap();
+
+        assert_eq!(prop, proposal_fixture());
     }
 }

@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 use clap::Subcommand;
+use std::path::PathBuf;
 
 use crate::{
     framework::Context,
@@ -70,8 +69,15 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
         } => {
             let proposal = if let Some(p) = proposal {
                 let proposal_str = std::fs::read_to_string(p)?;
-                let store_code_proposal: StoreCodeProposal =
-                    serde_yaml::from_str(proposal_str.as_str())?;
+                let extention_error_msg = "Extension must be one of `yaml`, `yml` or `toml`";
+                let ext = p.extension().expect(extention_error_msg);
+                let store_code_proposal: StoreCodeProposal = if ext == "yaml" || ext == "yml" {
+                    serde_yaml::from_str(proposal_str.as_str())?
+                } else if ext == "toml" {
+                    toml::from_str(proposal_str.as_str())?
+                } else {
+                    panic!("{}", extention_error_msg);
+                };
                 Some(store_code_proposal)
             } else {
                 None
