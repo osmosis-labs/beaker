@@ -117,6 +117,30 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+    /// Build, Optimize, Store code, and migrate contract
+    Upgrade {
+        /// Name of the contract to deploy
+        contract_name: String,
+
+        /// Label for the instantiated contract for later reference
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        /// Raw json string to use as instantiate msg
+        #[clap(short, long)]
+        raw: Option<String>,
+
+        /// Use existing .wasm file to deploy if set to true
+        #[clap(long)]
+        no_rebuild: bool,
+
+        /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
+        #[clap(long)]
+        no_wasm_opt: bool,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
     Proposal {
         #[clap(subcommand)]
         cmd: ProposalCmd,
@@ -258,6 +282,42 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     raw.as_ref(),
                     admin.as_ref(),
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
+                    network,
+                    timeout_height,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
+                    signer_args.private_key(&ctx.global_config()?)?,
+                    signer_args.private_key(&ctx.global_config()?)?,
+                    no_rebuild,
+                    no_wasm_opt,
+                )?;
+                Ok(())
+            }
+            WasmCmd::Upgrade {
+                contract_name,
+                label,
+                raw,
+                no_rebuild,
+                no_wasm_opt,
+                base_tx_args,
+            } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+                ops::upgrade(
+                    &ctx,
+                    contract_name,
+                    label.as_str(),
+                    raw.as_ref(),
                     network,
                     timeout_height,
                     {

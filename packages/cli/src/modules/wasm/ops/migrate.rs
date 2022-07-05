@@ -80,7 +80,6 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
                 timeout_height,
             )
             .await?;
-        dbg!(&response);
 
         let contract_address = response.pick("migrate", "_contract_address").to_string();
         let code_id = response.pick("migrate", "code_id").to_string();
