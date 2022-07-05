@@ -249,7 +249,7 @@ template_repo = "https://github.com/osmosis-labs/osmosis-bindings.git"
 
 ### Specified flag commands
 
-Some useful flag commands are located below. For more, please see [further documentation](https://github.com/xBalbinus/beaker/tree/main/docs/commands) 
+Some useful flag commands are located below. For more, please see [further documentation](https://github.com/osmosis-labs/beaker/tree/main/docs/commands) 
 
 ## License
 
