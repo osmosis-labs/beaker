@@ -169,6 +169,87 @@ beaker wasm deploy counter --signer-account test1 --no-wasm-opt
 
 You can find references for [`beaker wasm` subcommand here](./docs/commands/beaker_wasm.md).
 
+### Contract Upgrade
+
+Contract upgrade in CosmWasm goes through the following steps:
+
+1. store new code on to the chain
+2. broadcast migrate msg, targeting the contract address that wanted to be upgraded with the newly stored code
+
+To make a contract migratable, the contract needs to have proper entrypoint and admin designated.
+
+To create the contract entrypoint for migration, first, define `MigrateMsg` in `msg.rs`, this could have any information you want to pass for migration.
+
+```rust
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct MigrateMsg {}
+```
+
+With MigrateMsg defined we need to update `contract.rs`. First update the import from `crate::msg` to include `MigrateMsg`:
+
+```rust
+use crate::msg::{CountResponse, ExecuteMsg, InstantiateMsg, QueryMsg, MigrateMsg};
+```
+
+```rust
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn migrate(_deps: DepsMut, _env: Env, _msg: MigrateMsg) -> StdResult<Response> {
+    // perform state update or anything neccessary for the migration
+    Ok(Response::default())
+}
+```
+
+Now deploy the contract with admin assigned
+
+```sh
+# `--admin signer` use signer address (test1's address in this case) as designated admin
+# raw address could be passed in as well
+beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }' --admin signer
+```
+
+Now try to change the execute logic a bit to see if the upgrade works:
+
+```rust
+pub fn try_increment(deps: DepsMut) -> Result<Response, ContractError> {
+    STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
+        state.count += 1000000000; // 1 -> 1000000000
+        Ok(state)
+    })?;
+
+    Ok(Response::new().add_attribute("method", "try_increment"))
+}
+```
+
+With admin as `test1`, only `test1` can upgrade the contract
+
+```sh
+beaker wasm upgrade counter --signer-account test1 --raw '{}' --no-wasm-opt
+```
+
+Similar to `deploy`, `upgrade` is basiaclly running sequences of commands behind the scene:
+
+```sh
+beaker wasm build --no-wasm-opt
+beaker wasm store-code counter --signer-account test1 --no-wasm-opt
+beaker wasm migrate counter --signer-account test1 --raw '{}'
+```
+
+And, like before, `--no-wasm-opt` only means for developement. For mainnet, use:
+
+```sh
+beaker wasm upgrade counter --signer-account test1 --raw '{}' --network mainnet
+```
+
+Migrate message can be stored for later use:
+
+```sh
+mkdir contracts/counter/migrate-msgs
+echo '{}' > contracts/counter/migrate-msgs/default.json
+beaker wasm upgrade counter --signer-account test1 --no-wasm-opt
+```
+
+You can find more information about their options [here](./docs/commands/beaker_wasm.md).
+
 ### Console
 
 After deployed, you can play with the deployed contract using:
