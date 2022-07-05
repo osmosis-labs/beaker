@@ -3,7 +3,7 @@ description = "CosmWasm development tooling"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "beaker"
-version = "0.0.4"
+version = "0.0.5"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
