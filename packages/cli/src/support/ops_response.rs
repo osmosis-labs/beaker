@@ -16,6 +16,35 @@ pub trait OpResponseDisplay {
 }
 
 #[macro_export]
+macro_rules! format_single_val {
+    (@last, $ident:ident, $value:expr) => {
+        vec![
+            format!("    └── {}: {}", stringify!($ident), $value),
+            "".to_string(),
+        ]
+    };
+    (@inbetween, $ident:ident, $value:expr) => {{
+        let lines = format!("{}", $value);
+        let lines = lines.split("\n");
+        if lines.clone().count() > 1 {
+            vec![
+                vec![
+                    format!("    ├── {}:", stringify!($ident)),
+                    "    │".to_string(),
+                ],
+                lines
+                    .map(|s| format!("    │     {}", s))
+                    .collect::<Vec<String>>(),
+                vec!["    │".to_string()],
+            ]
+            .concat()
+        } else {
+            vec![format!("    ├── {}: {}", stringify!($ident), $value)]
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! attrs_format {
     ($container:ident | $attr:ident) => {
         vec![format!("    └── {}: {}", stringify!($attr), $container.$attr)]
@@ -31,11 +60,11 @@ macro_rules! attrs_format {
 #[macro_export]
 macro_rules! vars_format {
     ($attr:ident) => {
-        vec![format!("    └── {}: {}", stringify!($attr), $attr), "".to_string()]
+        $crate::format_single_val!(@last, $attr, $attr)
     };
     ($fst:ident, $($attr:ident),+) => {
         vec![
-           vec![format!("    ├── {}: {}", stringify!($fst), $fst)],
+            $crate::format_single_val!(@inbetween, $fst, $fst),
            vars_format!($($attr),+ )
         ].concat()
     };

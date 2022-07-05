@@ -90,7 +90,41 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
+* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+
 * `-f/--funds <funds>`: Funds to send to instantiated contract
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
+### `beaker wasm migrate`
+
+Migrated instanitate contract to use other code stored on chain
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`Name of the contract to instantiate
+
+* `-l/--label <label>`: Label for the instantiated contract for selcting migration target (default: `default`)
+
+* `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
@@ -124,7 +158,45 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
+* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+
 * `-f/--funds <funds>`: Funds to send to instantiated contract
+
+* `--no-rebuild`: Use existing .wasm file to deploy if set to true
+
+* `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
+### `beaker wasm upgrade`
+
+Build, Optimize, Store code, and migrate contract
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`Name of the contract to deploy
+
+* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+
+* `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
 * `--no-rebuild`: Use existing .wasm file to deploy if set to true
 

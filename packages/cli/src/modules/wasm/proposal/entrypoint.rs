@@ -1,10 +1,13 @@
 use clap::Subcommand;
+use std::path::PathBuf;
 
 use crate::{
     framework::Context,
     modules::wasm::{args::BaseTxArgs, WasmConfig},
     support::gas::Gas,
 };
+
+use super::proposal_struct::StoreCodeProposal;
 
 #[derive(Subcommand, Debug)]
 pub enum ProposalCmd {
@@ -13,17 +16,12 @@ pub enum ProposalCmd {
         /// Name of the contract to store
         contract_name: String,
 
-        /// Proposal title
-        #[clap(long)]
-        title: String,
-
-        /// Proposal decsription
+        /// Path to proposal file, could be either yaml / toml format.
         #[clap(short, long)]
-        description: String,
+        proposal: Option<PathBuf>,
 
-        /// Proposal deposit to activate voting
-        #[clap(long)]
-        deposit: Option<String>,
+        #[clap(flatten)]
+        store_code_proposal: StoreCodeProposal,
 
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
@@ -65,11 +63,29 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     match cmd {
         ProposalCmd::StoreCode {
             contract_name,
-            title,
-            description,
+            proposal,
+            store_code_proposal,
             base_tx_args,
-            deposit,
         } => {
+            let proposal = if let Some(p) = proposal {
+                let proposal_str = std::fs::read_to_string(p)?;
+                let extention_error_msg = "Extension must be one of `yaml`, `yml` or `toml`";
+                let ext = p.extension().expect(extention_error_msg);
+                let store_code_proposal: StoreCodeProposal = if ext == "yaml" || ext == "yml" {
+                    serde_yaml::from_str(proposal_str.as_str())?
+                } else if ext == "toml" {
+                    toml::from_str(proposal_str.as_str())?
+                } else {
+                    panic!("{}", extention_error_msg);
+                };
+                Some(store_code_proposal)
+            } else {
+                None
+            };
+
+            let store_code_proposal @ StoreCodeProposal { title, deposit, .. } =
+                proposal.as_ref().unwrap_or(store_code_proposal);
+
             let BaseTxArgs {
                 network,
                 signer_args,
@@ -80,8 +96,8 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
             super::ops::propose_store_code(
                 &ctx,
                 contract_name,
-                title,
-                description,
+                title.as_str(),
+                store_code_proposal.description_with_metadata()?.as_str(),
                 deposit.as_ref().map(|s| s.as_str()).try_into()?,
                 network,
                 {

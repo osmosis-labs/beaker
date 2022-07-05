@@ -26,6 +26,7 @@ pub struct Cli {
 // === APP DEFINITION ===
 // Could potentially move all this to macro
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 pub enum Commands {
     #[clap(flatten)]
     Workspace(WorkspaceCmd),
