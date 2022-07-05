@@ -68,6 +68,21 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+    /// Migrated instanitate contract to use other code stored on chain
+    Migrate {
+        /// Name of the contract to instantiate
+        contract_name: String,
+        /// Label for the instantiated contract for selcting migration target
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        /// Raw json string to use as instantiate msg
+        #[clap(short, long)]
+        raw: Option<String>,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
     /// Build, Optimize, Store code, and instantiate contract
     Deploy {
         /// Name of the contract to deploy
@@ -175,6 +190,37 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     raw.as_ref(),
                     admin.as_ref(),
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
+                    network,
+                    timeout_height,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
+                Ok(())
+            }
+            WasmCmd::Migrate {
+                contract_name,
+                label,
+                raw,
+                base_tx_args,
+            } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+                ops::migrate(
+                    &ctx,
+                    contract_name,
+                    label.as_str(),
+                    raw.as_ref(),
                     network,
                     timeout_height,
                     {
