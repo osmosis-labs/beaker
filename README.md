@@ -22,14 +22,13 @@
 
 ## Table of Contents
 
-### Guide
-- [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
-    - [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
-    - [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
-    - [Console](#console)
-    - [Frontend](#frontend)
+### Getting Started
+- [Installation](#installation)
+- [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
+- [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
+- [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
+- [Console](#console)
+- [Frontend](#frontend)
 
 
 ### Reference
