@@ -17,6 +17,10 @@
 
 [Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
 
+This document only show the basic to get you familiar with the tool. If you need more information about command and configuratio, please refer to:
+- [command](./docs/commands)
+- [config](./docs/config)
+
 ## Getting Started
 
 This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./docs/commands/README.md).
