@@ -17,9 +17,27 @@
 
 [Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
 
-This document only show the basic to get you familiar with the tool. If you need more information about command and configuration, please refer to:
-- [command](./docs/commands)
-- [config](./docs/config)
+
+---
+
+## Table of Contents
+
+### Guide
+- [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
+    - [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
+    - [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
+    - [Console](#console)
+    - [Frontend](#frontend)
+
+
+### Reference
+- [Command](./docs/commands)
+- [Config](./docs/config)
+
+
+---
 
 ## Getting Started
 
