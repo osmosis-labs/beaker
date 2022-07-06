@@ -23,12 +23,17 @@
 ## Table of Contents
 
 ### Getting Started
-- [Installation](#installation)
-- [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
-- [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
-- [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
-- [Console](#console)
-- [Frontend](#frontend)
++ [Installation](#installation)
++ [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
+  - [`frontend` and `contracts`](#frontend-and-contracts)
+  - [`Cargo.toml`](#cargotoml)
+  - [`Beaker.toml`](#beakertoml)
+  - [`.beaker`](#beaker-1)
++ [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
++ [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
++ [Contract Upgrade](#contract-upgrade)
++ [Console](#console)
++ [Frontend](#frontend)
 
 
 ### Reference
