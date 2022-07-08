@@ -40,6 +40,9 @@ pub fn upgrade<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         label,
         raw,
+        // upgrade command is not intended to use with the gov process
+        true,
+        true,
         network,
         timeout_height,
         gas,

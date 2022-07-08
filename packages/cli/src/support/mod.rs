@@ -3,6 +3,7 @@ pub mod coin;
 pub mod cosmos;
 pub mod future;
 pub mod gas;
+pub mod hooks;
 pub mod ops_response;
 pub mod proto;
 pub mod signer;
