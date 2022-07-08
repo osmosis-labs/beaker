@@ -94,6 +94,10 @@ Arguments:
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
+* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+
+* `-y/--yes`: Agree to all prompts
+
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
@@ -125,6 +129,10 @@ Arguments:
 * `-l/--label <label>`: Label for the instantiated contract for selcting migration target (default: `default`)
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
+
+* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+
+* `-y/--yes`: Agree to all prompts
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
