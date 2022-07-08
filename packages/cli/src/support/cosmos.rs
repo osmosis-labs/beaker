@@ -149,6 +149,10 @@ impl Client {
             .deposit_params
             .with_context(|| "Deposit params is not available")
     }
+
+    pub async fn code_id_by_store_code_proposal(&self, proposal_id: &u64) -> Result<u64> {
+        todo!()
+    }
 }
 
 pub struct SigningClient {
