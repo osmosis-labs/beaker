@@ -65,6 +65,14 @@ pub enum WasmCmd {
         #[clap(short, long)]
         funds: Option<String>,
 
+        /// Skip the check for proposal's updated code_id
+        #[clap(long)]
+        no_proposal_sync: bool,
+
+        /// Agree to all prompts
+        #[clap(short, long)]
+        yes: bool,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -198,6 +206,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 label,
                 raw,
                 admin,
+                no_proposal_sync,
+                yes,
                 funds,
                 base_tx_args,
             } => {
@@ -213,6 +223,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     label.as_str(),
                     raw.as_ref(),
                     admin.as_ref(),
+                    *no_proposal_sync,
+                    *yes,
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
                     timeout_height,
