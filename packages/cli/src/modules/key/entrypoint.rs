@@ -6,18 +6,8 @@ use clap::Subcommand;
 use cosmrs::bip32;
 use cosmrs::bip32::secp256k1::elliptic_curve::rand_core::OsRng;
 use cosmrs::crypto::secp256k1::SigningKey;
-
-// TODO:
-// -- DONE
-// beaker key set username "camel hours ..."
-// beaker key address <username>
-// beaker key gen username [--show]
-// beaker key delete username
-//
-// -- TODO
-// confirm on overrride
-// prevent wrong mnemonic to not pass
-// add alias
+use dialoguer::Confirm;
+use keyring::Entry;
 
 #[derive(Subcommand, Debug)]
 pub enum KeyCmd {
@@ -59,12 +49,21 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
         match cmd {
             KeyCmd::Set { name, mnemonic } => {
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
+                let global_config = ctx.global_config()?;
+                let derivation_path = global_config.derivation_path();
+
+                SigningKey::from_mnemonic(mnemonic, derivation_path)
+                    .with_context(|| "Invalid phrase, if word length is not 24, please consider using 24-words mnemonic")?;
+
+                confirm_override(&ctx.config()?.service, name, false)?;
                 entry
                     .set_password(mnemonic)
                     .with_context(|| "Unable to set key")
             }
             KeyCmd::Delete { name } => {
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
+
+                confirm_deletion(&ctx.config()?.service, name, false)?;
                 entry
                     .delete_password()
                     .with_context(|| "Unable to delete key")
@@ -90,6 +89,8 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
 
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
 
+                confirm_override(&ctx.config()?.service, name, false)?;
+
                 if *show {
                     println!("{}", mnemonic);
                 }
@@ -100,4 +101,33 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
             }
         }
     }
+}
+
+fn confirm_override(service: &str, name: &str, yes: bool) -> Result<bool, std::io::Error> {
+    let entry = Entry::new(service, name);
+    let exists = entry.get_password().is_ok();
+
+    if yes || !exists {
+        return core::result::Result::Ok(true);
+    }
+
+    Confirm::new()
+        .with_prompt(format!(
+            " > Key with name `{}` already exists. Do you want to override?",
+            name
+        ))
+        .interact()
+}
+
+fn confirm_deletion(service: &str, name: &str, yes: bool) -> Result<bool, std::io::Error> {
+    let entry = Entry::new(service, name);
+    let exists = entry.get_password().is_ok();
+
+    if yes || !exists {
+        return core::result::Result::Ok(true);
+    }
+
+    Confirm::new()
+        .with_prompt(format!(" > Do you want to delete `{}`?", name))
+        .interact()
 }
