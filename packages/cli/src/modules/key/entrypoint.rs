@@ -15,14 +15,23 @@ pub enum KeyCmd {
     Set {
         /// Name of the key to create or update
         name: String,
+
         /// Mnemonic string to store as an entry
         mnemonic: String,
+
+        /// Agree to all prompts
+        #[clap(short, long)]
+        yes: bool,
     },
     /// Delete existing key
     #[clap(alias = "del")]
     Delete {
         /// Name of the key to create or update
         name: String,
+
+        /// Agree to all prompts
+        #[clap(short, long)]
+        yes: bool,
     },
     /// Get address from keyring's stored key
     #[clap(alias = "addr")]
@@ -39,6 +48,10 @@ pub enum KeyCmd {
         /// Show mnemonic in the console if set, keep it secret otherwise
         #[clap(long)]
         show: bool,
+
+        /// Agree to all prompts
+        #[clap(short, long)]
+        yes: bool,
     },
 }
 
@@ -47,7 +60,11 @@ pub struct KeyModule {}
 impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
     fn execute<Ctx: Context<'a, KeyConfig>>(ctx: Ctx, cmd: &KeyCmd) -> Result<(), anyhow::Error> {
         match cmd {
-            KeyCmd::Set { name, mnemonic } => {
+            KeyCmd::Set {
+                name,
+                mnemonic,
+                yes,
+            } => {
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
                 let global_config = ctx.global_config()?;
                 let derivation_path = global_config.derivation_path();
@@ -55,15 +72,15 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
                 SigningKey::from_mnemonic(mnemonic, derivation_path)
                     .with_context(|| "Invalid phrase, if word length is not 24, please consider using 24-words mnemonic")?;
 
-                confirm_override(&ctx.config()?.service, name, false)?;
+                confirm_override(&ctx.config()?.service, name, *yes)?;
                 entry
                     .set_password(mnemonic)
                     .with_context(|| "Unable to set key")
             }
-            KeyCmd::Delete { name } => {
+            KeyCmd::Delete { name, yes } => {
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
 
-                confirm_deletion(&ctx.config()?.service, name, false)?;
+                confirm_deletion(&ctx.config()?.service, name, *yes)?;
                 entry
                     .delete_password()
                     .with_context(|| "Unable to delete key")
@@ -83,13 +100,13 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
                 println!("{}", address);
                 Ok(())
             }
-            KeyCmd::Generate { name, show } => {
+            KeyCmd::Generate { name, show, yes } => {
                 let mnemonic = bip32::Mnemonic::random(OsRng, bip32::Language::English);
                 let mnemonic = mnemonic.phrase();
 
                 let entry = keyring::Entry::new(&ctx.config()?.service, name);
 
-                confirm_override(&ctx.config()?.service, name, false)?;
+                confirm_override(&ctx.config()?.service, name, *yes)?;
 
                 if *show {
                     println!("{}", mnemonic);
