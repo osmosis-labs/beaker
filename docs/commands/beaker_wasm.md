@@ -66,6 +66,8 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
@@ -106,6 +108,8 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
@@ -141,6 +145,8 @@ Arguments:
 * `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -182,6 +188,8 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
@@ -217,6 +225,8 @@ Arguments:
 * `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 

@@ -17,29 +17,29 @@
 
 [Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
 
-
 ---
 
 ## Table of Contents
 
 ### Getting Started
-+ [Installation](#installation)
-+ [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
+
+- [Installation](#installation)
+- [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
   - [`frontend` and `contracts`](#frontend-and-contracts)
   - [`Cargo.toml`](#cargotoml)
   - [`Beaker.toml`](#beakertoml)
   - [`.beaker`](#beaker-1)
-+ [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
-+ [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
-+ [Contract Upgrade](#contract-upgrade)
-+ [Console](#console)
-+ [Frontend](#frontend)
-
+- [Your first CosmWasm contract with Beaker](#your-first-cosmwasm-contract-with-beaker)
+- [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
+- [Contract Upgrade](#contract-upgrade)
+- [Signers](#signers)
+- [Console](#console)
+- [Frontend](#frontend)
 
 ### Reference
+
 - [Command](./docs/commands)
 - [Config](./docs/config)
-
 
 ---
 
@@ -275,6 +275,15 @@ beaker wasm upgrade counter --signer-account test1 --no-wasm-opt
 ```
 
 You can find more information about their options [here](./docs/commands/beaker_wasm.md).
+
+### Signers
+
+Whenever you run command that requires signing transactions, there are 3 options you can reference your private keys:
+
+- `--signer-account` input of this option refer to the accounts defined in the [config file](./docs/config/global.md), which is not encrypted, so it should be used only for testing
+- `--signer-mnemonic` input of this option is the raw mnemonic string to construct a signer
+- `--signer-private-key` input of this option is the same as `--signer-mnemonic` except it expects base64 encoded private key
+- `--signer-keyring` use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](./docs/commands/beaker_key.md).
 
 ### Console
 
