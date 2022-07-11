@@ -21,6 +21,7 @@ data_doc_derive = {path = "../data_doc_derive"}
 derive-new = "0.5.9"
 dialoguer = "0.10.1"
 getset = "0.1.2"
+keyring = "1.2.0"
 prost = "0.10.3"
 regex = "1.5.6"
 serde = "1.0.137"
