@@ -45,6 +45,9 @@ pub fn deploy<'a, Ctx: Context<'a, WasmConfig>>(
         label,
         raw,
         admin,
+        // deploy command is not intended to use with the gov process
+        true,
+        true,
         funds,
         network,
         timeout_height,

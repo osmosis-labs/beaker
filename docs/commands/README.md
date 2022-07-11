@@ -44,6 +44,20 @@ Arguments:
 
 ---
 
+### `beaker key`
+
+Managing key backed by system's secret store
+
+[\> `beaker key`'s subcommands](./beaker_key.md)
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+---
+
 ### `beaker console`
 
 Launch interactive console for interacting with the project

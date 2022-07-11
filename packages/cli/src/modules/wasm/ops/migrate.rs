@@ -3,6 +3,7 @@ use crate::modules::wasm::config::WasmConfig;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
+use crate::support::hooks::use_code_id;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
@@ -21,6 +22,8 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     label: &str,
     raw: Option<&String>,
+    no_proposal_sync: bool,
+    yes: bool,
     network: &str,
     timeout_height: &u32,
     gas: &Gas,
@@ -38,10 +41,15 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let state = State::load_by_network(network_info.clone(), ctx.root()?)?;
-    let code_id = state
-        .get_ref(network, contract_name)?
-        .code_id()
-        .with_context(|| format!("Unable to retrieve code_id for {contract_name}"))?;
+    let code_id = use_code_id(
+        ctx,
+        network,
+        &network_info,
+        state.clone(),
+        contract_name,
+        no_proposal_sync,
+        yes,
+    )?;
 
     let contract = state
         .get_ref(network, contract_name)?

@@ -6,12 +6,15 @@ use anyhow::{bail, Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use data_doc_derive::GetDataDocs;
+use modules::key::entrypoint::{KeyCmd, KeyModule};
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 
 pub use framework::{config::GlobalConfig, Context, Module};
 pub use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
 pub use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
+
+use crate::modules::key::config::KeyConfig;
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -34,6 +37,11 @@ pub enum Commands {
     Wasm {
         #[clap(subcommand)]
         cmd: WasmCmd,
+    },
+    /// Managing key backed by system's secret store
+    Key {
+        #[clap(subcommand)]
+        cmd: KeyCmd,
     },
     /// Launch interactive console for interacting with the project
     Console {
@@ -99,7 +107,8 @@ fn console(network: &str) -> Result<()> {
 context!(
     WasmContext, config = { wasm: WasmConfig };
     WorkspaceContext, config = { workspace: WorkspaceConfig };
-    ConsoleContext, config = { console: ConsoleConfig }
+    ConsoleContext, config = { console: ConsoleConfig };
+    KeyContext, config = { key: KeyConfig }
 );
 
 pub fn execute(cmd: &Commands) -> Result<()> {
@@ -107,6 +116,7 @@ pub fn execute(cmd: &Commands) -> Result<()> {
         Commands::Wasm { cmd } => WasmModule::execute(WasmContext::new(), cmd),
         Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext::new(), cmd),
         Commands::Console { network } => console(network),
+        Commands::Key { cmd } => KeyModule::execute(KeyContext::new(), cmd),
     }
 }
 

@@ -5,6 +5,7 @@ use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
+use crate::support::hooks::use_code_id;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
@@ -13,7 +14,8 @@ use anyhow::Result;
 use cosmrs::cosmwasm::MsgInstantiateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
-use std::fs;
+
+use std::{fs, vec};
 
 #[allow(clippy::too_many_arguments)]
 pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
@@ -22,6 +24,8 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     label: &str,
     raw: Option<&String>,
     admin: Option<&String>,
+    no_proposal_sync: bool,
+    yes: bool,
     funds: Coins,
     network: &str,
     timeout_height: &u32,
@@ -40,10 +44,16 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let state = State::load_by_network(network_info.clone(), ctx.root()?)?;
-    let code_id = state
-        .get_ref(network, contract_name)?
-        .code_id()
-        .with_context(|| format!("Unable to retrieve code_id for {contract_name}"))?;
+
+    let code_id = use_code_id(
+        ctx,
+        network,
+        &network_info,
+        state,
+        contract_name,
+        no_proposal_sync,
+        yes,
+    )?;
 
     let msg_instantiate_contract = MsgInstantiateContract {
         sender: client.signer_account_id(),

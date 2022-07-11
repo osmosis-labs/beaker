@@ -66,6 +66,8 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
@@ -94,6 +96,10 @@ Arguments:
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
 
+* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+
+* `-y/--yes`: Agree to all prompts
+
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
@@ -101,6 +107,8 @@ Arguments:
 * `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -126,6 +134,10 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
+* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+
+* `-y/--yes`: Agree to all prompts
+
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
@@ -133,6 +145,8 @@ Arguments:
 * `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -174,6 +188,8 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
@@ -209,6 +225,8 @@ Arguments:
 * `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
