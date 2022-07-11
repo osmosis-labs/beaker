@@ -1,8 +1,9 @@
 use anyhow::bail;
 use clap::Parser;
 use cosmrs::{bip32, crypto::secp256k1::SigningKey};
+use keyring::Entry;
 
-use crate::framework::config::Account;
+use crate::{framework::config::Account, modules::key::config::SERVICE};
 
 // TODO:
 // - [x] make this a group
@@ -16,6 +17,10 @@ pub struct SignerArgs {
     /// Specifies predefined account as a tx signer
     #[clap(long, group = SIGNER_GROUP)]
     pub signer_account: Option<String>,
+
+    /// Specifies private_key as a tx signer (base64 encoded string)
+    #[clap(long, group = SIGNER_GROUP)]
+    pub signer_keyring: Option<String>,
 
     /// Specifies mnemonic as a tx signer
     #[clap(long, group = SIGNER_GROUP)]
@@ -33,6 +38,7 @@ impl SignerArgs {
     ) -> Result<SigningKey, anyhow::Error> {
         let Self {
             signer_account,
+            signer_keyring,
             signer_mnemonic,
             signer_private_key,
         } = self;
@@ -47,6 +53,9 @@ impl SignerArgs {
                     Ok(SigningKey::from_bytes(&base64::decode(private_key)?).unwrap())
                 }
             }
+        } else if let Some(signer_keyring) = signer_keyring {
+            let mnemonic = Entry::new(SERVICE, signer_keyring).get_password()?;
+            SigningKey::from_mnemonic(&mnemonic, derivation_path)
         } else if let Some(signer_mnemonic) = signer_mnemonic {
             SigningKey::from_mnemonic(signer_mnemonic, derivation_path)
         } else if let Some(signer_private_key) = signer_private_key {

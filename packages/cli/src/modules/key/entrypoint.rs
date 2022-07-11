@@ -1,4 +1,4 @@
-use super::config::KeyConfig;
+use super::config::{KeyConfig, SERVICE};
 use crate::framework::{Context, Module};
 use crate::support::signer::SigningKeyExt;
 use anyhow::{Context as _, Ok, Result};
@@ -65,28 +65,28 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
                 mnemonic,
                 yes,
             } => {
-                let entry = keyring::Entry::new(&ctx.config()?.service, name);
+                let entry = keyring::Entry::new(SERVICE, name);
                 let global_config = ctx.global_config()?;
                 let derivation_path = global_config.derivation_path();
 
                 SigningKey::from_mnemonic(mnemonic, derivation_path)
                     .with_context(|| "Invalid phrase, if word length is not 24, please consider using 24-words mnemonic")?;
 
-                confirm_override(&ctx.config()?.service, name, *yes)?;
+                confirm_override(SERVICE, name, *yes)?;
                 entry
                     .set_password(mnemonic)
                     .with_context(|| "Unable to set key")
             }
             KeyCmd::Delete { name, yes } => {
-                let entry = keyring::Entry::new(&ctx.config()?.service, name);
+                let entry = keyring::Entry::new(SERVICE, name);
 
-                confirm_deletion(&ctx.config()?.service, name, *yes)?;
+                confirm_deletion(SERVICE, name, *yes)?;
                 entry
                     .delete_password()
                     .with_context(|| "Unable to delete key")
             }
             KeyCmd::Address { name } => {
-                let entry = keyring::Entry::new(&ctx.config()?.service, name);
+                let entry = keyring::Entry::new(SERVICE, name);
                 let global_config = ctx.global_config()?;
 
                 let mnemonic = entry.get_password()?;
@@ -104,9 +104,9 @@ impl<'a> Module<'a, KeyConfig, KeyCmd, anyhow::Error> for KeyModule {
                 let mnemonic = bip32::Mnemonic::random(OsRng, bip32::Language::English);
                 let mnemonic = mnemonic.phrase();
 
-                let entry = keyring::Entry::new(&ctx.config()?.service, name);
+                let entry = keyring::Entry::new(SERVICE, name);
 
-                confirm_override(&ctx.config()?.service, name, *yes)?;
+                confirm_override(SERVICE, name, *yes)?;
 
                 if *show {
                     println!("{}", mnemonic);

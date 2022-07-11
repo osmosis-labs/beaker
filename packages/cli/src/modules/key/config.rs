@@ -2,16 +2,7 @@ use data_doc_derive::GetDataDocs;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Serialize, Deserialize, GetDataDocs)]
-pub struct KeyConfig {
-    /// Name of the service used as namespace for system's keyring
-    pub service: String,
-}
+#[derive(Serialize, Deserialize, GetDataDocs, Default)]
+pub struct KeyConfig {}
 
-impl Default for KeyConfig {
-    fn default() -> Self {
-        Self {
-            service: "beaker".to_string(),
-        }
-    }
-}
+pub const SERVICE: &str = "beaker";
