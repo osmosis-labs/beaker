@@ -4,18 +4,25 @@ use cosmrs::{bip32, crypto::secp256k1::SigningKey};
 
 use crate::framework::config::Account;
 
+// TODO:
+// - [x] make this a group
+// - [ ] add signer_keyring
+
+const SIGNER_GROUP: &str = "signer";
+
 #[derive(Debug, Parser, Clone)]
+#[clap(group = clap::ArgGroup::new(SIGNER_GROUP).multiple(false))]
 pub struct SignerArgs {
     /// Specifies predefined account as a tx signer
-    #[clap(long, conflicts_with_all=&["signer-mnemonic", "signer-private-key"])]
+    #[clap(long, group = SIGNER_GROUP)]
     pub signer_account: Option<String>,
 
     /// Specifies mnemonic as a tx signer
-    #[clap(long, conflicts_with_all=&["signer-account", "signer-private-key"])]
+    #[clap(long, group = SIGNER_GROUP)]
     pub signer_mnemonic: Option<String>,
 
     /// Specifies private_key as a tx signer (base64 encoded string)
-    #[clap(long, conflicts_with_all=&["signer-account", "signer-mnemonic"])]
+    #[clap(long, group = SIGNER_GROUP)]
     pub signer_private_key: Option<String>,
 }
 
