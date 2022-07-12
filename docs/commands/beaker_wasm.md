@@ -76,6 +76,72 @@ Arguments:
 
 ---
 
+### `beaker wasm update-admin`
+
+Update admin that can migrate contract
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`Name of the contract to store
+
+* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+
+* `--new-admin <new-admin>`: Address of new admin
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
+### `beaker wasm clear-admin`
+
+Clear admin so no one can migrate contract
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`Name of the contract to store
+
+* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
 ### `beaker wasm instantiate`
 
 Instanitate .wasm stored on chain
