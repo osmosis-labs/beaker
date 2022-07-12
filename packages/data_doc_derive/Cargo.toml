@@ -1,5 +1,7 @@
 [package]
+description = "Getting doc string at runtime"
 edition = "2021"
+license = "MIT OR Apache-2.0"
 name = "data_doc_derive"
 version = "0.1.0"
 
@@ -9,7 +11,7 @@ version = "0.1.0"
 proc-macro = true
 
 [dependencies]
-data_doc = {path = "../data_doc"}
+data_doc = {version = "0.1.0", path = "../data_doc"}
 proc-macro2 = "1.0.40"
 quote = "1.0.20"
 syn = {version = "1.0.98", features = ["full", "extra-traits"]}

@@ -3,7 +3,7 @@ description = "CosmWasm development tooling"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "beaker"
-version = "0.0.4"
+version = "0.0.5"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,8 +16,8 @@ config = {version = "0.13.1", features = ["preserve_order"]}
 console = "0.15.0"
 cosmos-sdk-proto = {version = "0.12.3", features = ["cosmwasm"]}
 cosmrs = {version = "0.7.1", features = ["dev", "cosmwasm"]}
-data_doc = {path = "../data_doc"}
-data_doc_derive = {path = "../data_doc_derive"}
+data_doc = {version = "0.1.0", path = "../data_doc"}
+data_doc_derive = {version = "0.1.0", path = "../data_doc_derive"}
 derive-new = "0.5.9"
 dialoguer = "0.10.1"
 getset = "0.1.2"
