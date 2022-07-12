@@ -42,6 +42,34 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+    /// Update admin that can migrate contract
+    UpdateAdmin {
+        /// Name of the contract to store
+        contract_name: String,
+
+        /// Label for the instantiated contract for later reference
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        /// Address of new admin
+        #[clap(long)]
+        new_admin: String,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
+    /// Clear admin so no one can migrate contract
+    ClearAdmin {
+        /// Name of the contract to store
+        contract_name: String,
+
+        /// Label for the instantiated contract for later reference
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
 
     /// Instanitate .wasm stored on chain
     Instantiate {
@@ -195,6 +223,68 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     network,
                     no_wasm_opt,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
+                    timeout_height,
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
+                Ok(())
+            }
+            WasmCmd::UpdateAdmin {
+                contract_name,
+                label,
+                new_admin,
+                base_tx_args,
+            } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+
+                ops::update_admin(
+                    &ctx,
+                    contract_name,
+                    label,
+                    network,
+                    new_admin,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
+                    timeout_height,
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
+                Ok(())
+            }
+            WasmCmd::ClearAdmin {
+                contract_name,
+                label,
+                base_tx_args,
+            } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+
+                ops::clear_admin(
+                    &ctx,
+                    contract_name,
+                    label,
+                    network,
                     {
                         let global_conf = ctx.global_config()?;
                         &Gas::from_args(
