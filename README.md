@@ -52,7 +52,7 @@ This section is intended to give you an introduction to `Beaker`, for more detai
 Beaker is available via [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) which is a rust toolchain. Once cargo is ready on your machine, run:
 
 ```sh
-cargo install beaker
+cargo install -f beaker # `-f` flag for up-to-date version
 ```
 
 Now `beaker` is ready to use!
