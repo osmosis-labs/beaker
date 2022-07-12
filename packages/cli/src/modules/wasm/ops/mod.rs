@@ -1,4 +1,5 @@
 pub mod build;
+pub mod clear_admin;
 pub mod deploy;
 pub mod instantiate;
 pub mod migrate;
@@ -8,6 +9,7 @@ pub mod update_admin;
 pub mod upgrade;
 
 pub use build::build;
+pub use clear_admin::clear_admin;
 pub use deploy::deploy;
 pub use instantiate::instantiate;
 pub use migrate::migrate;
