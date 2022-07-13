@@ -8,7 +8,6 @@ use derive_new::new;
 use std::path::PathBuf;
 
 // TODO:
-// - add instantiate permission to store-code proposal
 // - add instantiate permission to deploy
 // - add instantiate permission to upgrade
 #[derive(Subcommand, Debug)]
@@ -146,6 +145,10 @@ pub enum WasmCmd {
         /// Raw json string to use as instantiate msg
         #[clap(short, long)]
         raw: Option<String>,
+
+        /// Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+        #[clap(long)]
+        permit_only: Option<String>,
 
         /// Specifying admin required for contract migration.
         /// Use "signer" for setting tx signer as admin.
@@ -386,6 +389,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
+                permit_only,
                 admin,
                 funds,
                 no_rebuild,
@@ -403,6 +407,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    permit_only,
                     admin.as_ref(),
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
