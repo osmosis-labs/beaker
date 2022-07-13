@@ -17,10 +17,10 @@ pub fn compute_admin(
 }
 
 pub fn compute_instantiate_permission(
-    permit_only: &Option<String>,
+    permit_instantiate_only: &Option<String>,
     signer_account_id: AccountId,
 ) -> Result<Option<AccessConfig>, anyhow::Error> {
-    let instantiate_permission = permit_only
+    let instantiate_permission = permit_instantiate_only
         .as_ref()
         .map(|permitted_account| {
             let address = if permitted_account == "signer" {

@@ -20,7 +20,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     contract_name: &str,
     network: &str,
     no_wasm_opt: &bool,
-    permit_only: &Option<String>,
+    permit_instantiate_only: &Option<String>,
     gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
@@ -37,7 +37,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let instantiate_permission =
-        compute_instantiate_permission(permit_only, client.signer_account_id())?;
+        compute_instantiate_permission(permit_instantiate_only, client.signer_account_id())?;
 
     let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
     let msg_store_code = MsgStoreCode {

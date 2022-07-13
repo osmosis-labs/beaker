@@ -24,7 +24,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     deposit: Coins,
     network: &str,
     gas: &Gas,
-    permit_only: &Option<String>,
+    permit_instantiate_only: &Option<String>,
     timeout_height: &u32,
     signing_key: SigningKey,
 ) -> Result<ProposeStoreCodeResponse> {
@@ -42,7 +42,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
     let instantiate_permission =
-        compute_instantiate_permission(permit_only, client.signer_account_id())?;
+        compute_instantiate_permission(permit_instantiate_only, client.signer_account_id())?;
 
     let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
         title: title.to_string(),
