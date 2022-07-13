@@ -31,6 +31,7 @@ pub fn upgrade<'a, Ctx: Context<'a, WasmConfig>>(
         contract_name,
         network,
         no_wasm_opt,
+        &None,
         gas,
         timeout_height,
         store_code_signing_key,

@@ -12,16 +12,18 @@ use crate::support::wasm::read_wasm;
 use crate::{framework::Context, support::cosmos::Client};
 
 use anyhow::Result;
-use cosmrs::cosmwasm::MsgStoreCode;
+use cosmrs::cosmwasm::{AccessConfig, MsgStoreCode};
 
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
 
+#[allow(clippy::too_many_arguments)]
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
     network: &str,
     no_wasm_opt: &bool,
+    permit_only: &Option<String>,
     gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
@@ -37,11 +39,23 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
+    let instantiate_permission = permit_only
+        .as_ref()
+        .map(|addr| {
+            anyhow::Ok(AccessConfig {
+                permission: cosmrs::cosmwasm::AccessType::OnlyAddress,
+                address: addr
+                    .parse()
+                    .map_err(|e: cosmrs::ErrorReport| anyhow::anyhow!(e))?,
+            })
+        })
+        .transpose()?;
+
     let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
     let msg_store_code = MsgStoreCode {
         sender: client.signer_account_id(),
         wasm_byte_code: wasm,
-        instantiate_permission: None, // TODO: Add this when working on migration
+        instantiate_permission,
     }
     .to_any()
     .unwrap();

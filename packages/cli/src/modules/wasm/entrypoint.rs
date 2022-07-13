@@ -38,7 +38,10 @@ pub enum WasmCmd {
         #[clap(long)]
         no_wasm_opt: bool,
 
-        // TODO: implement --all flag
+        /// Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+        #[clap(long)]
+        permit_only: Option<String>,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -209,6 +212,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::StoreCode {
                 contract_name,
                 no_wasm_opt,
+                permit_only,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -223,6 +227,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     network,
                     no_wasm_opt,
+                    permit_only,
                     {
                         let global_conf = ctx.global_config()?;
                         &Gas::from_args(
