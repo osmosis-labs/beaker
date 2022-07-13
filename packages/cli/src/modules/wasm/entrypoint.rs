@@ -7,9 +7,6 @@ use clap::Subcommand;
 use derive_new::new;
 use std::path::PathBuf;
 
-// TODO:
-// - add instantiate permission to deploy
-// - add instantiate permission to upgrade
 #[derive(Subcommand, Debug)]
 pub enum WasmCmd {
     /// Create new CosmWasm contract from boilerplate
@@ -41,7 +38,7 @@ pub enum WasmCmd {
         #[clap(long)]
         no_wasm_opt: bool,
 
-        /// Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
         #[clap(long)]
         permit_only: Option<String>,
 
@@ -146,7 +143,7 @@ pub enum WasmCmd {
         #[clap(short, long)]
         raw: Option<String>,
 
-        /// Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
         #[clap(long)]
         permit_only: Option<String>,
 
@@ -191,6 +188,10 @@ pub enum WasmCmd {
         /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
         #[clap(long)]
         no_wasm_opt: bool,
+
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
+        #[clap(long)]
+        permit_only: Option<String>,
 
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
@@ -433,6 +434,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 raw,
                 no_rebuild,
                 no_wasm_opt,
+                permit_only,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -446,6 +448,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    permit_only,
                     network,
                     timeout_height,
                     {
