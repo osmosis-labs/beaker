@@ -16,6 +16,10 @@ pub enum ProposalCmd {
         /// Name of the contract to store
         contract_name: String,
 
+        /// Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+        #[clap(long)]
+        permit_instantiate_only: Option<String>,
+
         /// Path to proposal file, could be either yaml / toml format.
         #[clap(short, long)]
         proposal: Option<PathBuf>,
@@ -63,6 +67,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     match cmd {
         ProposalCmd::StoreCode {
             contract_name,
+            permit_instantiate_only,
             proposal,
             store_code_proposal,
             base_tx_args,
@@ -108,6 +113,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                         global_conf.gas_adjustment(),
                     )?
                 },
+                permit_instantiate_only,
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
             )?;

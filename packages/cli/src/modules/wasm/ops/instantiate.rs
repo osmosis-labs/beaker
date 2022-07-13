@@ -1,12 +1,12 @@
 use crate::attrs_format;
 use crate::modules::wasm::config::WasmConfig;
-use crate::support::admin::compute_admin;
 use crate::support::coin::Coins;
 use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::hooks::use_code_id;
 use crate::support::ops_response::OpResponseDisplay;
+use crate::support::permission::compute_admin;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
 use anyhow::Context as _;

@@ -58,6 +58,8 @@ Arguments:
 
 * `--no-wasm-opt`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
 
+* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
 * `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
@@ -238,6 +240,8 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
+* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+
 * `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
 
 * `-f/--funds <funds>`: Funds to send to instantiated contract
@@ -283,6 +287,8 @@ Arguments:
 * `--no-rebuild`: Use existing .wasm file to deploy if set to true
 
 * `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
+
+* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 

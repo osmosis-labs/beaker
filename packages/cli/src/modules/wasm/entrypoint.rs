@@ -38,7 +38,10 @@ pub enum WasmCmd {
         #[clap(long)]
         no_wasm_opt: bool,
 
-        // TODO: implement --all flag
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
+        #[clap(long)]
+        permit_instantiate_only: Option<String>,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -140,6 +143,10 @@ pub enum WasmCmd {
         #[clap(short, long)]
         raw: Option<String>,
 
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
+        #[clap(long)]
+        permit_instantiate_only: Option<String>,
+
         /// Specifying admin required for contract migration.
         /// Use "signer" for setting tx signer as admin.
         /// Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin.
@@ -182,6 +189,10 @@ pub enum WasmCmd {
         #[clap(long)]
         no_wasm_opt: bool,
 
+        /// Restricting the code to be able to instantiate only by given address, no restriction by default
+        #[clap(long)]
+        permit_instantiate_only: Option<String>,
+
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
@@ -209,6 +220,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::StoreCode {
                 contract_name,
                 no_wasm_opt,
+                permit_instantiate_only,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -223,6 +235,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     network,
                     no_wasm_opt,
+                    permit_instantiate_only,
                     {
                         let global_conf = ctx.global_config()?;
                         &Gas::from_args(
@@ -377,6 +390,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name,
                 label,
                 raw,
+                permit_instantiate_only,
                 admin,
                 funds,
                 no_rebuild,
@@ -394,6 +408,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    permit_instantiate_only,
                     admin.as_ref(),
                     funds.as_ref().map(|s| s.as_str()).try_into()?,
                     network,
@@ -419,6 +434,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 raw,
                 no_rebuild,
                 no_wasm_opt,
+                permit_instantiate_only,
                 base_tx_args,
             } => {
                 let BaseTxArgs {
@@ -432,6 +448,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     contract_name,
                     label.as_str(),
                     raw.as_ref(),
+                    permit_instantiate_only,
                     network,
                     timeout_height,
                     {
