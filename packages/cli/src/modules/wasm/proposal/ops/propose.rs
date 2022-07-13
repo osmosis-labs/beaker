@@ -4,6 +4,7 @@ use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
+use crate::support::permission::compute_instantiate_permission;
 use crate::support::proto::MessageExt;
 use crate::support::state::State;
 use crate::support::wasm::read_wasm;
@@ -23,6 +24,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     deposit: Coins,
     network: &str,
     gas: &Gas,
+    permit_only: &Option<String>,
     timeout_height: &u32,
     signing_key: SigningKey,
 ) -> Result<ProposeStoreCodeResponse> {
@@ -39,12 +41,15 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
     let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
+    let instantiate_permission =
+        compute_instantiate_permission(permit_only, client.signer_account_id())?;
+
     let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
         title: title.to_string(),
         description: description.to_string(),
         run_as: client.signer_account_id().to_string(),
         wasm_byte_code: wasm,
-        instantiate_permission: None, // TODO: add instantitate permission
+        instantiate_permission: instantiate_permission.clone().map(|ac| ac.into()),
     };
 
     let msg_submit_proposal = MsgSubmitProposal {
@@ -82,6 +87,9 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
         let propose_store_code_response = ProposeStoreCodeResponse {
             proposal_id,
             deposit_amount,
+            instantiate_permission: instantiate_permission
+                .map(|p| format!("only_address | {}", p.address))
+                .unwrap_or_else(|| "–".to_string()),
         };
 
         State::update_state_file(
@@ -101,6 +109,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 pub struct ProposeStoreCodeResponse {
     pub proposal_id: u64,
     pub deposit_amount: String,
+    pub instantiate_permission: String,
 }
 
 impl OpResponseDisplay for ProposeStoreCodeResponse {
@@ -108,6 +117,6 @@ impl OpResponseDisplay for ProposeStoreCodeResponse {
         "Store code proposal has been submitted!! 🎉"
     }
     fn attrs(&self) -> Vec<String> {
-        attrs_format! { self | proposal_id, deposit_amount }
+        attrs_format! { self | proposal_id, deposit_amount, instantiate_permission }
     }
 }

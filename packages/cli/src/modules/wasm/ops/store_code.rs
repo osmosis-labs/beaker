@@ -4,17 +4,13 @@ use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
-use anyhow::Context as _;
-use cosmrs::AccountId;
-
+use crate::support::permission::compute_instantiate_permission;
 use crate::support::state::State;
-
 use crate::support::wasm::read_wasm;
 use crate::{framework::Context, support::cosmos::Client};
-
+use anyhow::Context as _;
 use anyhow::Result;
-use cosmrs::cosmwasm::{AccessConfig, MsgStoreCode};
-
+use cosmrs::cosmwasm::MsgStoreCode;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
 
@@ -74,30 +70,6 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
         Ok(store_code_response)
     })
-}
-
-fn compute_instantiate_permission(
-    permit_only: &Option<String>,
-    signer_account_id: AccountId,
-) -> Result<Option<AccessConfig>, anyhow::Error> {
-    let instantiate_permission = permit_only
-        .as_ref()
-        .map(|permitted_account| {
-            let address = if permitted_account == "signer" {
-                signer_account_id
-            } else {
-                permitted_account
-                    .parse()
-                    .map_err(|e: cosmrs::ErrorReport| anyhow::anyhow!(e))?
-            };
-
-            anyhow::Ok(AccessConfig {
-                permission: cosmrs::cosmwasm::AccessType::OnlyAddress,
-                address,
-            })
-        })
-        .transpose()?;
-    Ok(instantiate_permission)
 }
 
 #[allow(dead_code)]

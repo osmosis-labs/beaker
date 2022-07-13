@@ -7,6 +7,10 @@ use clap::Subcommand;
 use derive_new::new;
 use std::path::PathBuf;
 
+// TODO:
+// - add instantiate permission to store-code proposal
+// - add instantiate permission to deploy
+// - add instantiate permission to upgrade
 #[derive(Subcommand, Debug)]
 pub enum WasmCmd {
     /// Create new CosmWasm contract from boilerplate
