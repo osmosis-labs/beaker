@@ -1,4 +1,4 @@
-import type { CodeDetails, Contract as ContractInfo, CosmWasmClient, ExecuteResult, StdFee } from 'cosmwasm';
+import type { CodeDetails, Contract as ContractInfo, CosmWasmClient, StdFee } from 'cosmwasm';
 import type { Account } from './account';
 declare type Msg = Record<string, unknown>;
 /**
@@ -26,9 +26,9 @@ export declare class Contract {
      * example usage: `contract.execute(xmsg).by(signerAccount)`
      */
     execute(xmsg: Msg, senderAddress: string | null, fee?: number | 'auto' | StdFee): {
-        by: (account: Account) => Promise<ExecuteResult>;
+        by: (account: Account) => Promise<import("cosmwasm").ExecuteResult>;
     };
 }
-export declare const getContracts: (client: CosmWasmClient, state: Record<string, unknown>) => Record<string, unknown>;
+export declare const getContracts: (client: CosmWasmClient, state: Record<string, unknown>, sdk: Record<string, Record<string, Function>>) => Record<string, unknown>;
 export {};
 //# sourceMappingURL=contract.d.ts.map

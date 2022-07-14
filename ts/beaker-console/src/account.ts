@@ -23,10 +23,27 @@ type Config = {
 export class Account {
   signingClient: SigningCosmWasmClient;
   wallet: Secp256k1HdWallet;
+  address: string;
 
-  constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient) {
+  constructor(
+    wallet: Secp256k1HdWallet,
+    signingClient: SigningCosmWasmClient,
+    address: string,
+  ) {
     this.wallet = wallet;
     this.signingClient = signingClient;
+    this.address = address;
+  }
+
+  static async withDerivedAddress(
+    wallet: Secp256k1HdWallet,
+    signingClient: SigningCosmWasmClient,
+  ): Promise<Account> {
+    const accountData = (await wallet.getAccounts())[0];
+    if (accountData === undefined) {
+      throw Error('address not found');
+    }
+    return new Account(wallet, signingClient, accountData.address);
   }
 
   /**
@@ -69,7 +86,7 @@ export const fromMnemonic = async (
     wallet,
     { gasPrice: GasPrice.fromString(conf.global.gas_price) },
   );
-  return new Account(wallet, signingClient);
+  return Account.withDerivedAddress(wallet, signingClient);
 };
 
 export const getAccounts = async (conf: Config, network: string) => {

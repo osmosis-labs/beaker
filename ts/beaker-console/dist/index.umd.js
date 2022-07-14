@@ -5,10 +5,10 @@
  */
 
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@cosmjs/crypto'), require('cosmwasm')) :
-    typeof define === 'function' && define.amd ? define(['exports', '@cosmjs/crypto', 'cosmwasm'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.beaker = {}, global.crypto, global.cosmwasm));
-})(this, (function (exports, crypto, cosmwasm) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@cosmjs/crypto'), require('cosmwasm'), require('case')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@cosmjs/crypto', 'cosmwasm', 'case'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.beaker = {}, global.crypto, global.cosmwasm, global._case));
+})(this, (function (exports, crypto, cosmwasm, _case) { 'use strict';
 
     /******************************************************************************
     Copyright (c) Microsoft Corporation.
@@ -78,10 +78,27 @@
      * Account instance with baked-in client and utility methods
      */
     var Account = /** @class */ (function () {
-        function Account(wallet, signingClient) {
+        function Account(wallet, signingClient, address) {
             this.wallet = wallet;
             this.signingClient = signingClient;
+            this.address = address;
         }
+        Account.withDerivedAddress = function (wallet, signingClient) {
+            return __awaiter(this, void 0, void 0, function () {
+                var accountData;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, wallet.getAccounts()];
+                        case 1:
+                            accountData = (_a.sent())[0];
+                            if (accountData === undefined) {
+                                throw Error('address not found');
+                            }
+                            return [2 /*return*/, new Account(wallet, signingClient, accountData.address)];
+                    }
+                });
+            });
+        };
         /**
          * Get balances for specific denom, only support native coin
          */
@@ -128,7 +145,7 @@
                     return [4 /*yield*/, cosmwasm.SigningCosmWasmClient.connectWithSigner(networkInfo.rpc_endpoint, wallet, { gasPrice: cosmwasm.GasPrice.fromString(conf.global.gas_price) })];
                 case 2:
                     signingClient = _a.sent();
-                    return [2 /*return*/, new Account(wallet, signingClient)];
+                    return [2 /*return*/, Account.withDerivedAddress(wallet, signingClient)];
             }
         });
     }); };
@@ -149,15 +166,17 @@
     }); };
 
     /* eslint-disable */
-    var id = function (x) { return x; };
     var mapObject = function (o, f, g) {
         return Object.fromEntries(Object.entries(o).map(function (_a) {
             var k = _a[0], v = _a[1];
             return [f(k), g(v)];
         }));
     };
-    var mapValues = function (o, g) {
-        return mapObject(o, id, g);
+    var mapKV = function (o, f) {
+        return Object.fromEntries(Object.entries(o).map(function (_a) {
+            var k = _a[0], v = _a[1];
+            return f(k, v);
+        }));
     };
     var extendWith = function (properties) {
         return function (context) {
@@ -230,43 +249,70 @@
             var _this = this;
             if (fee === void 0) { fee = 'auto'; }
             return {
-                by: function (account) { return __awaiter(_this, void 0, void 0, function () {
-                    var _senderAddress, _a;
-                    var _b;
-                    return __generator(this, function (_c) {
-                        switch (_c.label) {
-                            case 0:
-                                _a = senderAddress;
-                                if (_a) return [3 /*break*/, 2];
-                                return [4 /*yield*/, account.wallet.getAccounts()];
-                            case 1:
-                                _a = ((_b = (_c.sent())[0]) === null || _b === void 0 ? void 0 : _b.address);
-                                _c.label = 2;
-                            case 2:
-                                _senderAddress = _a;
-                                if (!_senderAddress) {
-                                    throw Error('Unable to get sender address');
-                                }
-                                return [4 /*yield*/, account.signingClient.execute(_senderAddress, this.address, xmsg, fee)];
-                            case 3: return [2 /*return*/, _c.sent()];
-                        }
-                    });
-                }); },
+                by: function (account) {
+                    return executor(account, _this.address)(xmsg, senderAddress, fee);
+                },
             };
         };
         return Contract;
     }());
-    var getContracts = function (client, state) {
-        return mapValues(state, function (contractInfo) {
+    var getContracts = function (client, state, 
+    /* eslint-disable */
+    // @ts-ignore
+    sdk) {
+        return mapKV(state, function (contractName, contractInfo) {
             var addresses = contractInfo.addresses;
             var prefixLabel = function (label) { return "$".concat(label); };
-            var contracts = mapObject(addresses, prefixLabel, function (addr) { return new Contract(addr, client); });
+            var pascalContractName = _case.pascal(contractName);
+            var contractSdk = errorIfNotFound(sdk["".concat(pascalContractName, "Contract")], "\"".concat(pascalContractName, "Contract\" not found in sdk"));
+            var contractQueryClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "QueryClient")], "\"".concat(pascalContractName, "QueryClient\" not found in contract's sdk"));
+            var contractClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "Client")], "\"".concat(pascalContractName, "Client\" not found in contract's sdk"));
+            var contracts = mapObject(addresses, prefixLabel, 
+            // (addr: string) => ,
+            function (addr) { return (__assign(__assign(__assign({}, new Contract(addr, client)), new contractQueryClient(client, addr)), { signer: function (account) {
+                    return __assign(__assign({}, new contractClient(account.signingClient, account.address, addr)), { execute: executor(account, addr) });
+                } })); });
             if (typeof contracts['$default'] === 'object' && contracts['$default']) {
                 contracts = __assign(__assign({}, contracts), contracts['$default']);
                 Object.setPrototypeOf(contracts, Contract.prototype);
             }
-            return contracts;
+            return [contractName, contracts];
         });
+    };
+    var executor = function (account, contractAddress) {
+        return function (msg, senderAddress, fee) {
+            if (fee === void 0) { fee = 'auto'; }
+            return __awaiter(void 0, void 0, void 0, function () {
+                var _senderAddress, _a;
+                var _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            _a = senderAddress;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, account.wallet.getAccounts()];
+                        case 1:
+                            _a = ((_b = (_c.sent())[0]) === null || _b === void 0 ? void 0 : _b.address);
+                            _c.label = 2;
+                        case 2:
+                            _senderAddress = _a;
+                            if (!_senderAddress) {
+                                throw Error('Unable to get sender address');
+                            }
+                            return [4 /*yield*/, account.signingClient.execute(_senderAddress, contractAddress, msg, fee)];
+                        case 3: return [2 /*return*/, _c.sent()];
+                    }
+                });
+            });
+        };
+    };
+    var errorIfNotFound = function (object, msg) {
+        if (object === undefined) {
+            throw Error(msg);
+        }
+        else {
+            return object;
+        }
     };
 
     exports.Account = Account;

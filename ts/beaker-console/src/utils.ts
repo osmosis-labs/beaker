@@ -9,6 +9,12 @@ export const mapObject = (
 ): Record<string, unknown> =>
   Object.fromEntries(Object.entries(o).map(([k, v]) => [f(k), g(v)]));
 
+export const mapKV = (
+  o: Record<string, unknown>,
+  f: Function,
+): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(o).map(([k, v]) => f(k, v)));
+
 export const mapValues = (o: Record<string, unknown>, g: Function) =>
   mapObject(o, id, g);
 
