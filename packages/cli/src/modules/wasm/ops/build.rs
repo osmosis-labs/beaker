@@ -15,6 +15,25 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 
     let root_dir_str = root.to_str().unwrap();
 
+    let list_installed_target = Command::new("rustup")
+        .arg("target")
+        .arg("list")
+        .arg("--installed")
+        .output()?;
+    let installed_target = String::from_utf8(list_installed_target.stdout)?;
+
+    if !installed_target
+        .split('\n')
+        .any(|t| t == "wasm32-unknown-unknown")
+    {
+        Command::new("rustup")
+            .arg("target")
+            .arg("add")
+            .arg("wasm32-unknown-unknown")
+            .spawn()?
+            .wait()?;
+    };
+
     let _build = Command::new("cargo")
         .env("RUSTFLAGS", "-C link-arg=-s")
         .arg("build")
