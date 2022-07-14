@@ -166,7 +166,7 @@ Arguments:
 
 ### `beaker wasm instantiate`
 
-Instanitate .wasm stored on chain
+instantiate .wasm stored on chain
 
 Arguments:
 
@@ -208,7 +208,7 @@ Arguments:
 
 ### `beaker wasm migrate`
 
-Migrated instanitate contract to use other code stored on chain
+Migrated instantiate contract to use other code stored on chain
 
 Arguments:
 

@@ -173,7 +173,7 @@ beaker wasm store-code counter --signer-account test1 --no-wasm-opt
 
 # instantiate counter contract
 # with instantiate msg: '{ "count": 0 }'
-beaker wasm instanitate counter --signer-account test1 --raw '{ "count": 0 }'
+beaker wasm instantiate counter --signer-account test1 --raw '{ "count": 0 }'
 ```
 
 The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration.

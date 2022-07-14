@@ -125,7 +125,7 @@ pub enum WasmCmd {
         base_tx_args: BaseTxArgs,
     },
 
-    /// Instanitate .wasm stored on chain
+    /// instantiate .wasm stored on chain
     Instantiate {
         /// Name of the contract to instantiate
         contract_name: String,
@@ -158,7 +158,7 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
-    /// Migrated instanitate contract to use other code stored on chain
+    /// Migrated instantiate contract to use other code stored on chain
     Migrate {
         /// Name of the contract to instantiate
         contract_name: String,

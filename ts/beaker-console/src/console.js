@@ -104,7 +104,7 @@ async function run() {
     },
   });
 
-  r.defineCommand('instanitate', {
+  r.defineCommand('instantiate', {
     help: 'Instantiate contract without leaving console (use only for development)',
     async action(args) {
       await beakerCommand(this, 'beaker wasm instantiate', args);
