@@ -38,7 +38,15 @@ async function run() {
     conf.global.networks[network].rpc_endpoint,
   );
 
-  const sdk = require(path.join(root, 'ts', 'sdk'));
+  let sdk;
+  try {
+    sdk = require(path.join(root, 'ts', 'sdk'));
+  } catch (e) {
+    console.error(e);
+    throw Error(
+      'Unable to load sdk from `$ROOT/ts/sdk`, please try running `beaker wasm ts-gen <contract_name>.',
+    );
+  }
 
   const options = {
     prompt: chalk.green(
