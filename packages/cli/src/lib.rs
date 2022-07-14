@@ -2,13 +2,13 @@ mod framework;
 mod modules;
 mod support;
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use data_doc_derive::GetDataDocs;
 use modules::key::entrypoint::{KeyCmd, KeyModule};
 use serde::{Deserialize, Serialize};
-use std::process::Command;
+use support::node::run_npx;
 
 pub use framework::{config::GlobalConfig, Context, Module};
 pub use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
@@ -82,26 +82,15 @@ fn console(network: &str) -> Result<()> {
         "console": console_ctx.config()?
     });
 
-    let npx = Command::new("npx")
-        .arg("beaker-console")
-        .arg(console_ctx.root()?.as_os_str())
-        .arg(network)
-        .arg(serde_json::to_string(&conf)?)
-        .spawn();
-
-    match npx {
-        Ok(mut npx) => {
-            npx.wait()?;
-            Ok(())
-        }
-        Err(e) => {
-            if let std::io::ErrorKind::NotFound = e.kind() {
-                bail!("`npx`, which pre-bundled with npm >= 5.2.0, is required for console but not found. Please install `npm` or check your path.")
-            } else {
-                Err(e).with_context(|| "beaker-console error")
-            }
-        }
-    }
+    run_npx(
+        [
+            "beaker-console",
+            console_ctx.root()?.to_str().unwrap(),
+            network,
+            serde_json::to_string(&conf)?.as_str(),
+        ],
+        "beaker-console error",
+    )
 }
 
 context!(

@@ -2,6 +2,7 @@ use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::Proposal
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
 use crate::support::gas::Gas;
+use crate::support::node::run_npx;
 use anyhow::Result;
 use clap::Subcommand;
 use console::style;
@@ -540,46 +541,34 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
 
                 let src_path = sdk_path.join("src");
                 let contracts_path = src_path.join("contracts");
-                // TODO: extract npx to support
-                let npx = Command::new("npx")
-                    .arg("cosmwasm-typescript-gen")
-                    .arg("generate")
-                    .arg("--schema")
-                    .arg(
+
+                run_npx(
+                    [
+                        "cosmwasm-typescript-gen",
+                        "generate",
+                        "--schema",
                         schema_dir
                             .as_ref()
                             .map(|s| pwd.join(s))
                             .as_ref()
                             .unwrap_or({
                                 &root.join("contracts").join(contract_name).join("schema")
-                            }),
-                    )
-                    .arg("--out")
-                    .arg(
+                            })
+                            .to_str()
+                            .unwrap(),
+                        "--out",
                         out_dir
                             .as_ref()
                             .map(|o| pwd.join(o))
                             .as_ref()
-                            .unwrap_or(&contracts_path),
-                    )
-                    .arg("--name")
-                    .arg(contract_name)
-                    .spawn();
-
-                match npx {
-                    Ok(mut npx) => {
-                        npx.wait()?;
-                        Ok(())
-                    }
-                    Err(e) => {
-                        if let std::io::ErrorKind::NotFound = e.kind() {
-                            anyhow::bail!("`npx`, which pre-bundled with npm >= 5.2.0, is required for console but not found. Please install `npm` or check your path.")
-                        } else {
-                            use anyhow::Context as _;
-                            Err(e).with_context(|| "cosmwasm-typescript-gen error")
-                        }
-                    }
-                }?;
+                            .unwrap_or(&contracts_path)
+                            .to_str()
+                            .unwrap(),
+                        "--name",
+                        contract_name,
+                    ],
+                    "cosmwasm-typescript-gen error",
+                )?;
 
                 if out_dir.is_some() {
                     println!(
