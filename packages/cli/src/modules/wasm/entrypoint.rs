@@ -2,10 +2,41 @@ use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::Proposal
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
 use crate::support::gas::Gas;
+use crate::support::node::run_npx;
 use anyhow::Result;
 use clap::Subcommand;
+use console::style;
 use derive_new::new;
 use std::path::PathBuf;
+use std::process::Command;
+use std::str::FromStr;
+use std::{env, fs};
+
+#[derive(clap::ArgEnum, Clone, Debug)]
+pub enum NodePackageManager {
+    Npm,
+    Yarn,
+}
+impl FromStr for NodePackageManager {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "npm" => anyhow::Ok(Self::Npm),
+            "yarn" => anyhow::Ok(Self::Yarn),
+            _ => Err(anyhow::anyhow!("must be either `npm` or `yarn`")),
+        }
+    }
+}
+
+impl From<&NodePackageManager> for String {
+    fn from(n: &NodePackageManager) -> Self {
+        match n {
+            NodePackageManager::Npm => "npm".to_string(),
+            NodePackageManager::Yarn => "yarn".to_string(),
+        }
+    }
+}
 
 #[derive(Subcommand, Debug)]
 pub enum WasmCmd {
@@ -44,6 +75,26 @@ pub enum WasmCmd {
 
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
+    },
+    TsGen {
+        /// Name of the contract to store
+        contract_name: String,
+
+        /// Sschema generation command, default: `cargo run -p {contract_name} --example schema`
+        #[clap(long)]
+        schema_gen_cmd: Option<String>,
+
+        /// Directory of input schema for ts generation
+        #[clap(long)]
+        schema_dir: Option<PathBuf>,
+
+        /// Code output directory, ignore remaining ts build process if custom out_dir is specified
+        #[clap(long)]
+        out_dir: Option<PathBuf>,
+
+        /// Code output directory
+        #[clap(long, default_value = "yarn")]
+        node_package_manager: NodePackageManager,
     },
     /// Update admin that can migrate contract
     UpdateAdmin {
@@ -467,6 +518,94 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 Ok(())
             }
             WasmCmd::Proposal { cmd } => proposal::entrypoint::execute(ctx, cmd),
+            WasmCmd::TsGen {
+                contract_name,
+                schema_gen_cmd,
+                schema_dir,
+                out_dir,
+                node_package_manager,
+            } => {
+                let pwd = env::current_dir()?;
+                let root = ctx.root()?;
+                let sdk_path = root.join("ts/sdk");
+                env::set_current_dir(root.join("contracts").join(contract_name))?;
+                if let Some(gen) = schema_gen_cmd {
+                    let gen = gen.replace("{contract_name}", contract_name);
+                    let split = gen.split(' ').collect::<Vec<&str>>();
+                    let mut command = Command::new(split.first().unwrap());
+                    command.args(&split[1..]).spawn()?.wait()?;
+                } else {
+                    let mut cargo = Command::new("cargo");
+                    cargo.arg("schema").spawn()?.wait()?;
+                };
+
+                let src_path = sdk_path.join("src");
+                let contracts_path = src_path.join("contracts");
+
+                run_npx(
+                    [
+                        "cosmwasm-typescript-gen",
+                        "generate",
+                        "--schema",
+                        schema_dir
+                            .as_ref()
+                            .map(|s| pwd.join(s))
+                            .as_ref()
+                            .unwrap_or({
+                                &root.join("contracts").join(contract_name).join("schema")
+                            })
+                            .to_str()
+                            .unwrap(),
+                        "--out",
+                        out_dir
+                            .as_ref()
+                            .map(|o| pwd.join(o))
+                            .as_ref()
+                            .unwrap_or(&contracts_path)
+                            .to_str()
+                            .unwrap(),
+                        "--name",
+                        contract_name,
+                    ],
+                    "cosmwasm-typescript-gen error",
+                )?;
+
+                if out_dir.is_some() {
+                    println!(
+                        "    {} {}",
+                        style("WARNING:").yellow().bold(),
+                        style("`out_dir` is not the default location, skipping typescript bundle")
+                            .yellow()
+                    );
+                    return Ok(());
+                }
+
+                let exports = fs::read_dir(&contracts_path)?
+                    .filter_map(|d| {
+                        let path = d.unwrap().path();
+                        let stem = path.file_stem().unwrap().to_string_lossy();
+                        if stem == "index" {
+                            None
+                        } else {
+                            Some(format!("export * as {} from \"./{}\"", stem, stem))
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let warning = "// THIS FILE IS GENERATED BY BEAKER, DO NOT EDIT.";
+                fs::write(
+                    contracts_path.join("index.ts"),
+                    format!("{}\n\n{}", warning, exports),
+                )?;
+
+                env::set_current_dir(ctx.root()?.join("ts/sdk"))?;
+
+                let node_pkg = || Command::new(String::from(node_package_manager));
+                node_pkg().arg("install").spawn()?.wait()?;
+                node_pkg().arg("run").arg("build").spawn()?.wait()?;
+                Ok(())
+            }
         }
     }
 }

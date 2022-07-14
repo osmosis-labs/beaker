@@ -5,6 +5,7 @@
 const { CosmWasmClient } = require('cosmwasm');
 const { execSync } = require('child_process');
 const { getContracts, getAccounts, extendWith } = require('../dist');
+const { pascal } = require('case');
 
 const CONSOLE_HISTORY_FILE = '.beaker_console_history';
 
@@ -37,6 +38,16 @@ async function run() {
     conf.global.networks[network].rpc_endpoint,
   );
 
+  let sdk;
+  try {
+    sdk = require(path.join(root, 'ts', 'sdk'));
+  } catch (e) {
+    console.error(e);
+    throw Error(
+      'Unable to load sdk from `$ROOT/ts/sdk`, please try running `beaker wasm ts-gen <contract_name>.',
+    );
+  }
+
   const options = {
     prompt: chalk.green(
       `beaker[${chalk.italic[networkColor(network)](network)}] ◇ `,
@@ -48,11 +59,12 @@ async function run() {
   const initializeContext = async (ctx) => {
     const _state = state();
     const account = await getAccounts(conf, network);
-    const contract = getContracts(client, _state);
+    const contract = getContracts(client, _state, sdk);
     return extendWith({
       state: _state,
       conf,
       client,
+      sdk,
       ...(conf.console.account_namespace ? { account } : account),
       ...(conf.console.contract_namespace ? { contract } : contract),
     })(ctx);
@@ -115,3 +127,4 @@ async function run() {
 }
 
 run();
+// console.log('test linkkkkkkkkkkkkkkkkkkkkkkkkkerrr');

@@ -20,7 +20,7 @@ Arguments:
 
 * ` <contract-name>`Name of the contract to store
 
-* `--permit-only <permit-only>`: Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
 
 * `-p/--proposal <proposal>`: Path to proposal file, could be either yaml / toml format
 

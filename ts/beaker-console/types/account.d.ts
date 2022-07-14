@@ -21,7 +21,9 @@ declare type Config = {
 export declare class Account {
     signingClient: SigningCosmWasmClient;
     wallet: Secp256k1HdWallet;
-    constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient);
+    address: string;
+    constructor(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient, address: string);
+    static withDerivedAddress(wallet: Secp256k1HdWallet, signingClient: SigningCosmWasmClient): Promise<Account>;
     /**
      * Get balances for specific denom, only support native coin
      */

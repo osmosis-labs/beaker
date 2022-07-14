@@ -3,6 +3,7 @@ pub mod cosmos;
 pub mod future;
 pub mod gas;
 pub mod hooks;
+pub mod node;
 pub mod ops_response;
 pub mod permission;
 pub mod proto;

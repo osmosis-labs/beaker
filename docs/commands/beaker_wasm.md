@@ -58,7 +58,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
 
-* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
@@ -75,6 +75,26 @@ Arguments:
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
+### `beaker wasm ts-gen`
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`Name of the contract to store
+
+* `--schema-gen-cmd <schema-gen-cmd>`: Sschema generation command, default: `cargo run -p {contract_name} --example schema`
+
+* `--schema-dir <schema-dir>`: Directory of input schema for ts generation
+
+* `--out-dir <out-dir>`: Code output directory, ignore remaining ts build process if custom out_dir is specified
+
+* `--node-package-manager <node-package-manager>`: Code output directory (default: `yarn`)
 
 ---
 
@@ -240,7 +260,7 @@ Arguments:
 
 * `-r/--raw <raw>`: Raw json string to use as instantiate msg
 
-* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
 * `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
 
@@ -288,7 +308,7 @@ Arguments:
 
 * `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
 
-* `--permit-only <permit-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
 * `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
