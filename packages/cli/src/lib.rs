@@ -84,13 +84,24 @@ fn console(network: &str) -> Result<()> {
 
     run_npx(
         [
-            "beaker-console",
+            beaker_console().as_str(),
             console_ctx.root()?.to_str().unwrap(),
             network,
             serde_json::to_string(&conf)?.as_str(),
         ],
         "beaker-console error",
     )
+}
+
+#[cfg(debug_assertions)]
+fn beaker_console() -> String {
+    "beaker-console".to_string()
+}
+
+#[cfg(not(debug_assertions))]
+fn beaker_console() -> String {
+    let version = env!("CARGO_PKG_VERSION");
+    format!("beaker-console@{}", version)
 }
 
 context!(
