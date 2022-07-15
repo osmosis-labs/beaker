@@ -14,7 +14,6 @@
     <a href="https://deps.rs/repo/github/osmosis-labs/beaker"><img height="20" src="https://deps.rs/repo/github/osmosis-labs/beaker/status.svg"></a>
     <a href="https://crates.io/crates/beaker"><img height="20" src="https://img.shields.io/crates/v/beaker.svg"></a>
 </p>
-
 [Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
 
 ---
@@ -24,6 +23,7 @@
 ### Getting Started
 
 - [Installation](#installation)
+- [Prerequisites](#prerequisites)
 - [Scaffolding your new dapp project](#scaffolding-your-new-dapp-project)
   - [`frontend` and `contracts`](#frontend-and-contracts)
   - [`Cargo.toml`](#cargotoml)
@@ -46,6 +46,16 @@
 ## Getting Started
 
 This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./docs/commands/README.md).
+
+
+
+### Prerequisites
+
+- [Rust](https://www.rust-lang.org/tools/install) for building cosmwasm contract
+- [Docker](https://docs.docker.com/get-docker/) for running wasm `rust-optimizer` and spinning up [LocalOsmosis](https://github.com/osmosis-labs/localosmosis)
+- [Node](https://nodejs.org/en/) for frontend related stuffs and `beaker-console`
+
+
 
 ### Installation
 
