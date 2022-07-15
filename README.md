@@ -311,7 +311,7 @@ This will launch custom node repl, where `contract`, `account` are available.
 So you can interact with the recently deployed contract like this:
 
 ```js
-await contract.counter.execute({ increment: {} }).by(account.test1);
+await contract.counter.signer(account.test1).execute({ increment: {} });
 await contract.counter.query({ get_count: {} });
 ```
 
@@ -331,7 +331,7 @@ contract_namespace = false
 ```
 
 ```js
-await counter.execute({ increment: {} }).by(test1);
+await counter.signer(test1).execute({ increment: {} });
 await counter.query({ get_count: {} });
 ```
 

@@ -3,9 +3,9 @@
 /* eslint-disable */
 
 const { CosmWasmClient } = require('cosmwasm');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const { getContracts, getAccounts, extendWith } = require('../dist');
-const { pascal } = require('case');
+const prompts = require('prompts');
 
 const CONSOLE_HISTORY_FILE = '.beaker_console_history';
 
@@ -42,10 +42,26 @@ async function run() {
   try {
     sdk = require(path.join(root, 'ts', 'sdk'));
   } catch (e) {
-    console.error(e);
-    throw Error(
-      'Unable to load sdk from `$ROOT/ts/sdk`, please try running `beaker wasm ts-gen <contract_name>.',
-    );
+    const { gen } = await prompts([
+      {
+        type: 'confirm',
+        name: 'gen',
+        message:
+          "Project's Typescript SDK seems to be missing, would you like to generate?",
+        initial: true,
+      },
+    ]);
+
+    if (gen) {
+      const contracts = Object.keys(state());
+      contracts.forEach((c) => {
+        spawnSync('beaker', ['wasm', 'ts-gen', c], {
+          shell: true,
+          stdio: 'inherit',
+        });
+      });
+      sdk = require(path.join(root, 'ts', 'sdk'));
+    }
   }
 
   const options = {
