@@ -35,6 +35,7 @@
 - [Contract Upgrade](#contract-upgrade)
 - [Signers](#signers)
 - [Console](#console)
+- [Typescript SDK Generation](#typescript-sdk-generation)
 - [Frontend](#frontend)
 
 ### Reference
@@ -304,6 +305,14 @@ After deployed, you can play with the deployed contract using:
 beaker console
 ```
 
+It might prompt you like the following:
+
+```
+? Project's Typescript SDK seems to be missing, would you like to generate? 
+```
+
+Press `enter` to proceed for now, and we will discuss about it in detail in the [Typescript SDK Generation](#typescript-sdk-generation) section.
+
 This will launch custom node repl, where `contract`, `account` are available.
 `contract` contains deployed contract.
 `account` contains [pre-defined accounts in localosmosis](https://github.com/osmosis-labs/LocalOsmosis#accounts).
@@ -335,6 +344,21 @@ await counter.signer(test1).execute({ increment: {} });
 await counter.query({ get_count: {} });
 ```
 
+
+
+With the Typescript SDK which was previously mentioned, it is used to extend the `Contract` instance with method generated ftom execute and query messages. For example:
+
+```js
+await counter.getCount()
+
+sc = counter.signer(test1) // create signing client for `counter` with `test1`
+
+await sc.increment()
+await sc.getCount()
+```
+
+With this, it's more convenient than the previous interaction method since you can use tab completion for the methods as well.
+
 Beaker console is also allowed to deploy contract, so that you don't another terminal tab to do so.
 
 ```js
@@ -345,7 +369,101 @@ Beaker console is also allowed to deploy contract, so that you don't another ter
 
 `.help` to see all avaiable commands.
 
-Apart from that, in the console, you can access Beaker's state and configuration from `state` and `conf` variables accordingly.
+Apart from that, in the console, you can access Beaker's state, configuration and sdk from `state`, `conf` and `sdk` variables accordingly.
+
+
+
+### Typescript SDK Generation
+
+Beaker leverage [cosmwasm-typescript-gen](https://github.com/CosmWasm/cosmwasm-typescript-gen) to generate typescript client for cosmwasm contract. By default, Beaker's template prepare `ts/sdk` directory where typescript compiler and bundler are setup, so the generated client definition could be used by `beaker-console`, frontend or published as library for others to use.
+
+To generate sdk for contract, run
+
+```sh
+beaker wasm ts-gen counter # replace `counter` with any of contract name
+```
+
+With this a package is avaiable in `ts/sdk` with name `<project-name>-sdk` which can be used by any node / js / ts project.
+
+Let's try adding `multiply` method to our contract and see how this works.
+
+```rust
+// msg.rs
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ExecuteMsg {
+    Increment {},
+    Multiply { times: i32 }, // [1] add this enum variant
+    Reset { count: i32 },
+}
+```
+
+```rust
+// contract.rs
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn execute(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::Increment {} => try_increment(deps),
+        ExecuteMsg::Multiply { times } => try_multiply(deps, times), // [2] add this match arm
+        ExecuteMsg::Reset { count } => try_reset(deps, info, count),
+    }
+}
+
+// [3] add this function
+fn try_multiply(deps: DepsMut, times: i32) -> Result<Response, ContractError> {
+    STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
+        state.count *= times;
+        Ok(state)
+    })?;
+
+    Ok(Response::new().add_attribute("method", "try_multiply"))
+}
+```
+
+
+
+Then redeploy the contract:
+
+```sh
+beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
+```
+
+
+
+Then regenerate `counter`'s client
+
+```sh
+beaker wasm ts-gen counter
+```
+
+
+
+Now we can test it out in the `beaker console`
+
+```js
+sc = counter.signer(test1)
+
+await sc.increment()
+await sc.getCount()
+// => { count: 1 }
+
+await sc.multiply({ times: 2 })
+await sc.getCount()
+// => { count: 2 }
+
+await sc.multiply({ times: 10 })
+await sc.getCount()
+// => { count: 20 }
+```
+
+`sc` is an instance of `CounterContract` which you can find it in `ts/sdk/src/contracts/CounterContract.ts`.
 
 ### Frontend
 
