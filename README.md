@@ -348,7 +348,15 @@ Apart from that, in the console, you can access Beaker's state and configuration
 
 ### Frontend
 
-Beaker project template also come with frontend template.
+Beaker project template also come with frontend template. But in order to interact with it you need:
+
+- [Keplr installed](https://www.keplr.app/)
+- [Keplr chain setup for LocalOsmosis](https://github.com/osmosis-labs/LocalOsmosis/tree/main/localKeplr)
+- Add test account to Keplr
+  - [Add account via mnemonic in Keplr](https://help.keplr.app/getting-started/connecting-additional-accounts)
+  - [List of test accounts and its mnemonics in LocalOsmosis](https://github.com/osmosis-labs/LocalOsmosis#accounts)
+
+Now we are good to go! Let's dive in
 
 ```sh
 cd frontend
@@ -357,9 +365,9 @@ yarn && yarn dev
 
 Then open `http://localhost:3000/` in the browser.
 
-To interact, you need to [add LocalOsmosis to keplr](https://github.com/osmosis-labs/LocalOsmosis/tree/main/localKeplr).
-
 In frontend directory, you will see that `.beaker` is in here. It is actually symlinked to the one in the root so that frontend code can access beaker state.
+
+
 
 ---
 
