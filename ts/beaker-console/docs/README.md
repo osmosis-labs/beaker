@@ -45,7 +45,7 @@ beaker
 
 #### Defined in
 
-[src/utils.ts:15](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/utils.ts#L15)
+[src/utils.ts:21](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/utils.ts#L21)
 
 ___
 
@@ -66,13 +66,13 @@ ___
 
 #### Defined in
 
-[src/account.ts:75](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L75)
+[src/account.ts:92](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L92)
 
 ___
 
 ### getContracts
 
-▸ **getContracts**(`client`, `state`): `Record`<`string`, `unknown`\>
+▸ **getContracts**(`client`, `state`, `sdk`): `Record`<`string`, `unknown`\>
 
 #### Parameters
 
@@ -80,6 +80,7 @@ ___
 | :------ | :------ |
 | `client` | `CosmWasmClient` |
 | `state` | `Record`<`string`, `unknown`\> |
+| `sdk` | `Record`<`string`, `Record`<`string`, `Function`\>\> |
 
 #### Returns
 
@@ -87,4 +88,4 @@ ___
 
 #### Defined in
 
-[src/contract.ts:76](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/contract.ts#L76)
+[src/contract.ts:63](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/contract.ts#L63)

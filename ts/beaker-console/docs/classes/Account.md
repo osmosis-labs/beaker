@@ -2,8 +2,6 @@
 
 # Class: Account
 
-Account instance with baked-in client and utility methods
-
 ## Table of contents
 
 ### Constructors
@@ -12,18 +10,20 @@ Account instance with baked-in client and utility methods
 
 ### Properties
 
+- [address](Account.md#address)
 - [signingClient](Account.md#signingclient)
 - [wallet](Account.md#wallet)
 
 ### Methods
 
 - [getBalance](Account.md#getbalance)
+- [withDerivedAddress](Account.md#withderivedaddress)
 
 ## Constructors
 
 ### constructor
 
-• **new Account**(`wallet`, `signingClient`)
+• **new Account**(`wallet`, `signingClient`, `address`)
 
 #### Parameters
 
@@ -31,12 +31,23 @@ Account instance with baked-in client and utility methods
 | :------ | :------ |
 | `wallet` | `Secp256k1HdWallet` |
 | `signingClient` | `SigningCosmWasmClient` |
+| `address` | `string` |
 
 #### Defined in
 
-[src/account.ts:27](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L27)
+[src/account.ts:28](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L28)
 
 ## Properties
+
+### address
+
+• **address**: `string`
+
+#### Defined in
+
+[src/account.ts:26](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L26)
+
+___
 
 ### signingClient
 
@@ -44,7 +55,7 @@ Account instance with baked-in client and utility methods
 
 #### Defined in
 
-[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L24)
+[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L24)
 
 ___
 
@@ -54,15 +65,13 @@ ___
 
 #### Defined in
 
-[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L25)
+[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L25)
 
 ## Methods
 
 ### getBalance
 
 ▸ **getBalance**(`denom`): `Promise`<`Coin`\>
-
-Get balances for specific denom, only support native coin
 
 #### Parameters
 
@@ -76,4 +85,25 @@ Get balances for specific denom, only support native coin
 
 #### Defined in
 
-[src/account.ts:35](https://github.com/osmosis-labs/beaker/blob/c77da51/ts/beaker-console/src/account.ts#L35)
+[src/account.ts:52](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L52)
+
+___
+
+### withDerivedAddress
+
+▸ `Static` **withDerivedAddress**(`wallet`, `signingClient`): `Promise`<[`Account`](Account.md)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `wallet` | `Secp256k1HdWallet` |
+| `signingClient` | `SigningCosmWasmClient` |
+
+#### Returns
+
+`Promise`<[`Account`](Account.md)\>
+
+#### Defined in
+
+[src/account.ts:38](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L38)
