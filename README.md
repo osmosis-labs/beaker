@@ -155,7 +155,7 @@ template_repo = "https://github.com/osmosis-labs/cw-tpl-osmosis.git"
 
 ### Deploy contract on LocalOsmosis
 
-LocalOsmosis, as it's name suggest, is Osmosis for local development. In the upcoming release, Beaker will have more complete integration with LocalOsmosis, it has to be installed and run separately.
+LocalOsmosis, as it's name suggest, is Osmosis for local development. In the upcoming release, Beaker will have more complete integration with LocalOsmosis, it has to be installed and run separately. 
 
 You can install from source by following the instruction at [osmosis-labs/LocalOsmosis](https://github.com/osmosis-labs/LocalOsmosis), or use the official installer and select option 3:
 
@@ -190,12 +190,18 @@ beaker wasm instanitate counter --signer-account test1 --raw '{ "count": 0 }'
 
 The flag `--no-wasm-opt` is skipping [rust-optimizer](https://github.com/CosmWasm/rust-optimizer) for faster development iteration.
 
-For testnet/mainnet deployment, use:
+### Deploy contract on Testnet (Permissionless)
+
+For permissionless network deployments such as the Osmosis testnet, use:
 
 ```sh
-beaker wasm deploy counter --signer-account <ACCOUNT> --raw '{ "count": 0 }' --network testnet
-beaker wasm deploy counter --signer-account <ACCOUNT> --raw '{ "count": 0 }' --network mainnet
+beaker wasm deploy counter --signer-account test1 --raw '{ "count": 0 }' --network testnet
 ```
+
+### Deploy contract on permissioned networks with governance proposals
+
+There is a [step by step guide ](https://docs.osmosis.zone/developing/dapps/get_started/cosmwasm-testnet.html) for deploying contracts to testnet with governance proposals. 
+
 
 Instantiate message can be stored for later use:
 
