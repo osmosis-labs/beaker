@@ -1,5 +1,5 @@
 /*!
- * beaker-console v0.0.6
+ * beaker-console v0.0.7
  * (c) Supanat Potiwarakorn
  * Released under the MIT OR Apache-2.0 License.
  */

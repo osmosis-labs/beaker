@@ -35,7 +35,7 @@
 
 #### Defined in
 
-[src/account.ts:28](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L28)
+[src/account.ts:28](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L28)
 
 ## Properties
 
@@ -45,7 +45,7 @@
 
 #### Defined in
 
-[src/account.ts:26](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L26)
+[src/account.ts:26](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L26)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L24)
+[src/account.ts:24](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L24)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L25)
+[src/account.ts:25](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L25)
 
 ## Methods
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-[src/account.ts:52](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L52)
+[src/account.ts:52](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L52)
 
 ___
 
@@ -106,4 +106,4 @@ ___
 
 #### Defined in
 
-[src/account.ts:38](https://github.com/osmosis-labs/beaker/blob/213f82c/ts/beaker-console/src/account.ts#L38)
+[src/account.ts:38](https://github.com/osmosis-labs/beaker/blob/f40f408/ts/beaker-console/src/account.ts#L38)
