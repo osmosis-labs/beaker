@@ -39,7 +39,11 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let instantiate_permission =
         compute_instantiate_permission(permit_instantiate_only, client.signer_account_id())?;
 
-    let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
+    let wasm = read_wasm(
+        ctx.root()?,
+        contract_name.replace('-', "_").as_str(), // Handles file name mismatch
+        no_wasm_opt,
+    )?;
     let msg_store_code = MsgStoreCode {
         sender: client.signer_account_id(),
         wasm_byte_code: wasm,

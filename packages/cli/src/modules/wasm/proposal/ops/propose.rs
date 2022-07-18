@@ -40,7 +40,11 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     let client = Client::new(network_info.clone()).to_signing_client(signing_key, account_prefix);
 
-    let wasm = read_wasm(ctx.root()?, contract_name, no_wasm_opt)?;
+    let wasm = read_wasm(
+        ctx.root()?,
+        contract_name.replace('-', "_").as_str(), // Handles file name mismatch
+        no_wasm_opt,
+    )?;
     let instantiate_permission =
         compute_instantiate_permission(permit_instantiate_only, client.signer_account_id())?;
 
