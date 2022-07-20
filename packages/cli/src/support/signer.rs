@@ -18,7 +18,7 @@ pub struct SignerArgs {
     #[clap(long, group = SIGNER_GROUP)]
     pub signer_account: Option<String>,
 
-    /// Specifies private_key as a tx signer (base64 encoded string)
+    /// Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md).
     #[clap(long, group = SIGNER_GROUP)]
     pub signer_keyring: Option<String>,
 
