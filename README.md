@@ -54,8 +54,10 @@ This section is intended to give you an introduction to `Beaker`, for more detai
 ### Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install) for building cosmwasm contract
+    - [Rustup](https://rustup.rs/) for dealing with wasm target
 - [Docker](https://docs.docker.com/get-docker/) for running wasm `rust-optimizer` and spinning up [LocalOsmosis](https://github.com/osmosis-labs/localosmosis)
 - [Node](https://nodejs.org/en/) for frontend related stuffs and `beaker-console`
+  - [Yarn](https://yarnpkg.com/) over NPM, since it will not have package resolving issue and causes weird errors down the road
 
 
 
