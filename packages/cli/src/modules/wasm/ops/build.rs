@@ -1,6 +1,9 @@
-use crate::{framework::Context, modules::wasm::WasmConfig};
-use anyhow::Result;
 use std::{env, process::Command};
+
+use anyhow::Result;
+
+use crate::{framework::Context, modules::wasm::WasmConfig};
+use crate::support::command::run_command;
 
 pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
@@ -26,22 +29,18 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
         .split('\n')
         .any(|t| t == "wasm32-unknown-unknown")
     {
-        Command::new("rustup")
+        run_command(Command::new("rustup")
             .arg("target")
             .arg("add")
-            .arg("wasm32-unknown-unknown")
-            .spawn()?
-            .wait()?;
+            .arg("wasm32-unknown-unknown"))?;
     };
 
-    let _build = Command::new("cargo")
+    let _build = run_command(Command::new("cargo")
         .env("RUSTFLAGS", "-C link-arg=-s")
         .arg("build")
         .arg("--release")
         .arg("--target")
-        .arg("wasm32-unknown-unknown")
-        .spawn()?
-        .wait()?;
+        .arg("wasm32-unknown-unknown"))?;
 
     if !*no_wasm_opt {
         println!("Optimizing wasm...");
@@ -49,7 +48,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };
 
-        let _optim = Command::new("docker")
+        let _optim = run_command(Command::new("docker")
             .args(&[
                 "run",
                 "--rm",
@@ -60,9 +59,8 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
                 "--mount",
                 "type=volume,source=registry_cache,target=/usr/local/cargo/registry",
                 format!("cosmwasm/workspace-optimizer{arch_suffix}:{optimizer_version}").as_str(),
-            ])
-            .spawn()?
-            .wait()?;
+            ]))?;
+
     }
 
     Ok(())
