@@ -12,3 +12,4 @@ pub mod state;
 pub mod string;
 pub mod template;
 pub mod wasm;
+pub mod command;
