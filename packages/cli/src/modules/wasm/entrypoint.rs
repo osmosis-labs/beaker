@@ -1,6 +1,7 @@
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
+use crate::support::command::run_command;
 use crate::support::gas::Gas;
 use crate::support::node::run_npx;
 use anyhow::Result;
@@ -11,7 +12,6 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
 use std::{env, fs};
-use crate::support::command::run_command;
 
 #[derive(clap::ArgEnum, Clone, Debug)]
 pub enum NodePackageManager {

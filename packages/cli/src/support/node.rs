@@ -1,5 +1,5 @@
-use std::{ffi::OsStr, process::Command};
 use anyhow::bail;
+use std::{ffi::OsStr, process::Command};
 
 pub fn run_npx<I, S>(args: I, error_context: &str) -> Result<(), anyhow::Error>
 where

@@ -7,4 +7,3 @@ pub fn run_command(cmd: &mut std::process::Command) -> Result<(), anyhow::Error>
     }
     Ok(())
 }
-

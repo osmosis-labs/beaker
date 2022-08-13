@@ -1,4 +1,5 @@
 pub mod coin;
+pub mod command;
 pub mod cosmos;
 pub mod future;
 pub mod gas;
@@ -12,4 +13,3 @@ pub mod state;
 pub mod string;
 pub mod template;
 pub mod wasm;
-pub mod command;
