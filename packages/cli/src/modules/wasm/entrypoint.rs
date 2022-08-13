@@ -1,6 +1,7 @@
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 use crate::framework::{Context, Module};
+use crate::support::command::run_command;
 use crate::support::gas::Gas;
 use crate::support::node::run_npx;
 use anyhow::Result;
@@ -533,10 +534,10 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     let gen = gen.replace("{contract_name}", contract_name);
                     let split = gen.split(' ').collect::<Vec<&str>>();
                     let mut command = Command::new(split.first().unwrap());
-                    command.args(&split[1..]).spawn()?.wait()?;
+                    run_command(command.args(&split[1..]))?;
                 } else {
                     let mut cargo = Command::new("cargo");
-                    cargo.arg("schema").spawn()?.wait()?;
+                    run_command(cargo.arg("schema"))?;
                 };
 
                 let src_path = sdk_path.join("src");
@@ -602,8 +603,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 env::set_current_dir(ctx.root()?.join("ts/sdk"))?;
 
                 let node_pkg = || Command::new(String::from(node_package_manager));
-                node_pkg().arg("install").spawn()?.wait()?;
-                node_pkg().arg("run").arg("build").spawn()?.wait()?;
+                run_command(node_pkg().arg("install"))?;
+                run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
             }
         }

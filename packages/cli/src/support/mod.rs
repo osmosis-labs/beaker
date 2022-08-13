@@ -1,4 +1,5 @@
 pub mod coin;
+pub mod command;
 pub mod cosmos;
 pub mod future;
 pub mod gas;
