@@ -266,7 +266,7 @@ sdk) {
         var addresses = contractInfo.addresses;
         var prefixLabel = function (label) { return "$".concat(label); };
         var pascalContractName = _case.pascal(contractName);
-        var contractSdk = errorIfNotFound(sdk["".concat(pascalContractName, "Contract")], "\"".concat(pascalContractName, "Contract\" not found in sdk"));
+        var contractSdk = errorIfNotFound(sdk.contracts[pascalContractName], "\"".concat(pascalContractName, "\" not found in sdk"));
         var contractQueryClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "QueryClient")], "\"".concat(pascalContractName, "QueryClient\" not found in contract's sdk"));
         var contractClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "Client")], "\"".concat(pascalContractName, "Client\" not found in contract's sdk"));
         var contracts = mapObject(addresses, prefixLabel, 

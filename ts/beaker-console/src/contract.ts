@@ -65,7 +65,7 @@ export const getContracts = (
   state: Record<string, unknown>,
   /* eslint-disable */
   // @ts-ignore
-  sdk: Record<string, Record<string, Function>>,
+  sdk: { contracts: Record<string, Record<string, Function>> },
 ) => {
   return mapKV(
     state,
@@ -78,8 +78,8 @@ export const getContracts = (
 
       const pascalContractName = pascal(contractName);
       const contractSdk = errorIfNotFound(
-        sdk[`${pascalContractName}Contract`],
-        `"${pascalContractName}Contract" not found in sdk`,
+        sdk.contracts[pascalContractName],
+        `"${pascalContractName}" not found in sdk`,
       );
 
       const contractQueryClient = errorIfNotFound(

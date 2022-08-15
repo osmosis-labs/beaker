@@ -4,10 +4,11 @@ use crate::framework::{Context, Module};
 use crate::support::command::run_command;
 use crate::support::gas::Gas;
 use crate::support::node::run_npx;
-use anyhow::Result;
+use anyhow::{bail, Result};
 use clap::Subcommand;
 use console::style;
 use derive_new::new;
+use std::fmt::Formatter;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
@@ -18,6 +19,7 @@ pub enum NodePackageManager {
     Npm,
     Yarn,
 }
+
 impl FromStr for NodePackageManager {
     type Err = anyhow::Error;
 
@@ -36,6 +38,12 @@ impl From<&NodePackageManager> for String {
             NodePackageManager::Npm => "npm".to_string(),
             NodePackageManager::Yarn => "yarn".to_string(),
         }
+    }
+}
+
+impl std::fmt::Display for NodePackageManager {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(String::from(self).as_str())
     }
 }
 
@@ -574,8 +582,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
 
                 run_npx(
                     [
-                        "cosmwasm-typescript-gen",
+                        "--package=@cosmwasm/ts-codegen@0.11.1",
+                        "--",
+                        "cosmwasm-ts-codegen",
                         "generate",
+                        "--plugin",
+                        "client",
+                        "--bundle",
+                        "",
                         "--schema",
                         schema_dir
                             .as_ref()
@@ -597,7 +611,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                         "--name",
                         contract_name,
                     ],
-                    "cosmwasm-typescript-gen error",
+                    "cosmwasm-ts-codegen error",
                 )?;
 
                 if out_dir.is_some() {
@@ -632,6 +646,15 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 env::set_current_dir(ctx.root()?.join("ts/sdk"))?;
 
                 let node_pkg = || Command::new(String::from(node_package_manager));
+
+                let which_node_pkg_manager = run_command(
+                    Command::new("which".to_string()).arg::<String>(node_package_manager.into()),
+                );
+
+                if !which_node_pkg_manager.is_ok() {
+                    bail!("`{}` is required but missing, please install, or if you intended to use another package manager eg. `npm`, please specify different package manager via `--node-package-manager` flag", node_package_manager);
+                };
+
                 run_command(node_pkg().arg("install"))?;
                 run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
