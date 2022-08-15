@@ -22,7 +22,7 @@
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false, // temp fix for current ts-codegen version that does not optimize imports
     "noUnusedParameters": true,
     "strict": true,
 
