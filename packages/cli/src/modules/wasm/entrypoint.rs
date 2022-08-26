@@ -268,6 +268,19 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+    /// Query contract state
+    Query {
+        contract_name: String,
+
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        #[clap(short, long)]
+        raw: Option<String>,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
 }
 
 #[derive(new)]
@@ -654,6 +667,16 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     },
                     signer_args.private_key(&ctx.global_config()?)?,
                 )?;
+                Ok(())
+            }
+            WasmCmd::Query {
+                contract_name,
+                label,
+                raw,
+                base_tx_args,
+            } => {
+                let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
+                ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)?;
                 Ok(())
             }
         }

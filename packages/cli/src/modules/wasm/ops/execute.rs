@@ -7,9 +7,9 @@ use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
+use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
-use anyhow::anyhow;
 use cosmrs::cosmwasm::MsgExecuteContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
@@ -63,9 +63,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                     .join("execute-msgs")
                     .join(format!("{label}.json"));
                 fs::read_to_string(&path)
-                    .with_context(|| {
-                        format!("Unable to execute with `{}`", path.to_string_lossy())
-                    })
+                    .with_context(|| format!("Unable to execute with `{}`", path.to_string_lossy()))
                     .map(|s| s.as_bytes().to_vec())
             })?,
         funds: funds.into(),
@@ -80,12 +78,9 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 timeout_height,
             )
             .await?;
-        
 
-        let contract_address = response
-            .pick("execute", "_contract_address")
-            .to_string();
-            
+        let contract_address = response.pick("execute", "_contract_address").to_string();
+
         let execute_response = ExecuteResponse {
             contract_address,
             label: label.to_string(),
