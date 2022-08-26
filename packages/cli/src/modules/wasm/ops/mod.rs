@@ -7,6 +7,7 @@ pub mod new;
 pub mod store_code;
 pub mod update_admin;
 pub mod upgrade;
+pub mod execute;
 
 pub use build::build;
 pub use clear_admin::clear_admin;
@@ -17,3 +18,4 @@ pub use new::new;
 pub use store_code::store_code;
 pub use update_admin::update_admin;
 pub use upgrade::upgrade;
+pub use execute::execute;

@@ -252,6 +252,22 @@ pub enum WasmCmd {
         #[clap(subcommand)]
         cmd: ProposalCmd,
     },
+    /// Execute contract messages
+    Execute {
+        contract_name: String,
+
+        #[clap(short, long, default_value = "default")]
+        label: String,
+
+        #[clap(short, long)]
+        raw: Option<String>,
+
+        #[clap(short, long)]
+        funds: Option<String>,
+
+        #[clap(flatten)]
+        base_tx_args: BaseTxArgs,
+    },
 }
 
 #[derive(new)]
@@ -605,6 +621,39 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 let node_pkg = || Command::new(String::from(node_package_manager));
                 run_command(node_pkg().arg("install"))?;
                 run_command(node_pkg().arg("run").arg("build"))?;
+                Ok(())
+            }
+            WasmCmd::Execute {
+                contract_name,
+                label,
+                raw,
+                funds,
+                base_tx_args,
+            } => {
+                let BaseTxArgs {
+                    network,
+                    signer_args,
+                    gas_args,
+                    timeout_height,
+                }: &BaseTxArgs = base_tx_args;
+                ops::execute(
+                    &ctx,
+                    contract_name,
+                    label.as_str(),
+                    raw.as_ref(),
+                    funds.as_ref().map(|s| s.as_str()).try_into()?,
+                    network,
+                    timeout_height,
+                    {
+                        let global_conf = ctx.global_config()?;
+                        &Gas::from_args(
+                            gas_args,
+                            global_conf.gas_price(),
+                            global_conf.gas_adjustment(),
+                        )?
+                    },
+                    signer_args.private_key(&ctx.global_config()?)?,
+                )?;
                 Ok(())
             }
         }
