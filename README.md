@@ -290,6 +290,20 @@ beaker wasm upgrade counter --signer-account test1 --no-wasm-opt
 
 You can find more information about their options [here](./docs/commands/beaker_wasm.md).
 
+### Execute Contract Messages
+
+Contract messages can be executed using the `beaker wasm execute` subcommand. For example:
+```sh
+beaker wasm execute counter --raw '{ "increment": {} }' --signer-account test1
+```
+
+### Query Contract State
+You can query contract state by submitting query messages with the `beaker wasm query` command. For example:
+```sh
+beaker wasm query counter --raw '{"get_count": {}}'
+```
+
+
 ### Signers
 
 Whenever you run command that requires signing transactions, there are 3 options you can reference your private keys:

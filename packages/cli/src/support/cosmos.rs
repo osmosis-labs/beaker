@@ -102,6 +102,26 @@ impl Client {
             .map_err(|e: cosmrs::ErrorReport| anyhow!(e))
     }
 
+    pub async fn query_smart(&self, address: String, query_data: Vec<u8>) -> Result<Vec<u8>> {
+        use cosmos_sdk_proto::cosmwasm::wasm::v1::*;
+        let grpc_endpoint = self.network.grpc_endpoint();
+
+        let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
+            .await
+            .context(format!("Unable to connect to {grpc_endpoint}"))?;
+
+        let res = c
+            .smart_contract_state(QuerySmartContractStateRequest {
+                address,
+                query_data,
+            })
+            .await?
+            .into_inner()
+            .data;
+
+        Ok(res)
+    }
+
     pub async fn proposal(&self, proposal_id: &u64) -> Result<Proposal> {
         use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
