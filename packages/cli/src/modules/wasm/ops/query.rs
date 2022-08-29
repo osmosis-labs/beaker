@@ -54,11 +54,15 @@ pub fn query<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client.query_smart(contract.to_string(), query_msg).await?;
+        let pretty_json_response = serde_json::to_string_pretty(
+            &serde_json::from_slice::<serde_json::Value>(&response)
+                .with_context(|| "Unable to deserialize response")?,
+        )?;
 
         let query_response = QueryResponse {
             label: label.to_string(),
             contract_address: contract.to_string(),
-            data: String::from_utf8_lossy(&response).to_string(),
+            data: format!("\n{}", textwrap::indent(&pretty_json_response, "        ")),
         };
 
         query_response.log();
