@@ -68,7 +68,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -122,7 +122,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -154,7 +154,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -196,7 +196,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -234,7 +234,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -278,7 +278,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -318,7 +318,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -337,3 +337,73 @@ Arguments:
 * `--help`: Print help information
 
 * `--version`: Print version information
+
+---
+
+### `beaker wasm execute`
+
+Execute contract messages
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`
+
+* `-l/--label <label>` (default: `default`)
+
+* `-r/--raw <raw>`
+
+* `-f/--funds <funds>`
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+---
+
+### `beaker wasm query`
+
+Query contract state
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
+
+* ` <contract-name>`
+
+* `-l/--label <label>` (default: `default`)
+
+* `-r/--raw <raw>`
+
+* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+
+* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+
+* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+
+* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+
+* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+
+* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
+
+* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)

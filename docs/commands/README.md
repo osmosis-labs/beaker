@@ -2,7 +2,7 @@
 
 CosmWasm development tooling
 
-Version: 0.0.6
+Version: 0.0.8
 
 Arguments:
 
