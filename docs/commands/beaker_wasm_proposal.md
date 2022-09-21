@@ -44,7 +44,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 
@@ -76,7 +76,7 @@ Arguments:
 
 * `--signer-account <signer-account>`: Specifies predefined account as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Specifies private_key as a tx signer (base64 encoded string)
+* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
 * `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
 

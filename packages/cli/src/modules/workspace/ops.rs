@@ -31,16 +31,18 @@ pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(
     })?;
 
     let frontend_dir = root_dir.join("frontend");
-    fs::rename(
-        frontend_dir.join(".env.local.example"),
-        frontend_dir.join(".env.local"),
-    )
-    .with_context(|| "Unable to rename `.env.local.example` to `.env.local`")?;
 
-    // symlink .beaker to frontend
-    std::env::set_current_dir(root_dir.join("frontend"))?;
-    std::os::unix::fs::symlink("../.beaker", ".beaker")
+    if frontend_dir.exists() {
+        fs::rename(
+            frontend_dir.join(".env.local.example"),
+            frontend_dir.join(".env.local"),
+        )
+        .with_context(|| "Unable to rename `.env.local.example` to `.env.local`")?;
+
+        // symlink .beaker to frontend
+        std::env::set_current_dir(root_dir.join("frontend"))?;
+        std::os::unix::fs::symlink("../.beaker", ".beaker")
         .with_context(|| "Currently not support symbolic link on non-unix system, if you are on windows, please consider using wsl.")?;
-
+    }
     Ok(())
 }
