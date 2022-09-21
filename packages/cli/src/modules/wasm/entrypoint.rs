@@ -785,6 +785,16 @@ mod tests {
         temp.child("contracts/counter-2")
             .assert(predicate::path::missing());
 
+        struct WasmContext {}
+        impl<'a> Context<'a, WasmConfig> for WasmContext {
+            fn config(&self) -> Result<WasmConfig> {
+                Ok(WasmConfig {
+                    template_repo: "https://github.com/CosmWasm/cw-template.git".to_string(),
+                    ..Default::default()
+                })
+            }
+        }
+
         WasmModule::execute(
             WasmContext {},
             &WasmCmd::New {
