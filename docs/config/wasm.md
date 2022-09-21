@@ -35,6 +35,6 @@
 ```toml
 [wasm]
 contract_dir = 'contracts'
-template_repo = 'https://github.com/InterWasm/cw-template.git'
-optimizer_version = '0.12.6'
+template_repo = 'https://github.com/osmosis-labs/cw-minimal-template'
+optimizer_version = '0.12.8'
 ```
