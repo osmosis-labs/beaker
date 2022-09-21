@@ -37,10 +37,11 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
         )?;
     };
 
-    let _build = run_command(
+    run_command(
         Command::new("cargo")
             .env("RUSTFLAGS", "-C link-arg=-s")
             .arg("build")
+            .arg("--lib")
             .arg("--release")
             .arg("--target")
             .arg("wasm32-unknown-unknown"),
@@ -52,7 +53,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };
 
-        let _optim = run_command(Command::new("docker").args(&[
+        run_command(Command::new("docker").args(&[
             "run",
             "--rm",
             "-v",
