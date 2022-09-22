@@ -49,17 +49,13 @@
 
 This section is intended to give you an introduction to `Beaker`, for more detailed reference, you can find them [here](./docs/commands/README.md).
 
-
-
 ### Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install) for building cosmwasm contract
-    - [Rustup](https://rustup.rs/) for dealing with wasm target
+  - [Rustup](https://rustup.rs/) for dealing with wasm target
 - [Docker](https://docs.docker.com/get-docker/) for running wasm `rust-optimizer` and spinning up [LocalOsmosis](https://github.com/osmosis-labs/localosmosis)
 - [Node](https://nodejs.org/en/) for frontend related stuffs and `beaker-console`
   - [Yarn](https://yarnpkg.com/) over NPM, since it will not have package resolving issue and causes weird errors down the road
-
-
 
 ### Installation
 
@@ -79,6 +75,15 @@ In the directory you want your project to reside, run:
 beaker new counter-dapp
 ```
 
+This gives you 2 template options to choose from.
+For the sake of this tutorial, let's use `counter-example` but you might want to use `minimal` option in your real work since it has zero assumption about your dapp logic or frontend.
+
+```
+? 🤷   Which starting template would you like to use? ›
+  minimal
+❯ counter-example
+```
+
 This will generate new directory called `counter-dapp` which, by default, come from [this template](https://github.com/osmosis-labs/beaker/tree/main/templates/project).
 
 So what's in the template? Let's have a look...
@@ -93,9 +98,19 @@ So what's in the template? Let's have a look...
 └── .beaker
 ```
 
-#### `frontend` and `contracts`
+#### `frontend`
 
-These should be self explanatory, it's where frontend and contracts are stored. And as you might be able to guess from the name, one project can contain multiple contracts.
+This should be self explanatory, it's where frontend and contracts are stored.
+
+With `counter-example` template, it demonstrate how frontend app can access deployed code/contract's info through [`.beaker`](#beaker-1). It does so by symlinking `.beaker` into frontend directory, and since states in `.beaker` are in json format, javascript code can just import them.
+
+With `minimal` template, this directory does not exist, which means it does not assume your frontend choice. In that case, you might want to checkout [create-cosmos-app](https://github.com/cosmology-tech/create-cosmos-app) for scaffolding your frontend or just create one from scratch.
+
+#### `contracts`
+
+This is where smart contracts are stored. Single workspace can contain multiple contracts.
+
+With `counter-example` template, this should have `counter` contract pregenerated.
 
 #### `Cargo.toml`
 
@@ -135,16 +150,20 @@ And I don't think we have to explain about `.gitignore` don't we?
 
 ---
 
-### Your first CosmWasm contract with Beaker
+### Scaffolding new CosmWasm contract
 
-After that we can create new contract (the command uses template from [cw-template](https://github.com/InterWasm/cw-template))
+We can scaffold new contract using the following command:
 
 ```sh
 cd counter-dapp
-beaker wasm new counter
+beaker wasm new <contract_name>
 ```
 
-Now your new contract will be avaiable on `contracts/counter`.
+Default template is from [osmosis-labs/cw-minimal-template](https://github.com/osmosis-labs/cw-minimal-template)
+
+The `cw-minimal-template` has no logic in it unlike `cw-template`, only the skeleton is provided, which makes it ideal to start writing new contract.
+
+Now your new contract will be avaiable on `contracts/multiplier`.
 
 If you want to use other contract template, you can change the configuration, for example:
 
@@ -152,20 +171,31 @@ If you want to use other contract template, you can change the configuration, fo
 # Beaker.toml
 
 [wasm]
-template_repo = "https://github.com/osmosis-labs/cw-tpl-osmosis.git"
+template_repo = "https://github.com/CosmWasm/cw-template"
 ```
+
+This step is not required for the rest of the guide since `counter` contract is already in place, but you can just try it out.
 
 ### Deploy contract on LocalOsmosis
 
 LocalOsmosis, as it's name suggest, is Osmosis for local development. In the upcoming release, Beaker will have more complete integration with LocalOsmosis, it has to be installed and run separately.
 
-You can install from source by following the instruction at [osmosis-labs/LocalOsmosis](https://github.com/osmosis-labs/LocalOsmosis), or use the official installer and select option 3:
+You can use the osmosis installer and select option 3:
 
 ```sh
 curl -sL https://get.osmosis.zone/install > i.py && python3 i.py
 ```
 
-After that, `counter` contract can be deployed (build + store-code + instantiate) using the following command:
+Or if you want to use a specific / modified version of LocalOsmosis, you can build from source by
+
+```sh
+git clone https://github.com/osmosis-labs/osmosis.git
+
+make localnet-build # build docker image
+make localnet-start # docker-compose up
+```
+
+Now, with LocalOsmosis up and running, `counter` contract can be deployed (build + store-code + instantiate) using the following command:
 
 ```sh
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
@@ -293,16 +323,18 @@ You can find more information about their options [here](./docs/commands/beaker_
 ### Execute Contract Messages
 
 Contract messages can be executed using the `beaker wasm execute` subcommand. For example:
+
 ```sh
 beaker wasm execute counter --raw '{ "increment": {} }' --signer-account test1
 ```
 
 ### Query Contract State
+
 You can query contract state by submitting query messages with the `beaker wasm query` command. For example:
+
 ```sh
 beaker wasm query counter --raw '{"get_count": {}}'
 ```
-
 
 ### Signers
 
@@ -324,7 +356,7 @@ beaker console
 It might prompt you like the following:
 
 ```
-? Project's Typescript SDK seems to be missing, would you like to generate? 
+? Project's Typescript SDK seems to be missing, would you like to generate?
 ```
 
 Press `enter` to proceed for now, and we will discuss about it in detail in the [Typescript SDK Generation](#typescript-sdk-generation) section.
@@ -360,17 +392,15 @@ await counter.signer(test1).execute({ increment: {} });
 await counter.query({ get_count: {} });
 ```
 
-
-
 With the Typescript SDK which was previously mentioned, it is used to extend the `Contract` instance with method generated ftom execute and query messages. For example:
 
 ```js
-await counter.getCount()
+await counter.getCount();
 
-sc = counter.signer(test1) // create signing client for `counter` with `test1`
+sc = counter.signer(test1); // create signing client for `counter` with `test1`
 
-await sc.increment()
-await sc.getCount()
+await sc.increment();
+await sc.getCount();
 ```
 
 With this, it's more convenient than the previous interaction method since you can use tab completion for the methods as well.
@@ -387,11 +417,9 @@ Beaker console is also allowed to deploy contract, so that you don't another ter
 
 Apart from that, in the console, you can access Beaker's state, configuration and sdk from `state`, `conf` and `sdk` variables accordingly.
 
-
-
 ### Typescript SDK Generation
 
-Beaker leverage [cosmwasm-typescript-gen](https://github.com/CosmWasm/cosmwasm-typescript-gen) to generate typescript client for cosmwasm contract. By default, Beaker's template prepare `ts/sdk` directory where typescript compiler and bundler are setup, so the generated client definition could be used by `beaker-console`, frontend or published as library for others to use.
+Beaker leverage [ts-codegen](https://github.com/CosmWasm/ts-codegen) to generate typescript client for cosmwasm contract. By default, Beaker's template prepare `ts/sdk` directory where typescript compiler and bundler are setup, so the generated client definition could be used by `beaker-console`, frontend or published as library for others to use.
 
 To generate sdk for contract, run
 
@@ -400,6 +428,8 @@ beaker wasm ts-gen counter # replace `counter` with any of contract name
 ```
 
 With this a package is avaiable in `ts/sdk` with name `<project-name>-sdk` which can be used by any node / js / ts project.
+
+The underlying code that actually calls `ts-codegen` with configuration is located in `ts/sdk/scripts/codegen.js`.
 
 Let's try adding `multiply` method to our contract and see how this works.
 
@@ -443,15 +473,11 @@ fn try_multiply(deps: DepsMut, times: i32) -> Result<Response, ContractError> {
 }
 ```
 
-
-
 Then redeploy the contract:
 
 ```sh
 beaker wasm deploy counter --signer-account test1 --no-wasm-opt --raw '{ "count": 0 }'
 ```
-
-
 
 Then regenerate `counter`'s client
 
@@ -459,23 +485,21 @@ Then regenerate `counter`'s client
 beaker wasm ts-gen counter
 ```
 
-
-
 Now we can test it out in the `beaker console`
 
 ```js
-sc = counter.signer(test1)
+sc = counter.signer(test1);
 
-await sc.increment()
-await sc.getCount()
+await sc.increment();
+await sc.getCount();
 // => { count: 1 }
 
-await sc.multiply({ times: 2 })
-await sc.getCount()
+await sc.multiply({ times: 2 });
+await sc.getCount();
 // => { count: 2 }
 
-await sc.multiply({ times: 10 })
-await sc.getCount()
+await sc.multiply({ times: 10 });
+await sc.getCount();
 // => { count: 20 }
 ```
 
@@ -502,8 +526,6 @@ yarn && yarn dev
 Then open `http://localhost:3000/` in the browser.
 
 In frontend directory, you will see that `.beaker` is in here. It is actually symlinked to the one in the root so that frontend code can access beaker state.
-
-
 
 ---
 
