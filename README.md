@@ -42,6 +42,7 @@
 
 - [Command](./docs/commands)
 - [Config](./docs/config)
+- [Migration](./MIGRATION.md)
 
 ---
 
