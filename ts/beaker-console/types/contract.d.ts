@@ -29,6 +29,8 @@ export declare class Contract {
         by: (account: Account) => Promise<import("cosmwasm").ExecuteResult>;
     };
 }
-export declare const getContracts: (client: CosmWasmClient, state: Record<string, unknown>, sdk: Record<string, Record<string, Function>>) => Record<string, unknown>;
+export declare const getContracts: (client: CosmWasmClient, state: Record<string, unknown>, sdk: {
+    contracts: Record<string, Record<string, Function>>;
+}) => Record<string, unknown>;
 export {};
 //# sourceMappingURL=contract.d.ts.map

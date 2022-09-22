@@ -27,10 +27,10 @@
     "strict": true,
 
     // Type-checking settings.
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "DOM"],
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "types": ["jest"]
+    "types": ["jest", "node"]
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
 

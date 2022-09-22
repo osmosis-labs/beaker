@@ -38,7 +38,7 @@ async function run() {
     conf.global.networks[network].rpc_endpoint,
   );
 
-  let sdk;
+  let sdk = { contracts: {} };
   try {
     sdk = require(path.join(root, 'ts', 'sdk'));
   } catch (e) {
@@ -53,14 +53,18 @@ async function run() {
     ]);
 
     if (gen) {
-      const contracts = Object.keys(state());
+      const contracts = fs.readdirSync(path.join(root, 'contracts'));
+
       contracts.forEach((c) => {
         spawnSync('beaker', ['wasm', 'ts-gen', c], {
           shell: true,
           stdio: 'inherit',
         });
       });
-      sdk = require(path.join(root, 'ts', 'sdk'));
+
+      if (contracts.length > 0) {
+        sdk = require(path.join(root, 'ts', 'sdk'));
+      }
     }
   }
 
@@ -120,7 +124,7 @@ async function run() {
     },
   });
 
-  r.defineCommand('instanitate', {
+  r.defineCommand('instantiate', {
     help: 'Instantiate contract without leaving console (use only for development)',
     async action(args) {
       await beakerCommand(this, 'beaker wasm instantiate', args);
@@ -143,4 +147,3 @@ async function run() {
 }
 
 run();
-// console.log('test linkkkkkkkkkkkkkkkkkkkkkkkkkerrr');
