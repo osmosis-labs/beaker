@@ -1,3 +1,6 @@
+#![allow(rustdoc::invalid_rust_codeblocks)]
+#![doc = include_str!("../../../README.md") ]
+
 mod framework;
 mod modules;
 mod support;

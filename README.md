@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://docs.osmosis.zone/developing/dapps/get_started/">
-    <img src="assets/beaker.png" alt="Beaker logo" title="Beaker" align="center" height="150" />
+    <img src="https://github.com/osmosis-labs/beaker/blob/main/assets/beaker.png?raw=true" alt="Beaker logo" title="Beaker" align="center" height="150" />
 </a>
 </p>
 
