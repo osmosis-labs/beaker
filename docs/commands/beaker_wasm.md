@@ -88,9 +88,7 @@ Arguments:
 
 * ` <contract-name>`Name of the contract to store
 
-* `--schema-gen-cmd <schema-gen-cmd>`: Sschema generation command, default: `cargo run -p {contract_name} --example schema`
-
-* `--schema-dir <schema-dir>`: Directory of input schema for ts generation
+* `--schema-gen-cmd <schema-gen-cmd>`: Sschema generation command, default: `cargo schema`
 
 * `--out-dir <out-dir>`: Code output directory, ignore remaining ts build process if custom out_dir is specified
 
