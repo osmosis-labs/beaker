@@ -263,12 +263,14 @@ sdk) {
         var prefixLabel = function (label) { return "$".concat(label); };
         var pascalContractName = pascal(contractName);
         var contractSdk = errorIfNotFound(sdk.contracts[pascalContractName], "\"".concat(pascalContractName, "\" not found in sdk"));
-        var contractQueryClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "QueryClient")], "\"".concat(pascalContractName, "QueryClient\" not found in contract's sdk"));
-        var contractClient = errorIfNotFound(contractSdk["".concat(pascalContractName, "Client")], "\"".concat(pascalContractName, "Client\" not found in contract's sdk"));
+        var contractQueryClient = warnIfNotFound(contractSdk["".concat(pascalContractName, "QueryClient")], "\"".concat(pascalContractName, "QueryClient\" not found in \"").concat(contractName, "\" contract's sdk. This may caused by empty QueryMsg variant."));
+        var contractClient = warnIfNotFound(contractSdk["".concat(pascalContractName, "Client")], "\"".concat(pascalContractName, "Client\" not found in \"").concat(contractName, "\" contract's sdk. This may caused by empty ExecuteMsg variant."), true);
         var contracts = mapObject(addresses, prefixLabel, 
         // (addr: string) => ,
-        function (addr) { return (__assign(__assign(__assign({}, new Contract(addr, client)), new contractQueryClient(client, addr)), { signer: function (account) {
-                return __assign(__assign({}, new contractClient(account.signingClient, account.address, addr)), { execute: executor(account, addr) });
+        function (addr) { return (__assign(__assign(__assign({}, new Contract(addr, client)), evalOrElse(contractQueryClient, function (cqc) { return new cqc(client, addr); }, {})), { signer: function (account) {
+                return __assign(__assign({}, evalOrElse(contractClient, function (cq) {
+                    return new cq(account.signingClient, account.address, addr);
+                }, {})), { execute: executor(account, addr) });
             } })); });
         if (typeof contracts['$default'] === 'object' && contracts['$default']) {
             contracts = __assign(__assign({}, contracts), contracts['$default']);
@@ -310,6 +312,31 @@ var errorIfNotFound = function (object, msg) {
     }
     else {
         return object;
+    }
+};
+var warnIfNotFound = function (object, msg, last) {
+    if (last === void 0) { last = false; }
+    if (object === undefined) {
+        process.stdout.clearLine(0, function () {
+            process.stdout.cursorTo(0, function () {
+                console.log('\u001B[33m[WARN] ' + msg);
+                if (last) {
+                    process.stdout.emit('resize'); // a hack to get prompt back after all warnings
+                }
+            });
+        });
+        return object;
+    }
+    else {
+        return object;
+    }
+};
+var evalOrElse = function (object, f, orElse) {
+    if (object !== undefined) {
+        return f(object);
+    }
+    else {
+        return orElse;
     }
 };
 

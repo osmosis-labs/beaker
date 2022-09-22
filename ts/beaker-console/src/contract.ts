@@ -82,14 +82,15 @@ export const getContracts = (
         `"${pascalContractName}" not found in sdk`,
       );
 
-      const contractQueryClient = errorIfNotFound(
+      const contractQueryClient = warnIfNotFound(
         contractSdk[`${pascalContractName}QueryClient`],
-        `"${pascalContractName}QueryClient" not found in contract's sdk`,
+        `"${pascalContractName}QueryClient" not found in "${contractName}" contract's sdk. This may caused by empty QueryMsg variant.`,
       );
 
-      const contractClient = errorIfNotFound(
+      const contractClient = warnIfNotFound(
         contractSdk[`${pascalContractName}Client`],
-        `"${pascalContractName}Client" not found in contract's sdk`,
+        `"${pascalContractName}Client" not found in "${contractName}" contract's sdk. This may caused by empty ExecuteMsg variant.`,
+        true,
       );
 
       let contracts = mapObject(
@@ -100,15 +101,20 @@ export const getContracts = (
           ...new Contract(addr, client),
           /* eslint-disable */
           // @ts-ignore
-          ...new contractQueryClient(client, addr),
+          ...evalOrElse(
+            contractQueryClient,
+            (cqc: any) => new cqc(client, addr),
+            {},
+          ),
           signer: (account: Account) => {
             return {
               /* eslint-disable */
               // @ts-ignore
-              ...new contractClient(
-                account.signingClient,
-                account.address,
-                addr,
+              ...evalOrElse(
+                contractClient,
+                (cq: any) =>
+                  new cq(account.signingClient, account.address, addr),
+                {},
               ),
               execute: executor(account, addr),
             };
@@ -156,5 +162,38 @@ const errorIfNotFound = <T>(object: T | undefined, msg: string) => {
     throw Error(msg);
   } else {
     return object;
+  }
+};
+
+const warnIfNotFound = <T>(
+  object: T | undefined,
+  msg: string,
+  last: boolean = false,
+) => {
+  if (object === undefined) {
+    process.stdout.clearLine(0, () => {
+      process.stdout.cursorTo(0, () => {
+        console.log('\u001B[33m[WARN] ' + msg);
+
+        if (last) {
+          process.stdout.emit('resize'); // a hack to get prompt back after all warnings
+        }
+      });
+    });
+    return object;
+  } else {
+    return object;
+  }
+};
+
+const evalOrElse = <T, U>(
+  object: T | undefined,
+  f: (object: T) => U,
+  orElse: U,
+) => {
+  if (object !== undefined) {
+    return f(object);
+  } else {
+    return orElse;
   }
 };
