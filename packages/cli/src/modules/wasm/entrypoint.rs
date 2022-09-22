@@ -592,15 +592,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
 
                 let node_pkg = || Command::new(String::from(node_package_manager));
 
-                let which_node_pkg_manager = run_command(
-                    Command::new("which".to_string()).arg::<String>(node_package_manager.into()),
-                );
+                let which_node_pkg_manager =
+                    run_command(Command::new("which").arg::<String>(node_package_manager.into()));
 
-                if !which_node_pkg_manager.is_ok() {
+                if which_node_pkg_manager.is_err() {
                     bail!("`{}` is required but missing, please install, or if you intended to use another package manager eg. `npm`, please specify different package manager via `--node-package-manager` flag", node_package_manager);
                 };
 
-                run_command(node_pkg().arg("run").arg("codegen"))?;
+                run_command(node_pkg().arg("run").arg("codegen"))?; // TODO: pass schema dir here
                 run_command(node_pkg().arg("install"))?;
                 run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
