@@ -1,5 +1,5 @@
 [package]
-description = "CosmWasm development tooling"
+description = "CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain."
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "beaker"
