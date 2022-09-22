@@ -53,7 +53,7 @@ async function run() {
     ]);
 
     if (gen) {
-      const contracts = Object.keys(state());
+      const contracts = fs.readdirSync(path.join(root, 'contracts'));
 
       contracts.forEach((c) => {
         spawnSync('beaker', ['wasm', 'ts-gen', c], {
