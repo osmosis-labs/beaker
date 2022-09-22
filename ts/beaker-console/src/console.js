@@ -38,7 +38,7 @@ async function run() {
     conf.global.networks[network].rpc_endpoint,
   );
 
-  let sdk;
+  let sdk = { contracts: {} };
   try {
     sdk = require(path.join(root, 'ts', 'sdk'));
   } catch (e) {
@@ -54,13 +54,17 @@ async function run() {
 
     if (gen) {
       const contracts = Object.keys(state());
+
       contracts.forEach((c) => {
         spawnSync('beaker', ['wasm', 'ts-gen', c], {
           shell: true,
           stdio: 'inherit',
         });
       });
-      sdk = require(path.join(root, 'ts', 'sdk'));
+
+      if (contracts.length > 0) {
+        sdk = require(path.join(root, 'ts', 'sdk'));
+      }
     }
   }
 
