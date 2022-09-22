@@ -95,10 +95,6 @@ pub enum WasmCmd {
         #[clap(long)]
         schema_gen_cmd: Option<String>,
 
-        /// Directory of input schema for ts generation
-        #[clap(long)]
-        schema_dir: Option<PathBuf>,
-
         /// Code output directory, ignore remaining ts build process if custom out_dir is specified
         #[clap(long)]
         out_dir: Option<PathBuf>,
@@ -561,7 +557,6 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             WasmCmd::TsGen {
                 contract_name,
                 schema_gen_cmd,
-                schema_dir,
                 out_dir,
                 node_package_manager,
             } => {
