@@ -91,7 +91,7 @@ pub enum WasmCmd {
         /// Name of the contract to store
         contract_name: String,
 
-        /// Sschema generation command, default: `cargo run -p {contract_name} --example schema`
+        /// Sschema generation command, default: `cargo schema`
         #[clap(long)]
         schema_gen_cmd: Option<String>,
 
