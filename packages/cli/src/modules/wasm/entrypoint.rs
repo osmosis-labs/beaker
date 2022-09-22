@@ -599,8 +599,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     bail!("`{}` is required but missing, please install, or if you intended to use another package manager eg. `npm`, please specify different package manager via `--node-package-manager` flag", node_package_manager);
                 };
 
-                run_command(node_pkg().arg("run").arg("codegen"))?; // TODO: pass schema dir here
                 run_command(node_pkg().arg("install"))?;
+                run_command(node_pkg().arg("run").arg("codegen"))?; // TODO: pass schema dir here
                 run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
             }
