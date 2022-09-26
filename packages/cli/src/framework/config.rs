@@ -120,7 +120,9 @@ impl Default for GlobalConfig {
                 ("test7".into(), Account::FromMnemonic { mnemonic: "noble width taxi input there patrol clown public spell aunt wish punch moment will misery eight excess arena pen turtle minimum grain vague inmate".into() }),
                 ("test8".into(), Account::FromMnemonic { mnemonic: "cream sport mango believe inhale text fish rely elegant below earth april wall rug ritual blossom cherry detail length blind digital proof identify ride".into() }),
                 ("test9".into(), Account::FromMnemonic { mnemonic: "index light average senior silent limit usual local involve delay update rack cause inmate wall render magnet common feature laundry exact casual resource hundred".into() }),
-                ("test10".into(), Account::FromMnemonic { mnemonic: "prefer forget visit mistake mixture feel eyebrow autumn shop pair address airport diesel street pass vague innocent poem method awful require hurry unhappy shoulder".into() })
+                ("test10".into(), Account::FromMnemonic { mnemonic: "prefer forget visit mistake mixture feel eyebrow autumn shop pair address airport diesel street pass vague innocent poem method awful require hurry unhappy shoulder".into() }),
+                ("lo-test1".into(), Account::FromMnemonic { mnemonic: "notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius".into() }),
+                ("lo-test2".into(), Account::FromMnemonic { mnemonic: "quality vacuum heart guard buzz spike sight swarm shove special gym robust assume sudden deposit grid alcohol choice devote leader tilt noodle tide penalty".into() })
             ]),
         }
     }
