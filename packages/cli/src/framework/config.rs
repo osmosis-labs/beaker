@@ -110,7 +110,7 @@ impl Default for GlobalConfig {
                 )
             ]),
             accounts: Map::from([
-                ("validator".into(), Account::FromMnemonic { mnemonic: "satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn".into() }),
+                ("validator".into(), Account::FromMnemonic { mnemonic: "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort".into() }),
                 ("test1".into(), Account::FromMnemonic { mnemonic: "notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius".into() }),
                 ("test2".into(), Account::FromMnemonic { mnemonic: "quality vacuum heart guard buzz spike sight swarm shove special gym robust assume sudden deposit grid alcohol choice devote leader tilt noodle tide penalty".into() }),
                 ("test3".into(), Account::FromMnemonic { mnemonic: "symbol force gallery make bulk round subway violin worry mixture penalty kingdom boring survey tool fringe patrol sausage hard admit remember broken alien absorb".into() }),
