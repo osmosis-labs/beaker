@@ -80,7 +80,7 @@ pub struct QueryResponse {
 
 impl OpResponseDisplay for QueryResponse {
     fn headline() -> &'static str {
-        "Succesffuly executed query!! 🎉 "
+        "Successfully executed query!! 🎉 "
     }
     fn attrs(&self) -> Vec<String> {
         attrs_format! { self | label, contract_address, data }
