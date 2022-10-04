@@ -9,5 +9,5 @@
 3. since 1. use `@cosmwasm/ts-codegen`, you need to [add it as dev dependency](https://github.com/osmosis-labs/beaker/blob/v0.1.0/templates/project/ts/sdk/package.json#L23)
 4. make sure `ts/sdk/index.ts` exports contracts as the following
 ```ts
-`export * as contracts from "./contracts";`
+export * as contracts from "./contracts";
 ```
