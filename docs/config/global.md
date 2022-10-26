@@ -143,13 +143,13 @@ derivation_path = '''m/44'/118'/0'/0/0'''
 [networks.local]
 chain_id = 'localosmosis'
 network_variant = 'Local'
-grpc_endpoint = 'http://localhost:9090'
+grpc_endpoint = 'http://localhost:443'
 rpc_endpoint = 'http://localhost:26657'
 
 [networks.testnet]
 chain_id = 'osmo-test-4'
 network_variant = 'Shared'
-grpc_endpoint = 'https://grpc-test.osmosis.zone:9090'
+grpc_endpoint = 'https://grpc-test.osmosis.zone:443'
 rpc_endpoint = 'https://rpc-test.osmosis.zone'
 
 [networks.mainnet]
