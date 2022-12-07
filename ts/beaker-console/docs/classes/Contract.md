@@ -35,7 +35,7 @@
 
 #### Defined in
 
-[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L20)
+[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L20)
 
 ## Properties
 
@@ -45,7 +45,7 @@
 
 #### Defined in
 
-[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L17)
+[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L17)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L18)
+[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L18)
 
 ## Methods
 
@@ -81,7 +81,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:51](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L51)
+[src/contract.ts:51](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L51)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L35)
+[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L35)
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L28)
+[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L28)
 
 ___
 
@@ -129,4 +129,4 @@ ___
 
 #### Defined in
 
-[src/contract.ts:43](https://github.com/osmosis-labs/beaker/blob/4213370/ts/beaker-console/src/contract.ts#L43)
+[src/contract.ts:43](https://github.com/osmosis-labs/beaker/blob/47fee14/ts/beaker-console/src/contract.ts#L43)
