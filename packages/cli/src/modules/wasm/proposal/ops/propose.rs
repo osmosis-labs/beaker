@@ -5,13 +5,13 @@ use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::permission::compute_instantiate_permission;
-use crate::support::proto::MessageExt;
 use crate::support::state::State;
 use crate::support::wasm::read_wasm;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::{Context as _, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::MsgSubmitProposal;
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::tx::MessageExt;
 use cosmrs::Any;
 use std::vec;
 

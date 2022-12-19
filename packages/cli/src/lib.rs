@@ -35,9 +35,13 @@ use modules::key::entrypoint::{KeyCmd, KeyModule};
 use serde::{Deserialize, Serialize};
 use support::node::run_npx;
 
-pub use framework::{config::GlobalConfig, Context, Module};
+pub use framework::{
+    config::{GlobalConfig, Network, NetworkVariant},
+    Context, Module,
+};
 pub use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
 pub use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
+pub use support::cosmos::{Client, SigningClient};
 
 use crate::modules::key::config::KeyConfig;
 

@@ -1,37 +1,34 @@
-use std::str::FromStr;
-
 use crate::framework::config::Network;
 use anyhow::{anyhow, Ok};
 use anyhow::{Context, Result};
+use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
 use cosmrs::abci::GasInfo;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::proto::cosmos::auth::v1beta1::BaseAccount;
-use cosmrs::tendermint::abci::tag::{Key, Value};
 
+use cosmos_sdk_proto::traits::Message;
 use cosmrs::tx::{self, SignDoc, SignerInfo};
 use cosmrs::{dev, AccountId, Coin};
 use cosmrs::{rpc, tx::Fee, Any};
-use prost::Message;
 
 use super::gas::Gas;
 
 pub type TxCommitResponse = rpc::endpoint::broadcast::tx_commit::Response;
 
 pub trait ResponseValuePicker {
-    fn pick(&self, event: &str, attribute: &str) -> Value;
+    fn pick(&self, event: &str, attribute: &str) -> String;
 }
 
 impl ResponseValuePicker for TxCommitResponse {
-    fn pick(&self, event: &str, attribute: &str) -> Value {
+    fn pick(&self, event: &str, attribute: &str) -> String {
         self.deliver_tx
             .events
             .iter()
-            .find(|e| e.type_str == event)
+            .find(|e| e.kind == event)
             .unwrap()
             .attributes
             .iter()
-            .find(|a| a.key == Key::from_str(attribute).unwrap())
+            .find(|a| a.key == attribute)
             .unwrap()
             .value
             .clone()
