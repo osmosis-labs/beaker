@@ -87,7 +87,7 @@ impl State {
         let path_str = path.to_string_lossy();
         let content =
             serde_json::to_string_pretty(self).with_context(|| "Unable to serialize to json")?;
-        fs::write(&path, content).with_context(|| format!("Unabel to write to `{path_str}`"))
+        fs::write(path, content).with_context(|| format!("Unabel to write to `{path_str}`"))
     }
 
     pub fn load_by_network(network: Network, root: PathBuf) -> Result<Self> {

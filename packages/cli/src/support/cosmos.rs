@@ -212,7 +212,7 @@ impl SigningClient {
                 .unwrap();
                 let tx_raw = sign_doc.sign(&self.signing_key).unwrap();
                 let gas_info = self.inner.simulate(tx_raw.to_bytes().unwrap()).await?;
-                let gas_limit: u64 = gas_info.gas_used.into();
+                let gas_limit: u64 = gas_info.gas_used;
                 let gas_limit = ((gas_limit as f64) * (gas_adjustment as f64)).ceil();
 
                 let amount = Coin {

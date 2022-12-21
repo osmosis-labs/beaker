@@ -42,6 +42,10 @@ pub use framework::{
 pub use modules::wasm::{WasmCmd, WasmConfig, WasmModule};
 pub use modules::workspace::{WorkspaceCmd, WorkspaceConfig, WorkspaceModule};
 pub use support::cosmos::{Client, SigningClient};
+pub use support::gas::{Gas, GasPrice};
+pub use support::state::{
+    Proposal, State, WasmRef, STATE_DIR, STATE_FILE_LOCAL, STATE_FILE_SHARED,
+};
 
 use crate::modules::key::config::KeyConfig;
 

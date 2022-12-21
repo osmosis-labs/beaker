@@ -60,10 +60,7 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
             .sign_and_broadcast(vec![msg_vote], gas, "", timeout_height)
             .await?;
 
-        let proposal_id: u64 = response
-            .pick("proposal_vote", "proposal_id")
-            .to_string()
-            .parse()?;
+        let proposal_id: u64 = response.pick("proposal_vote", "proposal_id").parse()?;
 
         let vote_response = VoteResponse { proposal_id };
 

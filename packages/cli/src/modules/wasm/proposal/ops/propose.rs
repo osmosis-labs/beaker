@@ -75,13 +75,10 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
             .sign_and_broadcast(vec![msg_submit_proposal], gas, "", timeout_height)
             .await?;
 
-        let proposal_id: u64 = response
-            .pick("submit_proposal", "proposal_id")
-            .to_string()
-            .parse()?;
+        let proposal_id: u64 = response.pick("submit_proposal", "proposal_id").parse()?;
 
         // TODO: ProposalStoreCodeResponse::from(response)
-        let deposit_amount: String = response.pick("proposal_deposit", "amount").to_string();
+        let deposit_amount: String = response.pick("proposal_deposit", "amount");
         let deposit_amount = if deposit_amount.is_empty() {
             "-".to_string()
         } else {

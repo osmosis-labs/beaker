@@ -86,8 +86,8 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
             )
             .await?;
 
-        let contract_address = response.pick("migrate", "_contract_address").to_string();
-        let code_id = response.pick("migrate", "code_id").to_string();
+        let contract_address = response.pick("migrate", "_contract_address");
+        let code_id = response.pick("migrate", "code_id");
 
         let migrate_response = MigrateResponse {
             code_id: code_id.parse()?,

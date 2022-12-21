@@ -89,9 +89,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
             )
             .await?;
 
-        let contract_address = response
-            .pick("instantiate", "_contract_address")
-            .to_string();
+        let contract_address = response.pick("instantiate", "_contract_address");
 
         let instantiate_response = InstantiateResponse {
             code_id,
