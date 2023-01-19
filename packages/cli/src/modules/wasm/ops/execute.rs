@@ -79,7 +79,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
             )
             .await?;
 
-        let contract_address = response.pick("execute", "_contract_address").to_string();
+        let contract_address = response.pick("execute", "_contract_address");
 
         let execute_response = ExecuteResponse {
             contract_address,

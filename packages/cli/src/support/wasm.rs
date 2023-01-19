@@ -5,7 +5,8 @@ use std::{
 };
 
 use anyhow::Context;
-use cosmrs::tendermint::abci::Event;
+
+use tendermint::abci::Event;
 use tendermint_rpc::{endpoint::block_results, Client, HttpClient, Order};
 
 pub fn read_wasm(
@@ -80,11 +81,11 @@ fn extract_code_id_for_proposal(
     let mut code_id: Option<String> = None;
     for event in end_block_events {
         // keep `code_id` from store_code event if found
-        if event.type_str == "store_code" {
+        if event.kind == "store_code" {
             code_id = event
                 .attributes
                 .iter()
-                .find(|attr| attr.key == "code_id".parse().unwrap())
+                .find(|attr| attr.key == "code_id")
                 .map(|attr| attr.value.to_string())
         }
 
@@ -92,11 +93,11 @@ fn extract_code_id_for_proposal(
         // so if `active_proposal.proposal_id` match the expected proposal id, it should break the loop
         // if not break the loop, it might find another store_code event and use that event's code_id
         // which belong to later proposal that happens to execute on the same block
-        if event.type_str == "active_proposal"
-            && event.attributes.iter().any(|attr| {
-                attr.key == "proposal_id".parse().unwrap()
-                    && attr.value == prop_id.to_string().parse().unwrap()
-            })
+        if event.kind == "active_proposal"
+            && event
+                .attributes
+                .iter()
+                .any(|attr| attr.key == "proposal_id" && attr.value == prop_id.to_string())
         {
             break;
         }
@@ -106,7 +107,8 @@ fn extract_code_id_for_proposal(
 
 #[cfg(test)]
 mod tests {
-    use cosmrs::tendermint::abci::tag::Tag;
+
+    use tendermint::abci::EventAttribute;
 
     use super::*;
 
@@ -116,17 +118,19 @@ mod tests {
             &1,
             vec![
                 Event {
-                    type_str: "store_code".to_string(),
-                    attributes: vec![Tag {
+                    kind: "store_code".to_string(),
+                    attributes: vec![EventAttribute {
                         key: "code_id".parse().unwrap(),
                         value: "99".parse().unwrap(),
+                        index: false,
                     }],
                 },
                 Event {
-                    type_str: "active_proposal".to_string(),
-                    attributes: vec![Tag {
+                    kind: "active_proposal".to_string(),
+                    attributes: vec![EventAttribute {
                         key: "proposal_id".parse().unwrap(),
                         value: "1".parse().unwrap(),
+                        index: false,
                     }],
                 },
             ],
@@ -139,31 +143,35 @@ mod tests {
     fn extract_code_id_from_multiple_proposal_exec_on_the_block() {
         let end_block_events = vec![
             Event {
-                type_str: "store_code".to_string(),
-                attributes: vec![Tag {
+                kind: "store_code".to_string(),
+                attributes: vec![EventAttribute {
                     key: "code_id".parse().unwrap(),
                     value: "111".parse().unwrap(),
+                    index: false,
                 }],
             },
             Event {
-                type_str: "active_proposal".to_string(),
-                attributes: vec![Tag {
+                kind: "active_proposal".to_string(),
+                attributes: vec![EventAttribute {
                     key: "proposal_id".parse().unwrap(),
                     value: "1".parse().unwrap(),
+                    index: false,
                 }],
             },
             Event {
-                type_str: "store_code".to_string(),
-                attributes: vec![Tag {
+                kind: "store_code".to_string(),
+                attributes: vec![EventAttribute {
                     key: "code_id".parse().unwrap(),
                     value: "999".parse().unwrap(),
+                    index: false,
                 }],
             },
             Event {
-                type_str: "active_proposal".to_string(),
-                attributes: vec![Tag {
+                kind: "active_proposal".to_string(),
+                attributes: vec![EventAttribute {
                     key: "proposal_id".parse().unwrap(),
                     value: "9".parse().unwrap(),
+                    index: false,
                 }],
             },
         ];

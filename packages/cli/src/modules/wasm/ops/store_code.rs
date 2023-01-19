@@ -57,7 +57,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
             .sign_and_broadcast(vec![msg_store_code], gas, "", timeout_height)
             .await?;
 
-        let code_id: u64 = response.pick("store_code", "code_id").to_string().parse()?;
+        let code_id: u64 = response.pick("store_code", "code_id").parse()?;
         let store_code_response = StoreCodeResponse {
             code_id,
             instantiate_permission: instantiate_permission

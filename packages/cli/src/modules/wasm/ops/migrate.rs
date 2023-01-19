@@ -7,13 +7,12 @@ use crate::support::hooks::use_code_id;
 use crate::support::ops_response::OpResponseDisplay;
 use crate::support::state::State;
 use crate::{framework::Context, support::cosmos::Client};
-use anyhow::anyhow;
+
 use anyhow::Context as _;
 use anyhow::Result;
-use cosmrs::cosmwasm::MsgMigrateContract;
+use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgMigrateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::tx::Msg;
-use cosmrs::AccountId;
+use cosmrs::tx::MessageExt;
 use std::fs;
 
 #[allow(clippy::too_many_arguments)]
@@ -51,17 +50,15 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
         yes,
     )?;
 
-    let contract = state
-        .get_ref(network, contract_name)?
+    let wasm_ref = state.get_ref(network, contract_name)?;
+    let contract = wasm_ref
         .addresses()
         .get(label)
-        .with_context(|| format!("Unable to retrieve contract for {contract_name}:{label}"))?
-        .parse::<AccountId>()
-        .map_err(|e| anyhow!(e))?;
+        .with_context(|| format!("Unable to retrieve contract for {contract_name}:{label}"))?;
 
     let msg_migrate_contract = MsgMigrateContract {
-        sender: client.signer_account_id(),
-        contract,
+        sender: client.signer_account_id().to_string(),
+        contract: contract.to_string(),
         code_id,
         msg: raw
             .map(|s| s.as_bytes().to_vec())
@@ -89,8 +86,8 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
             )
             .await?;
 
-        let contract_address = response.pick("migrate", "_contract_address").to_string();
-        let code_id = response.pick("migrate", "code_id").to_string();
+        let contract_address = response.pick("migrate", "_contract_address");
+        let code_id = response.pick("migrate", "code_id");
 
         let migrate_response = MigrateResponse {
             code_id: code_id.parse()?,

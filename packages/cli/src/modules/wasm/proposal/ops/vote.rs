@@ -3,12 +3,12 @@ use crate::support::cosmos::ResponseValuePicker;
 use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
-use crate::support::proto::MessageExt;
 use crate::support::state::State;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::anyhow;
 use anyhow::{Context as _, Result};
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::tx::MessageExt;
 use cosmrs::Any;
 use std::str::FromStr;
 use std::vec;
@@ -60,10 +60,7 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
             .sign_and_broadcast(vec![msg_vote], gas, "", timeout_height)
             .await?;
 
-        let proposal_id: u64 = response
-            .pick("proposal_vote", "proposal_id")
-            .to_string()
-            .parse()?;
+        let proposal_id: u64 = response.pick("proposal_vote", "proposal_id").parse()?;
 
         let vote_response = VoteResponse { proposal_id };
 

@@ -1,5 +1,5 @@
 /*!
- * beaker-console v0.1.0
+ * beaker-console v0.1.2
  * (c) Supanat Potiwarakorn
  * Released under the MIT OR Apache-2.0 License.
  */
@@ -264,7 +264,7 @@
             var addresses = contractInfo.addresses;
             var prefixLabel = function (label) { return "$".concat(label); };
             var pascalContractName = _case.pascal(contractName);
-            var contractSdk = errorIfNotFound(sdk.contracts[pascalContractName + 'Contract'], "\"".concat(pascalContractName, "Contract\" not found in sdk."));
+            var contractSdk = errorIfNotFound(sdk.contracts[pascalContractName], "\"".concat(pascalContractName, "\" not found in sdk."));
             var contractQueryClient = warnIfNotFound(contractSdk["".concat(pascalContractName, "QueryClient")], "\"".concat(pascalContractName, "QueryClient\" not found in \"").concat(contractName, "\" contract's sdk. This may caused by empty QueryMsg variant."));
             var contractClient = warnIfNotFound(contractSdk["".concat(pascalContractName, "Client")], "\"".concat(pascalContractName, "Client\" not found in \"").concat(contractName, "\" contract's sdk. This may caused by empty ExecuteMsg variant."), true);
             var contracts = mapObject(addresses, prefixLabel, 

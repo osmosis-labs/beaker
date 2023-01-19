@@ -53,7 +53,7 @@ pub fn build<'a, Ctx: Context<'a, WasmConfig>>(
 
         let arch_suffix = if *aarch64 { "-arm64" } else { "" };
 
-        run_command(Command::new("docker").args(&[
+        run_command(Command::new("docker").args([
             "run",
             "--rm",
             "-v",

@@ -79,8 +79,8 @@ export const getContracts = (
       const pascalContractName = pascal(contractName);
 
       const contractSdk = errorIfNotFound(
-        sdk.contracts[pascalContractName + 'Contract'],
-        `"${pascalContractName}Contract" not found in sdk.`,
+        sdk.contracts[pascalContractName],
+        `"${pascalContractName}" not found in sdk.`,
       );
 
       const contractQueryClient = warnIfNotFound(
