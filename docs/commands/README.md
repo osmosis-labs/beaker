@@ -1,8 +1,8 @@
 # `beaker`
 
-CosmWasm development tooling
+CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain.
 
-Version: 0.0.8
+Version: 0.1.3
 
 Arguments:
 

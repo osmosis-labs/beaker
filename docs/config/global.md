@@ -143,22 +143,22 @@ derivation_path = '''m/44'/118'/0'/0/0'''
 [networks.local]
 chain_id = 'localosmosis'
 network_variant = 'Local'
-grpc_endpoint = 'http://localhost:443'
+grpc_endpoint = 'http://localhost:9090'
 rpc_endpoint = 'http://localhost:26657'
 
 [networks.testnet]
 chain_id = 'osmo-test-4'
 network_variant = 'Shared'
 grpc_endpoint = 'https://grpc-test.osmosis.zone:443'
-rpc_endpoint = 'https://rpc-test.osmosis.zone'
+rpc_endpoint = 'https://rpc-test.osmosis.zone:443'
 
 [networks.mainnet]
 chain_id = 'osmosis-1'
 network_variant = 'Shared'
 grpc_endpoint = 'https://grpc.osmosis.zone:9090'
-rpc_endpoint = 'https://rpc.osmosis.zone'
+rpc_endpoint = 'https://rpc.osmosis.zone:443'
 [accounts.validator]
-mnemonic = 'satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn'
+mnemonic = 'bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort'
 
 [accounts.test1]
 mnemonic = 'notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius'
