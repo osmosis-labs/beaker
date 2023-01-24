@@ -26,6 +26,7 @@ pub fn clear_admin<'a, Ctx: Context<'a, WasmConfig>>(
     gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
+    account_sequence: &Option<u64>,
 ) -> Result<ClearAdminResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
@@ -54,7 +55,13 @@ pub fn clear_admin<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let _response = client
-            .sign_and_broadcast(vec![msg_clear_admin], gas, "", timeout_height)
+            .sign_and_broadcast(
+                vec![msg_clear_admin],
+                gas,
+                "",
+                timeout_height,
+                account_sequence,
+            )
             .await?;
 
         let clear_admin_response = ClearAdminResponse {

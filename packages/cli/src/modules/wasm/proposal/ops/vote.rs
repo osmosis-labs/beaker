@@ -22,6 +22,7 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
     gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
+    account_sequence: &Option<u64>,
 ) -> Result<VoteResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
@@ -57,7 +58,7 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client
-            .sign_and_broadcast(vec![msg_vote], gas, "", timeout_height)
+            .sign_and_broadcast(vec![msg_vote], gas, "", timeout_height, account_sequence)
             .await?;
 
         let proposal_id: u64 = response.pick("proposal_vote", "proposal_id").parse()?;

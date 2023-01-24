@@ -24,6 +24,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     gas: &Gas,
     timeout_height: &u32,
     signing_key: SigningKey,
+    account_sequence: &Option<u64>,
 ) -> Result<StoreCodeResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
@@ -54,7 +55,13 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client
-            .sign_and_broadcast(vec![msg_store_code], gas, "", timeout_height)
+            .sign_and_broadcast(
+                vec![msg_store_code],
+                gas,
+                "",
+                timeout_height,
+                account_sequence,
+            )
             .await?;
 
         let code_id: u64 = response.pick("store_code", "code_id").parse()?;

@@ -28,6 +28,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     timeout_height: &u32,
     gas: &Gas,
     signing_key: SigningKey,
+    account_sequence: &Option<u64>,
 ) -> Result<ExecuteResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
@@ -76,6 +77,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 gas,
                 "",
                 timeout_height,
+                account_sequence,
             )
             .await?;
 

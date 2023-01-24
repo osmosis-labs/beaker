@@ -96,6 +96,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 signer_args,
                 gas_args,
                 timeout_height,
+                account_sequence,
             }: &BaseTxArgs = base_tx_args;
 
             super::ops::propose_store_code(
@@ -116,6 +117,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 permit_instantiate_only,
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
             )?;
             Ok(())
         }
@@ -138,6 +140,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 signer_args,
                 gas_args,
                 timeout_height,
+                account_sequence,
             }: &BaseTxArgs = base_tx_args;
 
             super::ops::vote(
@@ -155,6 +158,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 },
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
             )?;
             Ok(())
         }

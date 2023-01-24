@@ -315,6 +315,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
 
                 ops::store_code(
@@ -333,6 +334,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     },
                     timeout_height,
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -347,6 +349,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
 
                 ops::update_admin(
@@ -365,6 +368,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     },
                     timeout_height,
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -378,6 +382,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
 
                 ops::clear_admin(
@@ -395,6 +400,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     },
                     timeout_height,
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -414,6 +420,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
                 ops::instantiate(
                     &ctx,
@@ -435,6 +442,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                         )?
                     },
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -451,6 +459,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
                 ops::migrate(
                     &ctx,
@@ -470,6 +479,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                         )?
                     },
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -489,6 +499,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
                 ops::deploy(
                     &ctx,
@@ -512,6 +523,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args.private_key(&ctx.global_config()?)?,
                     no_rebuild,
                     no_wasm_opt,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -529,6 +541,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
                 ops::upgrade(
                     &ctx,
@@ -550,6 +563,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args.private_key(&ctx.global_config()?)?,
                     no_rebuild,
                     no_wasm_opt,
+                    account_sequence,
                 )?;
                 Ok(())
             }
@@ -611,6 +625,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                     signer_args,
                     gas_args,
                     timeout_height,
+                    account_sequence,
                 }: &BaseTxArgs = base_tx_args;
                 ops::execute(
                     &ctx,
@@ -629,6 +644,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                         )?
                     },
                     signer_args.private_key(&ctx.global_config()?)?,
+                    account_sequence,
                 )?;
                 Ok(())
             }

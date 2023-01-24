@@ -23,6 +23,7 @@ pub fn upgrade<'a, Ctx: Context<'a, WasmConfig>>(
     instantiate_signing_key: SigningKey,
     no_rebuild: &bool,
     no_wasm_opt: &bool,
+    account_sequence: &Option<u64>,
 ) -> Result<MigrateResponse> {
     if !*no_rebuild {
         build(ctx, no_wasm_opt, &false)?;
@@ -36,6 +37,7 @@ pub fn upgrade<'a, Ctx: Context<'a, WasmConfig>>(
         gas,
         timeout_height,
         store_code_signing_key,
+        account_sequence,
     )?;
     migrate(
         ctx,
@@ -49,5 +51,6 @@ pub fn upgrade<'a, Ctx: Context<'a, WasmConfig>>(
         timeout_height,
         gas,
         instantiate_signing_key,
+        &account_sequence.map(|seq| seq + 1),
     )
 }

@@ -17,4 +17,9 @@ pub struct BaseTxArgs {
     /// Specifies a block timeout height to prevent the tx from being committed past a certain height
     #[clap(short, long, default_value = "0")]
     pub timeout_height: u32,
+
+    /// Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain.
+    /// This is useful if there is an account sequence mismatch.
+    #[clap(short, long)]
+    pub account_sequence: Option<u64>,
 }

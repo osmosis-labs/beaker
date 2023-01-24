@@ -231,12 +231,16 @@ impl SigningClient {
         gas: &Gas,
         memo: &str,
         timeout_height: &u32,
+        account_sequence: &Option<u64>,
     ) -> Result<TxCommitResponse> {
-        let acc = self
+        let mut acc = self
             .inner
             .account(self.signer_account_id().as_ref())
             .await
             .with_context(|| "Account can't be initialized")?;
+
+        // manually set sequence if provided
+        acc.sequence = account_sequence.unwrap_or(acc.sequence);
 
         let tx_body = tx::Body::new(msgs, memo, *timeout_height);
 

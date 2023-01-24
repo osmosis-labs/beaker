@@ -10,6 +10,7 @@ use crate::support::wasm::read_wasm;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::{Context as _, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::MsgSubmitProposal;
+use cosmos_sdk_proto::cosmwasm::wasm::v1::StoreCodeProposal;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::MessageExt;
 use cosmrs::Any;
@@ -27,6 +28,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     permit_instantiate_only: &Option<String>,
     timeout_height: &u32,
     signing_key: SigningKey,
+    account_sequence: &Option<u64>,
 ) -> Result<ProposeStoreCodeResponse> {
     let global_config = ctx.global_config()?;
     let account_prefix = global_config.account_prefix().as_str();
@@ -48,12 +50,16 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     let instantiate_permission =
         compute_instantiate_permission(permit_instantiate_only, client.signer_account_id())?;
 
-    let store_code_proposal = cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal {
+    let store_code_proposal = StoreCodeProposal {
         title: title.to_string(),
         description: description.to_string(),
         run_as: client.signer_account_id().to_string(),
         wasm_byte_code: wasm,
         instantiate_permission: instantiate_permission.clone().map(|ac| ac.into()),
+        // unpin_code: false,
+        // source: "".to_string(),
+        // builder: "".to_string(),
+        // code_hash: vec![],
     };
 
     let msg_submit_proposal = MsgSubmitProposal {
@@ -72,7 +78,13 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
 
     block(async {
         let response = client
-            .sign_and_broadcast(vec![msg_submit_proposal], gas, "", timeout_height)
+            .sign_and_broadcast(
+                vec![msg_submit_proposal],
+                gas,
+                "",
+                timeout_height,
+                account_sequence,
+            )
             .await?;
 
         let proposal_id: u64 = response.pick("submit_proposal", "proposal_id").parse()?;
