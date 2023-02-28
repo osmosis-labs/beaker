@@ -27,7 +27,10 @@ pub fn use_code_id<'a, Ctx: Context<'a, WasmConfig>>(
         let proposal_id = wasm_ref
             .proposal()
             .store_code()
-            .with_context(|| format!( "Proposal store code not found for contract `{contract_name}` on network `{network}`"))?;
+            .with_context(|| style(format!(
+                "Proposal store code not found for contract `{contract_name}` on network `{network}`. \n\n\
+                  Use {} option to ignore proposal syncing.\n",
+                style("`--no-proposal-sync`").yellow().italic())))?;
 
         match get_code_id(network_info.rpc_endpoint(), &proposal_id).await {
             Ok(code_id_from_proposal) => {
