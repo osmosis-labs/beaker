@@ -31,7 +31,10 @@ use anyhow::{Context as _, Result};
 use clap::{AppSettings, Parser, Subcommand};
 use config::Config;
 use data_doc_derive::GetDataDocs;
-use modules::key::entrypoint::{KeyCmd, KeyModule};
+use modules::{
+    key::entrypoint::{KeyCmd, KeyModule},
+    task::entrypoint::{TaskCmd, TaskModule},
+};
 use serde::{Deserialize, Serialize};
 use support::node::run_npx;
 
@@ -47,7 +50,7 @@ pub use support::state::{
     Proposal, State, WasmRef, STATE_DIR, STATE_FILE_LOCAL, STATE_FILE_SHARED,
 };
 
-use crate::modules::key::config::KeyConfig;
+use crate::modules::{key::config::KeyConfig, task::config::TaskConfig};
 
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
@@ -80,6 +83,10 @@ pub enum Commands {
     Console {
         #[clap(short, long, default_value = "local")]
         network: String,
+    },
+    Task {
+        #[clap(subcommand)]
+        cmd: TaskCmd,
     },
 }
 
@@ -141,7 +148,8 @@ context!(
     WasmContext, config = { wasm: WasmConfig };
     WorkspaceContext, config = { workspace: WorkspaceConfig };
     ConsoleContext, config = { console: ConsoleConfig };
-    KeyContext, config = { key: KeyConfig }
+    KeyContext, config = { key: KeyConfig };
+    TaskContext, config = { task: TaskConfig }
 );
 
 pub fn execute(cmd: &Commands) -> Result<()> {
@@ -150,6 +158,7 @@ pub fn execute(cmd: &Commands) -> Result<()> {
         Commands::Workspace(cmd) => WorkspaceModule::execute(WorkspaceContext::new(), cmd),
         Commands::Console { network } => console(network),
         Commands::Key { cmd } => KeyModule::execute(KeyContext::new(), cmd),
+        Commands::Task { cmd } => TaskModule::execute(TaskContext::new(), cmd),
     }
 }
 
