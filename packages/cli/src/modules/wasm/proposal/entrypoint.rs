@@ -1,4 +1,5 @@
 use clap::Subcommand;
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use crate::{
@@ -9,7 +10,7 @@ use crate::{
 
 use super::proposal_struct::StoreCodeProposal;
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum ProposalCmd {
     /// Proposal for storing .wasm on chain for later initialization
     StoreCode {
@@ -48,7 +49,7 @@ pub enum ProposalCmd {
     },
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum ProposalQueryCmd {
     /// Proposal for storing .wasm on chain for later initialization
     StoreCode {

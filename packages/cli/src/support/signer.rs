@@ -2,6 +2,7 @@ use anyhow::bail;
 use clap::Parser;
 use cosmrs::{bip32, crypto::secp256k1::SigningKey};
 use keyring::Entry;
+use serde::Deserialize;
 
 use crate::{framework::config::Account, modules::key::config::SERVICE};
 
@@ -11,7 +12,7 @@ use crate::{framework::config::Account, modules::key::config::SERVICE};
 
 const SIGNER_GROUP: &str = "signer";
 
-#[derive(Debug, Parser, Clone)]
+#[derive(Debug, Parser, Clone, Deserialize)]
 #[clap(group = clap::ArgGroup::new(SIGNER_GROUP).multiple(false))]
 pub struct SignerArgs {
     /// Specifies predefined account as a tx signer

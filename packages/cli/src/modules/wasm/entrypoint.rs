@@ -1,22 +1,23 @@
+use anyhow::{bail, Result};
+use clap::Subcommand;
+use console::style;
+use derive_new::new;
+use serde::Deserialize;
 use std::env;
 use std::fmt::Formatter;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
 
-use anyhow::{bail, Result};
-use clap::Subcommand;
-use console::style;
-use derive_new::new;
-
 use crate::framework::{Context, Module};
 use crate::support::command::run_command;
 use crate::support::gas::Gas;
 
+use super::ops::instantiate::InstantiateResponse;
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 
-#[derive(clap::ArgEnum, Clone, Debug)]
+#[derive(clap::ArgEnum, Clone, Debug, Deserialize)]
 pub enum NodePackageManager {
     Npm,
     Yarn,
@@ -49,7 +50,7 @@ impl std::fmt::Display for NodePackageManager {
     }
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum WasmCmd {
     /// Create new CosmWasm contract from boilerplate
     New {
@@ -66,6 +67,7 @@ pub enum WasmCmd {
     Build {
         /// If set, the contract(s) will not be optimized by wasm-opt after build (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
         /// Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
         #[clap(short, long)]
@@ -78,6 +80,7 @@ pub enum WasmCmd {
 
         /// If set, use non wasm-opt optimized wasm to store code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         /// Restricting the code to be able to instantiate only by given address, no restriction by default
@@ -101,6 +104,7 @@ pub enum WasmCmd {
 
         /// Code output directory
         #[clap(long, default_value = "yarn")]
+        #[serde(default = "default_value::node_package_manager")]
         node_package_manager: NodePackageManager,
     },
     /// Update admin that can migrate contract
@@ -110,6 +114,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Address of new admin
@@ -126,6 +131,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(flatten)]
@@ -138,6 +144,7 @@ pub enum WasmCmd {
         contract_name: String,
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -156,6 +163,7 @@ pub enum WasmCmd {
 
         /// Skip the check for proposal's updated code_id
         #[clap(long)]
+        #[serde(default = "default_value::no_proposal_sync")]
         no_proposal_sync: bool,
 
         /// Agree to all prompts
@@ -171,6 +179,7 @@ pub enum WasmCmd {
         contract_name: String,
         /// Label for the instantiated contract for selcting migration target
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -195,6 +204,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -217,13 +227,16 @@ pub enum WasmCmd {
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
+        #[serde(default = "default_value::no_rebuild")]
         no_rebuild: bool,
 
         /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Build, Optimize, Store code, and migrate contract
@@ -233,6 +246,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -241,10 +255,12 @@ pub enum WasmCmd {
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
+        #[serde(default = "default_value::no_rebuild")]
         no_rebuild: bool,
 
         /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         /// Restricting the code to be able to instantiate only by given address, no restriction by default
@@ -263,6 +279,7 @@ pub enum WasmCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(short, long)]
@@ -279,6 +296,7 @@ pub enum WasmCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(short, long)]
@@ -287,6 +305,30 @@ pub enum WasmCmd {
         #[clap(flatten)]
         base_tx_args: BaseTxArgs,
     },
+}
+
+mod default_value {
+    use super::NodePackageManager;
+
+    pub(crate) fn label() -> String {
+        "default".to_string()
+    }
+
+    pub(crate) fn node_package_manager() -> NodePackageManager {
+        NodePackageManager::Yarn
+    }
+
+    pub(crate) fn no_wasm_opt() -> bool {
+        false
+    }
+
+    pub(crate) fn no_rebuild() -> bool {
+        false
+    }
+
+    pub(crate) fn no_proposal_sync() -> bool {
+        false
+    }
 }
 
 #[derive(new)]
@@ -483,48 +525,8 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 )?;
                 Ok(())
             }
-            WasmCmd::Deploy {
-                contract_name,
-                label,
-                raw,
-                permit_instantiate_only,
-                admin,
-                funds,
-                no_rebuild,
-                no_wasm_opt,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::deploy(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    permit_instantiate_only,
-                    admin.as_ref(),
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    no_rebuild,
-                    no_wasm_opt,
-                    account_sequence,
-                )?;
+            cmd @ WasmCmd::Deploy { .. } => {
+                deploy(ctx, cmd)?;
                 Ok(())
             }
             WasmCmd::Upgrade {
@@ -659,6 +661,58 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 Ok(())
             }
         }
+    }
+}
+
+pub(crate) fn deploy<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<InstantiateResponse> {
+    match cmd {
+        WasmCmd::Deploy {
+            contract_name,
+            label,
+            raw,
+            permit_instantiate_only,
+            admin,
+            funds,
+            no_rebuild,
+            no_wasm_opt,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::deploy(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                permit_instantiate_only,
+                admin.as_ref(),
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                signer_args.private_key(&ctx.global_config()?)?,
+                no_rebuild,
+                no_wasm_opt,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
     }
 }
 
