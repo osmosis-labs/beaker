@@ -122,7 +122,6 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
 #[derive(Serialize)]
 pub struct InstantiateResponse {
     pub label: String,

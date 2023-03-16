@@ -1,7 +1,10 @@
+use std::{fs::File, io::Read, path::Path};
+
 use super::{config::TaskConfig, script_mod::wasm};
 use crate::framework::{Context, Module};
 use anyhow::Result;
 use clap::{Arg, Command, Subcommand};
+use regex::Regex;
 use rhai::{
     exported_module,
     serde::{from_dynamic, to_dynamic},
@@ -39,15 +42,16 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                     .join(format!("{}.rhai", script));
 
                 let moved_script = script.to_owned();
-
                 let args = args.to_owned();
 
+                // function that merges two maps
                 engine.register_fn("merge", |a: Map, b: Map| {
                     let mut merged = a;
                     merged.extend(b);
                     merged
                 });
 
+                // function that matches cli args and feed into rhai script as map
                 engine.register_fn(
                     "match_args",
                     move |arg_defs: Dynamic| -> Result<Map, Box<EvalAltResult>> {
@@ -75,7 +79,18 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                     },
                 );
 
-                engine.run_file(script_path.clone()).map_err(|e| {
+                let script_content = read_file(script_path.clone()).map_err(|e| {
+                    anyhow::anyhow!(
+                        "Failed to read script `{}` ({}):\n{}",
+                        script,
+                        script_path.display(),
+                        e.to_string()
+                    )
+                })?;
+
+                let script_content = expand_macro_assert(&script_content);
+
+                engine.run(&script_content).map_err(|e| {
                     anyhow::anyhow!(
                         "Failed to run script `{}` ({}):\n{}",
                         script,
@@ -87,4 +102,49 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
             }
         }
     }
+}
+
+fn expand_macro_assert(input: &str) -> String {
+    let re = Regex::new(r"@assert\((?P<left>[^=]+)==(?P<right>[^;]+)\);").unwrap();
+    let output = re.replace_all(input, |caps: &regex::Captures| {
+        let left = caps.name("left").unwrap().as_str().trim();
+        let right = caps.name("right").unwrap().as_str().trim();
+        format!(
+            r#"if ({} != {}) {{ throw "\n\n[ASSERTION FAILED]\n{} == {}\n\n    left:  " + {}.to_string() + "\n    right: " + {}.to_string() + "\n\n"; }}"#,
+            left, right, left, right, left, right
+        )
+    });
+
+    output.into_owned()
+}
+
+fn read_file(path: impl AsRef<Path>) -> Result<String, EvalAltResult> {
+    let path = path.as_ref();
+
+    let mut f = File::open(path).map_err(|err| {
+        EvalAltResult::ErrorSystem(
+            format!("Cannot open script file '{}'", path.to_string_lossy()),
+            err.into(),
+        )
+    })?;
+
+    let mut contents = String::new();
+
+    f.read_to_string(&mut contents).map_err(|err| {
+        EvalAltResult::ErrorSystem(
+            format!("Cannot read script file '{}'", path.to_string_lossy()),
+            err.into(),
+        )
+    })?;
+
+    if contents.starts_with("#!") {
+        // Remove shebang
+        if let Some(n) = contents.find('\n') {
+            contents.drain(0..n).count();
+        } else {
+            contents.clear();
+        }
+    };
+
+    Ok(contents)
 }

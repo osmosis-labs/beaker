@@ -14,6 +14,7 @@ use crate::support::command::run_command;
 use crate::support::gas::Gas;
 
 use super::ops::instantiate::InstantiateResponse;
+use super::ops::query::QueryResponse;
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 
@@ -303,6 +304,7 @@ pub enum WasmCmd {
         raw: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
 }
@@ -525,10 +527,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 )?;
                 Ok(())
             }
-            cmd @ WasmCmd::Deploy { .. } => {
-                deploy(ctx, cmd)?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Deploy { .. } => deploy(ctx, cmd).map(|_| ()),
             WasmCmd::Upgrade {
                 contract_name,
                 label,
@@ -650,16 +649,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 )?;
                 Ok(())
             }
-            WasmCmd::Query {
-                contract_name,
-                label,
-                raw,
-                base_tx_args,
-            } => {
-                let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
-                ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Query { .. } => query(ctx, cmd).map(|_| ()),
         }
     }
 }
@@ -711,6 +701,21 @@ pub(crate) fn deploy<'a>(
                 no_wasm_opt,
                 account_sequence,
             )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn query<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Result<QueryResponse> {
+    match cmd {
+        WasmCmd::Query {
+            contract_name,
+            label,
+            raw,
+            base_tx_args,
+        } => {
+            let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
+            ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)
         }
         _ => unimplemented!(),
     }
