@@ -105,14 +105,16 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
 }
 
 fn expand_macro_assert(input: &str) -> String {
-    let re = Regex::new(r"@assert\((?P<left>[^=]+)==(?P<right>[^;]+)\);").unwrap();
+    let re = Regex::new(r"@assert\((?P<left>[^=!<>]+)(?P<op>==|!=|<=|<|>=|>)(?P<right>[^;]+)\);")
+        .unwrap();
     let output = re.replace_all(input, |caps: &regex::Captures| {
         let left = caps.name("left").unwrap().as_str().trim();
         let right = caps.name("right").unwrap().as_str().trim();
-        format!(
-            r#"if ({} != {}) {{ throw "\n\n[ASSERTION FAILED]\n{} == {}\n\n    left:  " + {}.to_string() + "\n    right: " + {}.to_string() + "\n\n"; }}"#,
-            left, right, left, right, left, right
-        )
+        let op = caps.name("op").unwrap().as_str().trim();
+        dbg!(format!(
+            r#"if (!({} {} {})) {{ throw "[ASSERTION FAILED]\n\n  expected:\n    {} {} {}\n\n  but:\n    left  = " + {}.to_string() + "\n    right = " + {}.to_string() + "\n\n"; }}"#,
+            left, op, right, left, op, right, left, right
+        ))
     });
 
     output.into_owned()
