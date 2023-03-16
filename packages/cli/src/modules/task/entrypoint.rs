@@ -42,6 +42,12 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
 
                 let args = args.to_owned();
 
+                engine.register_fn("merge", |a: Map, b: Map| {
+                    let mut merged = a;
+                    merged.extend(b);
+                    merged
+                });
+
                 engine.register_fn(
                     "match_args",
                     move |arg_defs: Dynamic| -> Result<Map, Box<EvalAltResult>> {
