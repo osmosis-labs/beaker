@@ -282,6 +282,7 @@ pub enum WasmCmd {
         permit_instantiate_only: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     Proposal {
@@ -372,46 +373,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             cmd @ WasmCmd::Instantiate { .. } => instantiate(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::Migrate { .. } => migrate(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::Deploy { .. } => deploy(ctx, cmd).map(|_| ()),
-            WasmCmd::Upgrade {
-                contract_name,
-                label,
-                raw,
-                no_rebuild,
-                no_wasm_opt,
-                permit_instantiate_only,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::upgrade(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    permit_instantiate_only,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    no_rebuild,
-                    no_wasm_opt,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Upgrade { .. } => upgrade(ctx, cmd).map(|_| ()),
             WasmCmd::Proposal { cmd } => proposal::entrypoint::execute(ctx, cmd),
             WasmCmd::TsGen {
                 contract_name,
@@ -610,6 +572,54 @@ pub(crate) fn store_code<'a>(
                 },
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn upgrade<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<MigrateResponse> {
+    match cmd {
+        WasmCmd::Upgrade {
+            contract_name,
+            label,
+            raw,
+            no_rebuild,
+            no_wasm_opt,
+            permit_instantiate_only,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::upgrade(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                permit_instantiate_only,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                signer_args.private_key(&ctx.global_config()?)?,
+                no_rebuild,
+                no_wasm_opt,
                 account_sequence,
             )
         }
