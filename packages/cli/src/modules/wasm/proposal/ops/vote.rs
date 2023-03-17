@@ -10,6 +10,7 @@ use anyhow::{Context as _, Result};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::MessageExt;
 use cosmrs::Any;
+use serde::Serialize;
 use std::str::FromStr;
 use std::vec;
 
@@ -102,6 +103,7 @@ impl FromStr for VoteOptionImpl {
     }
 }
 
+#[derive(Serialize)]
 pub struct VoteResponse {
     pub proposal_id: u64,
 }
