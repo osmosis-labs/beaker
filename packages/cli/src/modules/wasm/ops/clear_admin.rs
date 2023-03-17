@@ -8,6 +8,7 @@ use anyhow::Context as _;
 
 use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgClearAdmin;
 use cosmrs::tx::MessageExt;
+use serde::Serialize;
 
 use crate::support::state::State;
 
@@ -75,7 +76,7 @@ pub fn clear_admin<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct ClearAdminResponse {
     pub contract: String,
     pub admin: String,

@@ -13,6 +13,7 @@ use crate::framework::{Context, Module};
 use crate::support::command::run_command;
 use crate::support::gas::Gas;
 
+use super::ops::clear_admin::ClearAdminResponse;
 use super::ops::instantiate::InstantiateResponse;
 use super::ops::query::QueryResponse;
 use super::ops::store_code::StoreCodeResponse;
@@ -141,6 +142,7 @@ pub enum WasmCmd {
         label: String,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
 
@@ -356,38 +358,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             cmd @ WasmCmd::Build { .. } => build(ctx, cmd),
             cmd @ WasmCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::UpdateAdmin { .. } => update_admin(ctx, cmd).map(|_| ()),
-            WasmCmd::ClearAdmin {
-                contract_name,
-                label,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-
-                ops::clear_admin(
-                    &ctx,
-                    contract_name,
-                    label,
-                    network,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::ClearAdmin { .. } => clear_admin(ctx, cmd).map(|_| ()),
 
             WasmCmd::Instantiate {
                 contract_name,
@@ -755,6 +726,45 @@ pub(crate) fn update_admin<'a>(
     }
 }
 
+pub(crate) fn clear_admin<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<ClearAdminResponse> {
+    match cmd {
+        WasmCmd::ClearAdmin {
+            contract_name,
+            label,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+
+            ops::clear_admin(
+                &ctx,
+                contract_name,
+                label,
+                network,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
 #[cfg(test)]
 mod tests {
     use std::{env, fs, path::Path};

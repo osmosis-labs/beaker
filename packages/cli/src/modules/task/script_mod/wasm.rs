@@ -71,7 +71,6 @@ pub(crate) mod commands {
             .and_then(to_dynamic)
     }
 
-    // store_code
     #[rhai_fn(return_raw)]
     pub fn store_code(cmd_args: Map) -> Result<Dynamic, Box<EvalAltResult>> {
         let mut cmd = Map::new();
@@ -88,6 +87,16 @@ pub(crate) mod commands {
         cmd.insert("UpdateAdmin".into(), cmd_args.into());
 
         wasm::entrypoint::update_admin(CONTEXT, &from_dynamic(&to_dynamic(cmd)?)?)
+            .map_err(|e| e.to_string().into())
+            .and_then(to_dynamic)
+    }
+
+    #[rhai_fn(return_raw)]
+    pub fn clear_admin(cmd_args: Map) -> Result<Dynamic, Box<EvalAltResult>> {
+        let mut cmd = Map::new();
+        cmd.insert("ClearAdmin".into(), cmd_args.into());
+
+        wasm::entrypoint::clear_admin(CONTEXT, &from_dynamic(&to_dynamic(cmd)?)?)
             .map_err(|e| e.to_string().into())
             .and_then(to_dynamic)
     }
