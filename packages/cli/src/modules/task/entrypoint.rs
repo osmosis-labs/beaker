@@ -1,4 +1,8 @@
-use std::{fs::File, io::Read, path::Path};
+use std::{
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 use super::{
     config::TaskConfig,
@@ -8,11 +12,13 @@ use crate::framework::{Context, Module};
 use anyhow::Result;
 use clap::{Arg, Command, Subcommand};
 use regex::Regex;
+use rhai::packages::Package;
 use rhai::{
     exported_module,
     serde::{from_dynamic, to_dynamic},
     Dynamic, Engine, EvalAltResult, Map,
 };
+use rhai_fs::FilesystemPackage;
 
 #[derive(Subcommand, Debug)]
 #[clap(trailing_var_arg = true)]
@@ -31,11 +37,17 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
     fn execute<Ctx: Context<'a, TaskConfig>>(ctx: Ctx, cmd: &TaskCmd) -> Result<(), anyhow::Error> {
         let root = ctx.root()?;
         let config = ctx.config()?;
+        let global_config = ctx.global_config()?;
 
         match cmd {
             TaskCmd::Run { script, args } => {
                 let mut engine = Engine::new();
 
+                // register filesystem package
+                let package = FilesystemPackage::new();
+                package.register_into_engine_as(&mut engine, "fs");
+
+                // register wasm & wasm_proposal module
                 let wasm = exported_module!(wasm::commands);
                 let wasm_proposal = exported_module!(wasm_proposal::commands);
 
@@ -48,6 +60,17 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
 
                 let moved_script = script.to_owned();
                 let args = args.to_owned();
+
+                // function that get global config
+                engine.register_fn("get_global_config", move || {
+                    to_dynamic(global_config.clone())
+                });
+
+                // function that converts string to path buf
+                engine.register_fn("path", |path_str: &str| PathBuf::from(path_str));
+
+                // function that get project root
+                engine.register_fn("project_root", move || root.clone());
 
                 // function that merges two maps
                 engine.register_fn("merge", |a: Map, b: Map| {

@@ -11,7 +11,7 @@ pub(crate) mod commands {
     };
     use serde::Serialize;
 
-    use crate::WasmContext;
+    use crate::{Context, WasmContext};
 
     const CONTEXT: WasmContext = WasmContext {};
 
@@ -161,6 +161,14 @@ pub(crate) mod commands {
         cmd.insert("Execute".into(), cmd_args.into());
 
         wasm::entrypoint::execute(CONTEXT, &from_dynamic(&to_dynamic(cmd)?)?)
+            .map_err(|e| e.to_string().into())
+            .and_then(to_dynamic)
+    }
+
+    #[rhai_fn(return_raw)]
+    pub fn get_config() -> Result<Dynamic, Box<EvalAltResult>> {
+        CONTEXT
+            .config()
             .map_err(|e| e.to_string().into())
             .and_then(to_dynamic)
     }

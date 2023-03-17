@@ -3,7 +3,7 @@ use data_doc_derive::GetDataDocs;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Getters, Debug, GetDataDocs)]
+#[derive(Serialize, Deserialize, Getters, Debug, Clone, GetDataDocs)]
 #[get = "pub"]
 pub struct GlobalConfig {
     /// Name of the project
@@ -57,7 +57,7 @@ pub struct Network {
     rpc_endpoint: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, GetDataDocs)]
+#[derive(Serialize, Deserialize, Debug, Clone, GetDataDocs)]
 #[serde(untagged)]
 pub enum Account {
     /// Used for specifying account from mnemonic, eg.
