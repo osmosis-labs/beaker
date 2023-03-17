@@ -176,9 +176,11 @@ pub enum WasmCmd {
 
         /// Agree to all prompts
         #[clap(short, long)]
+        #[serde(default = "default_value::yes")]
         yes: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Migrated instanitate contract to use other code stored on chain
@@ -339,6 +341,10 @@ mod default_value {
         false
     }
 
+    pub(crate) fn yes() -> bool {
+        false
+    }
+
     pub(crate) fn aarch64() -> bool {
         false
     }
@@ -359,48 +365,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             cmd @ WasmCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::UpdateAdmin { .. } => update_admin(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::ClearAdmin { .. } => clear_admin(ctx, cmd).map(|_| ()),
-
-            WasmCmd::Instantiate {
-                contract_name,
-                label,
-                raw,
-                admin,
-                no_proposal_sync,
-                yes,
-                funds,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::instantiate(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    admin.as_ref(),
-                    *no_proposal_sync,
-                    *yes,
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Instantiate { .. } => instantiate(ctx, cmd).map(|_| ()),
             WasmCmd::Migrate {
                 contract_name,
                 label,
@@ -758,6 +723,55 @@ pub(crate) fn clear_admin<'a>(
                     )?
                 },
                 timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn instantiate<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<InstantiateResponse> {
+    match cmd {
+        WasmCmd::Instantiate {
+            contract_name,
+            label,
+            raw,
+            admin,
+            funds,
+            no_proposal_sync,
+            yes,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::instantiate(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                admin.as_ref(),
+                *no_proposal_sync,
+                *yes,
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
                 signer_args.private_key(&ctx.global_config()?)?,
                 account_sequence,
             )
