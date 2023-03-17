@@ -14,6 +14,7 @@ use cosmrs::cosmwasm::MsgExecuteContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
 use cosmrs::AccountId;
+use serde::Serialize;
 
 use std::{fs, vec};
 
@@ -94,7 +95,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct ExecuteResponse {
     pub label: String,
     pub contract_address: String,

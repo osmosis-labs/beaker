@@ -14,6 +14,7 @@ use crate::support::command::run_command;
 use crate::support::gas::Gas;
 
 use super::ops::clear_admin::ClearAdminResponse;
+use super::ops::execute::ExecuteResponse;
 use super::ops::instantiate::InstantiateResponse;
 use super::ops::migrate::MigrateResponse;
 use super::ops::query::QueryResponse;
@@ -304,6 +305,7 @@ pub enum WasmCmd {
         funds: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Query contract state
@@ -420,41 +422,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
             }
-            WasmCmd::Execute {
-                contract_name,
-                label,
-                raw,
-                funds,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::execute(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Execute { .. } => execute(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::Query { .. } => query(ctx, cmd).map(|_| ()),
         }
     }
@@ -802,6 +770,50 @@ pub(crate) fn instantiate<'a>(
         _ => unimplemented!(),
     }
 }
+
+pub(crate) fn execute<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<ExecuteResponse> {
+    match cmd {
+        WasmCmd::Execute {
+            contract_name,
+            label,
+            raw,
+            funds,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::execute(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{env, fs, path::Path};
