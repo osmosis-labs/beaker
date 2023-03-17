@@ -5,6 +5,7 @@ use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use anyhow::Context as _;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgUpdateAdmin;
+use serde::Serialize;
 
 use crate::support::state::State;
 
@@ -75,7 +76,7 @@ pub fn update_admin<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct UpdateAdminResponse {
     pub contract: String,
     pub new_admin: String,
