@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Subcommand;
-use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
 use serde::Deserialize;
 use std::path::PathBuf;
 
@@ -11,7 +10,7 @@ use crate::{
 };
 
 use super::{
-    ops::{propose::ProposeStoreCodeResponse, vote::VoteResponse},
+    ops::{propose::ProposeStoreCodeResponse, query::QueryProposalResponse, vote::VoteResponse},
     proposal_struct::StoreCodeProposal,
 };
 
@@ -65,8 +64,15 @@ pub enum ProposalQueryCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "local")]
+        #[serde(default = "default_value::network")]
         network: String,
     },
+}
+
+mod default_value {
+    pub fn network() -> String {
+        "local".to_string()
+    }
 }
 
 pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
@@ -184,7 +190,10 @@ pub(crate) fn vote<'a>(
     }
 }
 
-pub(crate) fn query<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &ProposalCmd) -> Result<Proposal> {
+pub(crate) fn query<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &ProposalCmd,
+) -> Result<QueryProposalResponse> {
     match cmd {
         ProposalCmd::Query { cmd } => match cmd {
             ProposalQueryCmd::StoreCode {

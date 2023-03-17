@@ -45,4 +45,20 @@ pub(crate) mod commands {
             .map_err(|e| e.to_string().into())
             .and_then(to_dynamic)
     }
+
+    #[rhai_fn(return_raw)]
+    pub fn query(cmd_args: Map) -> Result<Dynamic, Box<EvalAltResult>> {
+        let cmd = Map::from([(
+            "Query".into(),
+            Map::from([(
+                "cmd".into(),
+                Map::from([("StoreCode".into(), cmd_args.into())]).into(),
+            )])
+            .into(),
+        )]);
+
+        wasm::proposal::entrypoint::query(CONTEXT, &from_dynamic(&to_dynamic(cmd)?)?)
+            .map_err(|e| e.to_string().into())
+            .and_then(to_dynamic)
+    }
 }
