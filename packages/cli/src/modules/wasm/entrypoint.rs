@@ -72,6 +72,7 @@ pub enum WasmCmd {
         no_wasm_opt: bool,
         /// Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
         #[clap(short, long)]
+        #[serde(default = "default_value::aarch64")]
         aarch64: bool,
     },
     /// Store .wasm on chain for later initialization
@@ -331,6 +332,10 @@ mod default_value {
     pub(crate) fn no_proposal_sync() -> bool {
         false
     }
+
+    pub(crate) fn aarch64() -> bool {
+        false
+    }
 }
 
 #[derive(new)]
@@ -344,10 +349,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
-            WasmCmd::Build {
-                no_wasm_opt,
-                aarch64,
-            } => ops::build(&ctx, no_wasm_opt, aarch64),
+            cmd @ WasmCmd::Build { .. } => build(ctx, cmd),
             WasmCmd::StoreCode {
                 contract_name,
                 no_wasm_opt,
@@ -717,6 +719,17 @@ pub(crate) fn query<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Res
             let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
             ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)
         }
+        _ => unimplemented!(),
+    }
+}
+
+// build
+pub(crate) fn build<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Result<()> {
+    match cmd {
+        WasmCmd::Build {
+            no_wasm_opt,
+            aarch64,
+        } => ops::build(&ctx, no_wasm_opt, aarch64),
         _ => unimplemented!(),
     }
 }

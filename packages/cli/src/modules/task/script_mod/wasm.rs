@@ -1,13 +1,13 @@
 use crate::modules::wasm;
 
 use rhai::plugin::*;
-use rhai::{Dynamic, Map};
+use rhai::Map;
 
 #[export_module]
 pub(crate) mod commands {
     use rhai::{
         serde::{from_dynamic, to_dynamic},
-        EvalAltResult,
+        Dynamic, EvalAltResult,
     };
     use serde::Serialize;
 
@@ -58,6 +58,17 @@ pub(crate) mod commands {
                     data: serde_json::from_str(&res.data).map_err(|e| e.to_string())?,
                 })
             })
+            .and_then(to_dynamic)
+    }
+
+    // build
+    #[rhai_fn(return_raw)]
+    pub fn build(cmd_args: Map) -> Result<Dynamic, Box<EvalAltResult>> {
+        let mut cmd = Map::new();
+        cmd.insert("Build".into(), cmd_args.into());
+
+        wasm::entrypoint::build(CONTEXT, &from_dynamic(&to_dynamic(cmd)?)?)
+            .map_err(|e| e.to_string().into())
             .and_then(to_dynamic)
     }
 }
