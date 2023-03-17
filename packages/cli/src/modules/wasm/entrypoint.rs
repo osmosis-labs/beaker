@@ -15,6 +15,7 @@ use crate::support::gas::Gas;
 
 use super::ops::instantiate::InstantiateResponse;
 use super::ops::query::QueryResponse;
+use super::ops::store_code::StoreCodeResponse;
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 
@@ -90,6 +91,7 @@ pub enum WasmCmd {
         permit_instantiate_only: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     TsGen {
@@ -350,40 +352,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
             cmd @ WasmCmd::Build { .. } => build(ctx, cmd),
-            WasmCmd::StoreCode {
-                contract_name,
-                no_wasm_opt,
-                permit_instantiate_only,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-
-                ops::store_code(
-                    &ctx,
-                    contract_name,
-                    network,
-                    no_wasm_opt,
-                    permit_instantiate_only,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
             WasmCmd::UpdateAdmin {
                 contract_name,
                 label,
@@ -723,7 +692,6 @@ pub(crate) fn query<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Res
     }
 }
 
-// build
 pub(crate) fn build<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Result<()> {
     match cmd {
         WasmCmd::Build {
@@ -734,6 +702,47 @@ pub(crate) fn build<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Res
     }
 }
 
+pub(crate) fn store_code<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<StoreCodeResponse> {
+    match cmd {
+        WasmCmd::StoreCode {
+            contract_name,
+            no_wasm_opt,
+            permit_instantiate_only,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+
+            ops::store_code(
+                &ctx,
+                contract_name,
+                network,
+                no_wasm_opt,
+                permit_instantiate_only,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
 #[cfg(test)]
 mod tests {
     use std::{env, fs, path::Path};
