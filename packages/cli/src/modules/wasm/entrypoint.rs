@@ -15,6 +15,7 @@ use crate::support::gas::Gas;
 
 use super::ops::clear_admin::ClearAdminResponse;
 use super::ops::instantiate::InstantiateResponse;
+use super::ops::migrate::MigrateResponse;
 use super::ops::query::QueryResponse;
 use super::ops::store_code::StoreCodeResponse;
 use super::ops::update_admin::UpdateAdminResponse;
@@ -198,13 +199,16 @@ pub enum WasmCmd {
 
         /// Skip the check for proposal's updated code_id
         #[clap(long)]
+        #[serde(default = "default_value::no_proposal_sync")]
         no_proposal_sync: bool,
 
         /// Agree to all prompts
         #[clap(short, long)]
+        #[serde(default = "default_value::yes")]
         yes: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Build, Optimize, Store code, and instantiate contract
@@ -366,43 +370,7 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
             cmd @ WasmCmd::UpdateAdmin { .. } => update_admin(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::ClearAdmin { .. } => clear_admin(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::Instantiate { .. } => instantiate(ctx, cmd).map(|_| ()),
-            WasmCmd::Migrate {
-                contract_name,
-                label,
-                raw,
-                no_proposal_sync,
-                yes,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::migrate(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    *no_proposal_sync,
-                    *yes,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Migrate { .. } => migrate(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::Deploy { .. } => deploy(ctx, cmd).map(|_| ()),
             WasmCmd::Upgrade {
                 contract_name,
@@ -641,6 +609,51 @@ pub(crate) fn store_code<'a>(
                     )?
                 },
                 timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn migrate<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<MigrateResponse> {
+    match cmd {
+        WasmCmd::Migrate {
+            contract_name,
+            label,
+            raw,
+            no_proposal_sync,
+            yes,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::migrate(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                *no_proposal_sync,
+                *yes,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
                 signer_args.private_key(&ctx.global_config()?)?,
                 account_sequence,
             )
