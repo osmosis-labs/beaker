@@ -1,6 +1,9 @@
 use std::{fs::File, io::Read, path::Path};
 
-use super::{config::TaskConfig, script_mod::wasm};
+use super::{
+    config::TaskConfig,
+    script_mod::{wasm, wasm_proposal},
+};
 use crate::framework::{Context, Module};
 use anyhow::Result;
 use clap::{Arg, Command, Subcommand};
@@ -34,8 +37,10 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                 let mut engine = Engine::new();
 
                 let wasm = exported_module!(wasm::commands);
+                let wasm_proposal = exported_module!(wasm_proposal::commands);
 
                 engine.register_static_module("wasm", wasm.into());
+                engine.register_static_module("wasm::proposal", wasm_proposal.into());
 
                 let script_path = root
                     .join(config.tasks_path)

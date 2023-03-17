@@ -8,6 +8,7 @@ const PROPOSAL_GROUP: &str = "detailed-proposal";
 pub struct Code {
     /// Public repository of the code
     #[clap(long, group = PROPOSAL_GROUP, default_value="")]
+    #[serde(default)]
     pub repo: String,
 
     /// RUST_FLAGS that passed while compiling to wasm
@@ -30,10 +31,12 @@ pub struct Code {
 pub struct StoreCodeProposal {
     /// Proposal title
     #[clap(long, group = PROPOSAL_GROUP, default_value="")]
+    #[serde(default)]
     pub title: String,
 
     /// Proposal decsription
     #[clap(long, group = PROPOSAL_GROUP, default_value="")]
+    #[serde(default)]
     pub description: String,
 
     /// Proposal deposit to activate voting
@@ -42,6 +45,7 @@ pub struct StoreCodeProposal {
 
     /// Metadata of the wasm to store
     #[clap(flatten)]
+    #[serde(flatten)]
     pub code: Code,
 }
 
