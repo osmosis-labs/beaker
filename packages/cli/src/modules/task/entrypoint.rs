@@ -111,9 +111,12 @@ fn expand_macro_assert(input: &str) -> String {
         let left = caps.name("left").unwrap().as_str().trim();
         let right = caps.name("right").unwrap().as_str().trim();
         let op = caps.name("op").unwrap().as_str().trim();
+
+        let escaped_left = left.replace('"', r#"\""#);
+        let escaped_right = right.replace('"', r#"\""#);
         format!(
             r#"if (!({} {} {})) {{ throw "[ASSERTION FAILED]\n\n  expected:\n    {} {} {}\n\n  but:\n    left  = " + {}.to_string() + "\n    right = " + {}.to_string() + "\n\n"; }}"#,
-            left, op, right, left, op, right, left, right
+            left, op, right, escaped_left, op, escaped_right, left, right
         )
     });
 
