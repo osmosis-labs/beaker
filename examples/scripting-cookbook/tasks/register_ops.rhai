@@ -1,55 +1,45 @@
+import "lib/shared_args" as shared_args;
+
 // # Matching command line arguments
 // matches the arguments passed to the script and returns a map of the arguments
-let cli_args = match_args(["signer", "build_flags", "op"]);
+let cli_args = match_args(["signer", "build_flags", "op", "op_name"]);
 
-// expect build flags to be a comma separated list of flags
-// - no_rebuild: don't rebuild the contract
-// - no_wasm_opt: don't optimize the wasm
-let build_flags = cli_args.build_flags.split(",");
+let shared_args = shared_args::from(cli_args);
 
-let base_args = #{
-    signer_account: cli_args.signer,
-    no_rebuild: build_flags.contains("no_rebuild"),
-    no_wasm_opt: build_flags.contains("no_wasm_opt"),
-};
-
+// Deploy op contract of choice
 let op_contract = wasm::deploy(merge(
-    base_args,
+    shared_args,
     #{
-        contract_name: "op-" + cli_args.op,
-        label: cli_args.op,
+        contract_name: "op-" + cli_args.op_name,
+        label: cli_args.op_name,
         msg: #{}
     }
 ));
 
+// register the op contract
 wasm::execute(merge(
-    base_args,
+    shared_args,
     #{
         contract_name: "calculator",
         label: "calculator",
         msg: #{
             register_ops: #{
                 ops: [
-                    #{ op: "*", addr: op_contract.contract_address }
+                    #{ op: cli_args.op, addr: op_contract.contract_address }
                 ]
             }
         }
     }
 ));
 
-let eval_response = wasm::execute(merge(
-    base_args,
+// query the registered contract
+let registered_add_contract = wasm::query(merge(
+    shared_args,
     #{
         contract_name: "calculator",
         label: "calculator",
-        msg: #{
-            eval: #{
-                op: "*",
-                a: "2",
-                b: "3"
-            }
-        }
-    }
-));
+        msg: #{ op_contract: #{ op: cli_args.op } }
+    }));
 
-@assert(eval_response.data.result == "6");
+// ensure that the op contract was registered properly
+@assert(registered_add_contract.data.addr == op_contract.contract_address);

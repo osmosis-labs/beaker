@@ -1,27 +1,20 @@
+import "lib/shared_args" as shared_args;
+
 // # Matching command line arguments
 // matches the arguments passed to the script and returns a map of the arguments
 let cli_args = match_args(["signer", "build_flags"]);
 
-// expect build flags to be a comma separated list of flags
-// - no_rebuild: don't rebuild the contract
-// - no_wasm_opt: don't optimize the wasm
-let build_flags = cli_args.build_flags.split(",");
-
-let base_args = #{
-    signer_account: cli_args.signer,
-    no_rebuild: build_flags.contains("no_rebuild"),
-    no_wasm_opt: build_flags.contains("no_wasm_opt"),
-};
+// use the shared_args library to create a base set of arguments
+let shared_args = shared_args::from(cli_args);
 
 // with this setup, we can run commands like:
 // $ beaker task run deploy -- --signer test1 --build_flags ""
 // $ beaker task run deploy -- --signer test2 --build_flags "no_rebuild"
 // $ beaker task run deploy -- --signer test3 --build_flags "no_rebuild,no_wasm_opt"
 
-
-// deployment logic
+// Deploy the add contract
 let add_contract = wasm::deploy(merge(
-    base_args,
+    shared_args,
     #{
         contract_name: "op-add",
         label: "add",
@@ -29,9 +22,9 @@ let add_contract = wasm::deploy(merge(
     }
 ));
 
-
+// Deploy the calculator contract and use the add contract as the first operator
 let calculator_contract = wasm::deploy(merge(
-    base_args,
+    shared_args,
     #{
         contract_name: "calculator",
         label: "calculator",
@@ -45,7 +38,7 @@ let calculator_contract = wasm::deploy(merge(
 
 // query the registered add contract
 let registered_add_contract = wasm::query(merge(
-    base_args,
+    shared_args,
     #{
         contract_name: "calculator",
         label: "calculator",
@@ -57,7 +50,7 @@ let registered_add_contract = wasm::query(merge(
 
 // try evaluating an expression
 let eval_response = wasm::execute(merge(
-    base_args,
+    shared_args,
     #{
         contract_name: "calculator",
         label: "calculator",
