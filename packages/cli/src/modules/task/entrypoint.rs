@@ -1,5 +1,5 @@
 use std::{
-    fs::File,
+    fs::{create_dir_all, File},
     io::Read,
     path::{Path, PathBuf},
 };
@@ -9,7 +9,7 @@ use super::{
     script_mod::{wasm, wasm_proposal},
 };
 use crate::framework::{Context, Module};
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use clap::{Arg, Command, Subcommand};
 use regex::Regex;
 use rhai::packages::Package;
@@ -23,6 +23,9 @@ use rhai_fs::FilesystemPackage;
 #[derive(Subcommand, Debug)]
 #[clap(trailing_var_arg = true)]
 pub enum TaskCmd {
+    New {
+        script: String,
+    },
     Run {
         script: String,
 
@@ -126,6 +129,31 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                         e.to_string()
                     )
                 })?;
+                Ok(())
+            }
+            TaskCmd::New { script } => {
+                let script_path = root
+                    .join(config.tasks_path)
+                    .join(format!("{}.rhai", script));
+
+                // create new file if not exists
+                create_dir_all(script_path.parent().with_context(|| {
+                    format!(
+                        "Failed to create parent directory for script `{}`",
+                        script_path.display()
+                    )
+                })?)?;
+
+                File::create(&script_path).with_context(|| {
+                    format!(
+                        "Failed to create script `{}` ({}).",
+                        script,
+                        script_path.display()
+                    )
+                })?;
+
+                println!("Created script `{}` ({}).", script, script_path.display());
+
                 Ok(())
             }
         }
