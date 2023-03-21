@@ -5,9 +5,10 @@ use clap::Parser;
 use cosmrs::{tx::Fee, Denom};
 use getset::Getters;
 use regex::Regex;
+use serde::Deserialize;
 
 use super::coin::CoinFromStr;
-#[derive(Debug, Parser, Getters, Clone)]
+#[derive(Debug, Parser, Getters, Clone, Deserialize)]
 #[get = "pub"]
 pub struct GasArgs {
     /// Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`

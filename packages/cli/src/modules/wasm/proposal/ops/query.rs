@@ -6,6 +6,7 @@ use anyhow::{Context as _, Result};
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{Proposal, ProposalStatus, TallyResult};
 use cosmos_sdk_proto::traits::Message;
 use cosmrs::bip32::secp256k1::pkcs8::der::DateTime;
+use serde::Serialize;
 use std::time::Duration;
 use std::vec;
 
@@ -13,7 +14,7 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: &Ctx,
     contract_name: &str,
     network: &str,
-) -> Result<Proposal> {
+) -> Result<QueryProposalResponse> {
     let global_config = ctx.global_config()?;
 
     let network_info = global_config
@@ -74,6 +75,14 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
             ..
         } = StoreCodeProposal::decode(content.unwrap().value.as_slice())?;
 
+        let total_deposit_coins = total_deposit
+            .iter()
+            .map(|c| Coin {
+                amount: c.amount.parse::<u128>().unwrap(),
+                denom: c.denom.clone(),
+            })
+            .collect::<Vec<Coin>>();
+
         let total_deposit = total_deposit
             .iter()
             .map(|c| format!("{}{}", c.amount, c.denom))
@@ -129,7 +138,7 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
                     total_deposit,
                     status
                 ),
-                vars_format!("Tally Result", yes, no, no_with_veto, abstain),
+                vars_format!("Final Tally Result", yes, no, no_with_veto, abstain),
                 vars_format!(
                     "Time",
                     submit_time,
@@ -142,6 +151,52 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
             .join("\n")
         );
 
-        Ok(res)
+        Ok(QueryProposalResponse {
+            proposal_id,
+            title,
+            description,
+            run_as,
+            total_deposit: total_deposit_coins,
+            status: status.to_string(),
+            final_tally_result: TallyResultReponse {
+                yes,
+                abstain,
+                no,
+                no_with_veto,
+            },
+            submit_time,
+            deposit_end_time,
+            voting_start_time,
+            voting_end_time,
+        })
     })
+}
+
+#[derive(Serialize)]
+pub struct QueryProposalResponse {
+    pub proposal_id: u64,
+    pub title: String,
+    pub description: String,
+    pub run_as: String,
+    pub total_deposit: Vec<Coin>,
+    pub status: String,
+    pub final_tally_result: TallyResultReponse,
+    pub submit_time: String,
+    pub deposit_end_time: String,
+    pub voting_start_time: String,
+    pub voting_end_time: String,
+}
+
+#[derive(Serialize)]
+pub struct TallyResultReponse {
+    pub yes: String,
+    pub abstain: String,
+    pub no: String,
+    pub no_with_veto: String,
+}
+
+#[derive(Serialize)]
+pub struct Coin {
+    pub amount: u128,
+    pub denom: String,
 }

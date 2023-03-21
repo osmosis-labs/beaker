@@ -6,4 +6,4 @@ pub use crate::modules::wasm::config::WasmConfig;
 pub use crate::modules::wasm::entrypoint::{WasmCmd, WasmModule};
 
 mod args;
-mod proposal;
+pub(crate) mod proposal;

@@ -1,4 +1,6 @@
+use anyhow::Result;
 use clap::Subcommand;
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use crate::{
@@ -7,9 +9,12 @@ use crate::{
     support::gas::Gas,
 };
 
-use super::proposal_struct::StoreCodeProposal;
+use super::{
+    ops::{propose::ProposeStoreCodeResponse, query::QueryProposalResponse, vote::VoteResponse},
+    proposal_struct::StoreCodeProposal,
+};
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum ProposalCmd {
     /// Proposal for storing .wasm on chain for later initialization
     StoreCode {
@@ -25,9 +30,11 @@ pub enum ProposalCmd {
         proposal: Option<PathBuf>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         store_code_proposal: StoreCodeProposal,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Vote for proposal
@@ -40,6 +47,7 @@ pub enum ProposalCmd {
         option: String,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     Query {
@@ -48,7 +56,7 @@ pub enum ProposalCmd {
     },
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum ProposalQueryCmd {
     /// Proposal for storing .wasm on chain for later initialization
     StoreCode {
@@ -56,14 +64,32 @@ pub enum ProposalQueryCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "local")]
+        #[serde(default = "default_value::network")]
         network: String,
     },
+}
+
+mod default_value {
+    pub fn network() -> String {
+        "local".to_string()
+    }
 }
 
 pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     ctx: Ctx,
     cmd: &ProposalCmd,
 ) -> Result<(), anyhow::Error> {
+    match cmd {
+        cmd @ ProposalCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
+        cmd @ ProposalCmd::Query { .. } => query(ctx, cmd).map(|_| ()),
+        cmd @ ProposalCmd::Vote { .. } => vote(ctx, cmd).map(|_| ()),
+    }
+}
+
+pub(crate) fn store_code<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &ProposalCmd,
+) -> Result<ProposeStoreCodeResponse> {
     match cmd {
         ProposalCmd::StoreCode {
             contract_name,
@@ -118,18 +144,17 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
                 account_sequence,
-            )?;
-            Ok(())
+            )
         }
-        ProposalCmd::Query { cmd } => match cmd {
-            ProposalQueryCmd::StoreCode {
-                contract_name,
-                network,
-            } => {
-                super::ops::query_proposal(&ctx, contract_name, network)?;
-                Ok(())
-            }
-        },
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn vote<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &ProposalCmd,
+) -> Result<VoteResponse> {
+    match cmd {
         ProposalCmd::Vote {
             contract_name,
             option,
@@ -159,8 +184,23 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
                 timeout_height,
                 signer_args.private_key(&ctx.global_config()?)?,
                 account_sequence,
-            )?;
-            Ok(())
+            )
         }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn query<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &ProposalCmd,
+) -> Result<QueryProposalResponse> {
+    match cmd {
+        ProposalCmd::Query { cmd } => match cmd {
+            ProposalQueryCmd::StoreCode {
+                contract_name,
+                network,
+            } => super::ops::query_proposal(&ctx, contract_name, network),
+        },
+        _ => unimplemented!(),
     }
 }

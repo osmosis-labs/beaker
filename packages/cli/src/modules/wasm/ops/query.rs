@@ -8,6 +8,7 @@ use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
 use cosmrs::AccountId;
+use serde::Serialize;
 
 use std::fs;
 
@@ -71,7 +72,7 @@ pub fn query<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct QueryResponse {
     pub label: String,
     pub contract_address: String,

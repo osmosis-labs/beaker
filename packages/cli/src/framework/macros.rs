@@ -23,7 +23,8 @@ macro_rules! config_impl {
 #[macro_export]
 macro_rules! context {
     ($ctx:ident, config={ $key:ident: $cfg:ident }) => {
-        struct $ctx {}
+        #[derive(Debug, Clone)]
+        pub struct $ctx {}
         impl $ctx {
             fn new() -> Self {
                 $ctx {}

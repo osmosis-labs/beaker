@@ -1,22 +1,29 @@
+use anyhow::{bail, Result};
+use clap::Subcommand;
+use console::style;
+use derive_new::new;
+use serde::Deserialize;
 use std::env;
 use std::fmt::Formatter;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
 
-use anyhow::{bail, Result};
-use clap::Subcommand;
-use console::style;
-use derive_new::new;
-
 use crate::framework::{Context, Module};
 use crate::support::command::run_command;
 use crate::support::gas::Gas;
 
+use super::ops::clear_admin::ClearAdminResponse;
+use super::ops::execute::ExecuteResponse;
+use super::ops::instantiate::InstantiateResponse;
+use super::ops::migrate::MigrateResponse;
+use super::ops::query::QueryResponse;
+use super::ops::store_code::StoreCodeResponse;
+use super::ops::update_admin::UpdateAdminResponse;
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 
-#[derive(clap::ArgEnum, Clone, Debug)]
+#[derive(clap::ArgEnum, Clone, Debug, Deserialize)]
 pub enum NodePackageManager {
     Npm,
     Yarn,
@@ -49,7 +56,7 @@ impl std::fmt::Display for NodePackageManager {
     }
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Deserialize)]
 pub enum WasmCmd {
     /// Create new CosmWasm contract from boilerplate
     New {
@@ -66,9 +73,11 @@ pub enum WasmCmd {
     Build {
         /// If set, the contract(s) will not be optimized by wasm-opt after build (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
         /// Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
         #[clap(short, long)]
+        #[serde(default = "default_value::aarch64")]
         aarch64: bool,
     },
     /// Store .wasm on chain for later initialization
@@ -78,6 +87,7 @@ pub enum WasmCmd {
 
         /// If set, use non wasm-opt optimized wasm to store code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         /// Restricting the code to be able to instantiate only by given address, no restriction by default
@@ -85,6 +95,7 @@ pub enum WasmCmd {
         permit_instantiate_only: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     TsGen {
@@ -101,6 +112,7 @@ pub enum WasmCmd {
 
         /// Code output directory
         #[clap(long, default_value = "yarn")]
+        #[serde(default = "default_value::node_package_manager")]
         node_package_manager: NodePackageManager,
     },
     /// Update admin that can migrate contract
@@ -110,6 +122,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Address of new admin
@@ -117,6 +130,7 @@ pub enum WasmCmd {
         new_admin: String,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Clear admin so no one can migrate contract
@@ -126,9 +140,11 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
 
@@ -138,6 +154,7 @@ pub enum WasmCmd {
         contract_name: String,
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -156,13 +173,16 @@ pub enum WasmCmd {
 
         /// Skip the check for proposal's updated code_id
         #[clap(long)]
+        #[serde(default = "default_value::no_proposal_sync")]
         no_proposal_sync: bool,
 
         /// Agree to all prompts
         #[clap(short, long)]
+        #[serde(default = "default_value::yes")]
         yes: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Migrated instanitate contract to use other code stored on chain
@@ -171,6 +191,7 @@ pub enum WasmCmd {
         contract_name: String,
         /// Label for the instantiated contract for selcting migration target
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -179,13 +200,16 @@ pub enum WasmCmd {
 
         /// Skip the check for proposal's updated code_id
         #[clap(long)]
+        #[serde(default = "default_value::no_proposal_sync")]
         no_proposal_sync: bool,
 
         /// Agree to all prompts
         #[clap(short, long)]
+        #[serde(default = "default_value::yes")]
         yes: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Build, Optimize, Store code, and instantiate contract
@@ -195,6 +219,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -217,13 +242,16 @@ pub enum WasmCmd {
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
+        #[serde(default = "default_value::no_rebuild")]
         no_rebuild: bool,
 
         /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Build, Optimize, Store code, and migrate contract
@@ -233,6 +261,7 @@ pub enum WasmCmd {
 
         /// Label for the instantiated contract for later reference
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         /// Raw json string to use as instantiate msg
@@ -241,10 +270,12 @@ pub enum WasmCmd {
 
         /// Use existing .wasm file to deploy if set to true
         #[clap(long)]
+        #[serde(default = "default_value::no_rebuild")]
         no_rebuild: bool,
 
         /// If set, skip wasm-opt and store the unoptimized code (only use in dev)
         #[clap(long)]
+        #[serde(default = "default_value::no_wasm_opt")]
         no_wasm_opt: bool,
 
         /// Restricting the code to be able to instantiate only by given address, no restriction by default
@@ -252,6 +283,7 @@ pub enum WasmCmd {
         permit_instantiate_only: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     Proposal {
@@ -263,6 +295,7 @@ pub enum WasmCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(short, long)]
@@ -272,6 +305,7 @@ pub enum WasmCmd {
         funds: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
     /// Query contract state
@@ -279,14 +313,48 @@ pub enum WasmCmd {
         contract_name: String,
 
         #[clap(short, long, default_value = "default")]
+        #[serde(default = "default_value::label")]
         label: String,
 
         #[clap(short, long)]
         raw: Option<String>,
 
         #[clap(flatten)]
+        #[serde(flatten)]
         base_tx_args: BaseTxArgs,
     },
+}
+
+mod default_value {
+    use super::NodePackageManager;
+
+    pub(crate) fn label() -> String {
+        "default".to_string()
+    }
+
+    pub(crate) fn node_package_manager() -> NodePackageManager {
+        NodePackageManager::Yarn
+    }
+
+    pub(crate) fn no_wasm_opt() -> bool {
+        false
+    }
+
+    pub(crate) fn no_rebuild() -> bool {
+        false
+    }
+
+    pub(crate) fn no_proposal_sync() -> bool {
+        false
+    }
+
+    pub(crate) fn yes() -> bool {
+        false
+    }
+
+    pub(crate) fn aarch64() -> bool {
+        false
+    }
 }
 
 #[derive(new)]
@@ -300,273 +368,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 target_dir, // TODO: Rremove this
                 version,
             } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
-            WasmCmd::Build {
-                no_wasm_opt,
-                aarch64,
-            } => ops::build(&ctx, no_wasm_opt, aarch64),
-            WasmCmd::StoreCode {
-                contract_name,
-                no_wasm_opt,
-                permit_instantiate_only,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-
-                ops::store_code(
-                    &ctx,
-                    contract_name,
-                    network,
-                    no_wasm_opt,
-                    permit_instantiate_only,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::UpdateAdmin {
-                contract_name,
-                label,
-                new_admin,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-
-                ops::update_admin(
-                    &ctx,
-                    contract_name,
-                    label,
-                    network,
-                    new_admin,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::ClearAdmin {
-                contract_name,
-                label,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-
-                ops::clear_admin(
-                    &ctx,
-                    contract_name,
-                    label,
-                    network,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    timeout_height,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-
-            WasmCmd::Instantiate {
-                contract_name,
-                label,
-                raw,
-                admin,
-                no_proposal_sync,
-                yes,
-                funds,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::instantiate(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    admin.as_ref(),
-                    *no_proposal_sync,
-                    *yes,
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::Migrate {
-                contract_name,
-                label,
-                raw,
-                no_proposal_sync,
-                yes,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::migrate(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    *no_proposal_sync,
-                    *yes,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::Deploy {
-                contract_name,
-                label,
-                raw,
-                permit_instantiate_only,
-                admin,
-                funds,
-                no_rebuild,
-                no_wasm_opt,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::deploy(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    permit_instantiate_only,
-                    admin.as_ref(),
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    no_rebuild,
-                    no_wasm_opt,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::Upgrade {
-                contract_name,
-                label,
-                raw,
-                no_rebuild,
-                no_wasm_opt,
-                permit_instantiate_only,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::upgrade(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    permit_instantiate_only,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    no_rebuild,
-                    no_wasm_opt,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Build { .. } => build(ctx, cmd),
+            cmd @ WasmCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::UpdateAdmin { .. } => update_admin(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::ClearAdmin { .. } => clear_admin(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::Instantiate { .. } => instantiate(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::Migrate { .. } => migrate(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::Deploy { .. } => deploy(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::Upgrade { .. } => upgrade(ctx, cmd).map(|_| ()),
             WasmCmd::Proposal { cmd } => proposal::entrypoint::execute(ctx, cmd),
             WasmCmd::TsGen {
                 contract_name,
@@ -613,52 +422,395 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 run_command(node_pkg().arg("run").arg("build"))?;
                 Ok(())
             }
-            WasmCmd::Execute {
-                contract_name,
-                label,
-                raw,
-                funds,
-                base_tx_args,
-            } => {
-                let BaseTxArgs {
-                    network,
-                    signer_args,
-                    gas_args,
-                    timeout_height,
-                    account_sequence,
-                }: &BaseTxArgs = base_tx_args;
-                ops::execute(
-                    &ctx,
-                    contract_name,
-                    label.as_str(),
-                    raw.as_ref(),
-                    funds.as_ref().map(|s| s.as_str()).try_into()?,
-                    network,
-                    timeout_height,
-                    {
-                        let global_conf = ctx.global_config()?;
-                        &Gas::from_args(
-                            gas_args,
-                            global_conf.gas_price(),
-                            global_conf.gas_adjustment(),
-                        )?
-                    },
-                    signer_args.private_key(&ctx.global_config()?)?,
-                    account_sequence,
-                )?;
-                Ok(())
-            }
-            WasmCmd::Query {
-                contract_name,
-                label,
-                raw,
-                base_tx_args,
-            } => {
-                let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
-                ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)?;
-                Ok(())
-            }
+            cmd @ WasmCmd::Execute { .. } => execute(ctx, cmd).map(|_| ()),
+            cmd @ WasmCmd::Query { .. } => query(ctx, cmd).map(|_| ()),
         }
+    }
+}
+
+pub(crate) fn deploy<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<InstantiateResponse> {
+    match cmd {
+        WasmCmd::Deploy {
+            contract_name,
+            label,
+            raw,
+            permit_instantiate_only,
+            admin,
+            funds,
+            no_rebuild,
+            no_wasm_opt,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::deploy(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                permit_instantiate_only,
+                admin.as_ref(),
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                signer_args.private_key(&ctx.global_config()?)?,
+                no_rebuild,
+                no_wasm_opt,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn query<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Result<QueryResponse> {
+    match cmd {
+        WasmCmd::Query {
+            contract_name,
+            label,
+            raw,
+            base_tx_args,
+        } => {
+            let BaseTxArgs { network, .. }: &BaseTxArgs = base_tx_args;
+            ops::query(&ctx, contract_name, label.as_str(), raw.as_ref(), network)
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn build<'a>(ctx: impl Context<'a, WasmConfig>, cmd: &WasmCmd) -> Result<()> {
+    match cmd {
+        WasmCmd::Build {
+            no_wasm_opt,
+            aarch64,
+        } => ops::build(&ctx, no_wasm_opt, aarch64),
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn store_code<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<StoreCodeResponse> {
+    match cmd {
+        WasmCmd::StoreCode {
+            contract_name,
+            no_wasm_opt,
+            permit_instantiate_only,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+
+            ops::store_code(
+                &ctx,
+                contract_name,
+                network,
+                no_wasm_opt,
+                permit_instantiate_only,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn upgrade<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<MigrateResponse> {
+    match cmd {
+        WasmCmd::Upgrade {
+            contract_name,
+            label,
+            raw,
+            no_rebuild,
+            no_wasm_opt,
+            permit_instantiate_only,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::upgrade(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                permit_instantiate_only,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                signer_args.private_key(&ctx.global_config()?)?,
+                no_rebuild,
+                no_wasm_opt,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn migrate<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<MigrateResponse> {
+    match cmd {
+        WasmCmd::Migrate {
+            contract_name,
+            label,
+            raw,
+            no_proposal_sync,
+            yes,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::migrate(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                *no_proposal_sync,
+                *yes,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn update_admin<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<UpdateAdminResponse> {
+    match cmd {
+        WasmCmd::UpdateAdmin {
+            contract_name,
+            label,
+            new_admin,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+
+            ops::update_admin(
+                &ctx,
+                contract_name,
+                label,
+                network,
+                new_admin,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn clear_admin<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<ClearAdminResponse> {
+    match cmd {
+        WasmCmd::ClearAdmin {
+            contract_name,
+            label,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+
+            ops::clear_admin(
+                &ctx,
+                contract_name,
+                label,
+                network,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                timeout_height,
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn instantiate<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<InstantiateResponse> {
+    match cmd {
+        WasmCmd::Instantiate {
+            contract_name,
+            label,
+            raw,
+            admin,
+            funds,
+            no_proposal_sync,
+            yes,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::instantiate(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                admin.as_ref(),
+                *no_proposal_sync,
+                *yes,
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
+    }
+}
+
+pub(crate) fn execute<'a>(
+    ctx: impl Context<'a, WasmConfig>,
+    cmd: &WasmCmd,
+) -> Result<ExecuteResponse> {
+    match cmd {
+        WasmCmd::Execute {
+            contract_name,
+            label,
+            raw,
+            funds,
+            base_tx_args,
+        } => {
+            let BaseTxArgs {
+                network,
+                signer_args,
+                gas_args,
+                timeout_height,
+                account_sequence,
+            }: &BaseTxArgs = base_tx_args;
+            ops::execute(
+                &ctx,
+                contract_name,
+                label.as_str(),
+                raw.as_ref(),
+                funds.as_ref().map(|s| s.as_str()).try_into()?,
+                network,
+                timeout_height,
+                {
+                    let global_conf = ctx.global_config()?;
+                    &Gas::from_args(
+                        gas_args,
+                        global_conf.gas_price(),
+                        global_conf.gas_adjustment(),
+                    )?
+                },
+                signer_args.private_key(&ctx.global_config()?)?,
+                account_sequence,
+            )
+        }
+        _ => unimplemented!(),
     }
 }
 

@@ -13,6 +13,7 @@ use anyhow::Result;
 use cosmrs::cosmwasm::MsgStoreCode;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
+use serde::Serialize;
 
 #[allow(clippy::too_many_arguments)]
 pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
@@ -83,7 +84,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct StoreCodeResponse {
     pub code_id: u64,
     pub instantiate_permission: String,

@@ -14,6 +14,7 @@ use cosmos_sdk_proto::cosmwasm::wasm::v1::StoreCodeProposal;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::MessageExt;
 use cosmrs::Any;
+use serde::Serialize;
 use std::vec;
 
 #[allow(clippy::too_many_arguments)]
@@ -118,7 +119,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct ProposeStoreCodeResponse {
     pub proposal_id: u64,
     pub deposit_amount: String,

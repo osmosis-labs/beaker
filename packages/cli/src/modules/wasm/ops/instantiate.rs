@@ -14,6 +14,7 @@ use anyhow::Result;
 use cosmrs::cosmwasm::MsgInstantiateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
+use serde::Serialize;
 
 use std::{fs, vec};
 
@@ -121,7 +122,7 @@ pub fn instantiate<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct InstantiateResponse {
     pub label: String,
     pub contract_address: String,

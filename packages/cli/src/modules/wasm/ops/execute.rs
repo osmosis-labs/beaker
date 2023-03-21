@@ -10,10 +10,13 @@ use crate::{framework::Context, support::cosmos::Client};
 use anyhow::anyhow;
 use anyhow::Context as _;
 use anyhow::Result;
+use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgExecuteContractResponse;
+use cosmos_sdk_proto::{traits::Message, Any};
 use cosmrs::cosmwasm::MsgExecuteContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::Msg;
 use cosmrs::AccountId;
+use serde::Serialize;
 
 use std::{fs, vec};
 
@@ -50,7 +53,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
         .parse::<AccountId>()
         .map_err(|e| anyhow!(e))?;
 
-    let msg_instantiate_contract = MsgExecuteContract {
+    let msg_execute_contract = MsgExecuteContract {
         sender: client.signer_account_id(),
         contract,
         msg: raw
@@ -73,7 +76,7 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     block(async {
         let response = client
             .sign_and_broadcast(
-                vec![msg_instantiate_contract.to_any().unwrap()],
+                vec![msg_execute_contract.to_any().unwrap()],
                 gas,
                 "",
                 timeout_height,
@@ -83,9 +86,19 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
 
         let contract_address = response.pick("execute", "_contract_address");
 
+        let deliver_tx_data_bytes = base64::decode(&response.deliver_tx.data[..])?;
+        let deliver_tx_data: DeliverTxData =
+            DeliverTxData::decode(&mut &deliver_tx_data_bytes[..])?;
+
+        let response: MsgExecuteContractResponse =
+            MsgExecuteContractResponse::decode(&mut &deliver_tx_data.data[0].value[..])?;
+
+        let decoded = serde_json::from_slice::<serde_json::Value>(&response.data[..]);
+
         let execute_response = ExecuteResponse {
             contract_address,
             label: label.to_string(),
+            data: decoded.ok(),
         };
 
         execute_response.log();
@@ -94,10 +107,11 @@ pub fn execute<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct ExecuteResponse {
     pub label: String,
     pub contract_address: String,
+    pub data: Option<serde_json::Value>,
 }
 
 impl OpResponseDisplay for ExecuteResponse {
@@ -107,4 +121,10 @@ impl OpResponseDisplay for ExecuteResponse {
     fn attrs(&self) -> Vec<String> {
         attrs_format! { self | label, contract_address }
     }
+}
+
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeliverTxData {
+    #[prost(message, repeated, tag = "1")]
+    pub data: ::prost::alloc::vec::Vec<Any>,
 }

@@ -13,6 +13,7 @@ use anyhow::Result;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgMigrateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::MessageExt;
+use serde::Serialize;
 use std::fs;
 
 #[allow(clippy::too_many_arguments)]
@@ -113,7 +114,7 @@ pub fn migrate<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-#[allow(dead_code)]
+#[derive(Serialize)]
 pub struct MigrateResponse {
     pub label: String,
     pub contract_address: String,
