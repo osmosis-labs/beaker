@@ -84,6 +84,7 @@ pub enum Commands {
         #[clap(short, long, default_value = "local")]
         network: String,
     },
+    /// Managing tasks for the project
     Task {
         #[clap(subcommand)]
         cmd: TaskCmd,

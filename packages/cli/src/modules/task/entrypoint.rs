@@ -23,10 +23,14 @@ use rhai_fs::FilesystemPackage;
 #[derive(Subcommand, Debug)]
 #[clap(trailing_var_arg = true)]
 pub enum TaskCmd {
+    /// Create a new task
     New {
-        script: String,
+        /// Name of the task
+        task: String,
     },
+    /// Run a task
     Run {
+        /// Name of the task
         script: String,
 
         #[clap(multiple_values = true, allow_hyphen_values = true)]
@@ -131,7 +135,7 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                 })?;
                 Ok(())
             }
-            TaskCmd::New { script } => {
+            TaskCmd::New { task: script } => {
                 let script_path = root
                     .join(config.tasks_path)
                     .join(format!("{}.rhai", script));
