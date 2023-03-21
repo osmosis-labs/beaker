@@ -34,6 +34,7 @@
 - [Deploy contract on LocalOsmosis](#deploy-contract-on-localosmosis)
 - [Contract Upgrade](#contract-upgrade)
 - [Signers](#signers)
+- [Tasks](#tasks)
 - [Console](#console)
 - [Typescript SDK Generation](#typescript-sdk-generation)
 - [Frontend](#frontend)
@@ -345,6 +346,96 @@ Whenever you run command that requires signing transactions, there are 3 options
 - `--signer-mnemonic` input of this option is the raw mnemonic string to construct a signer
 - `--signer-private-key` input of this option is the same as `--signer-mnemonic` except it expects base64 encoded private key
 - `--signer-keyring` use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](./docs/commands/beaker_key.md).
+
+### Tasks
+Sometimes you want to run a series of commands in a single command. For example, you want to deploy a set of contracts that one contract instantiation depends on another contract. You can do this by defining a task in the `tasks` directory.
+
+```sh
+beaker task new deploy
+```
+
+This will create a new task file in `tasks/deploy.rhai`.
+
+Task is written in `Rhai` which is an embedded scripting language in Rust. You can find example of how to write Rhai [here](https://rhai.rs/book/start/examples/scripts.html).
+
+Using Rhai as a scripting language makes exposing all existing functionality of Beaker to the task script relatively simple. Currently, all the subcommands of `beaker wasm` are exposed to the task script. So you can do things like:
+
+```rhai
+let counter_contract = wasm::deploy(merge(
+    #{
+        signer_account: "test1"
+        contract_name: "counter",
+        msg: #{}
+    }
+));
+
+let counter_proxy_contract = wasm::deploy(merge(
+    #{
+        signer_account: "test1"
+        contract_name: "counter",
+        msg: #{
+            counter_contract_address: counter_contract.address
+        }
+    }
+));
+
+```
+
+The interface of `wasm::deploy` the same as the `beaker wasm deploy` command. Other functions in `wasm` module are also similar to their corresponding subcommands so you can refer to the [documentation](./docs/commands/beaker_wasm.md) for more information about what is avialable in the script.
+
+Note that additional feature here is that `msg` can also be passed as an object rather than passing JSON string to `raw`.
+
+There are also some additional helper function and macros that are exposed to the task script.
+
+#### `fs` module
+This module provides access to the file system. It is similar to the `std::fs` module in Rust. Morre information about the module can be found [here](https://github.com/rhaiscript/rhai-fs#rhai-script). This is how it can be used in the task script:
+
+```rhai
+file = fs::open_file("params.json");
+```
+
+#### `match_args`
+
+Matching command line arguments passed to the script and returns a map of the arguments
+
+```rhai
+// beaker task run deploy -- --signer test1 --build-flags no_wasm_opt
+let cli_args = match_args(["signer", "build_flags"]);
+
+print(cli_args) // => #{ signer: "test1", "build_flags": "no_wasm_opt" }
+```
+
+#### `merge`
+Merges 2 objects together. If there are duplicate keys, the value from the second object will be used.
+
+```rhai
+let a = #{ a: 1, b: 2 };
+let b = #{ b: 3, c: 4 };
+
+let merged = merge(a, b);
+
+print(merged) // => #{ a: 1, b: 3, c: 4 }
+```
+
+#### `@assert`
+Perform assertion on the given condition. If the condition is false, the script will exit with an error.
+This is useful for ensuring that the script is running as expected.
+
+```rhai
+@assert(1 == 1); // pass
+@assert(1 == 2); // fail
+
+@assert(1 != 2); // pass
+@assert(1 != 1); // fail
+
+@assert(1 < 2); // pass
+@assert(1 > 2); // fail
+
+@assert(1 <= 2); // pass
+@assert(1 >= 2); // fail
+```
+
+For more example on how to use task, you can refer to the [example tasks](./examples/scripting-cookbook/tasks/).
 
 ### Console
 
