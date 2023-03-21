@@ -76,6 +76,8 @@ Arguments:
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+
 ---
 
 ### `beaker wasm ts-gen`
@@ -128,6 +130,8 @@ Arguments:
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+
 ---
 
 ### `beaker wasm clear-admin`
@@ -159,6 +163,8 @@ Arguments:
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -202,6 +208,8 @@ Arguments:
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+
 ---
 
 ### `beaker wasm migrate`
@@ -239,6 +247,8 @@ Arguments:
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -284,6 +294,8 @@ Arguments:
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+
 ---
 
 ### `beaker wasm upgrade`
@@ -323,6 +335,8 @@ Arguments:
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -372,6 +386,8 @@ Arguments:
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+
 ---
 
 ### `beaker wasm query`
@@ -405,3 +421,5 @@ Arguments:
 * `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
 
 * `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
+
+* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch

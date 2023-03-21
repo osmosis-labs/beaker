@@ -2,7 +2,7 @@
 
 CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain.
 
-Version: 0.1.3
+Version: 0.1.4
 
 Arguments:
 
@@ -69,3 +69,17 @@ Arguments:
 * `--version`: Print version information
 
 * `-n/--network <network>` (default: `local`)
+
+---
+
+### `beaker task`
+
+Managing tasks for the project
+
+[\> `beaker task`'s subcommands](./beaker_task.md)
+
+Arguments:
+
+* `--help`: Print help information
+
+* `--version`: Print version information
