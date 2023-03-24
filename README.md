@@ -15,7 +15,7 @@
     <a href="https://crates.io/crates/beaker"><img height="20" src="https://img.shields.io/crates/v/beaker.svg"></a>
 </p>
 
-[Beaker](https://github.com/osmosis-labs/beaker) makes it easy to scaffold a new cosmwasm app, with all of the dependencies for osmosis hooked up, interactive console, and a sample front-end at the ready.
+[Beaker](https://github.com/osmosis-labs/beaker) is a toolkit for interacting with CosmWasm smart contracts: sacffolding your project, streamline your deployment, upgrade, execute, query, interactive console, task scripting and more.
 
 ---
 
