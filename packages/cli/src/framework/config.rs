@@ -93,10 +93,10 @@ impl Default for GlobalConfig {
                 (
                     "testnet".into(),
                     Network {
-                        chain_id: "osmo-test-4".into(),
+                        chain_id: "osmo-test-5".into(),
                         network_variant: NetworkVariant::Shared,
-                        grpc_endpoint: "https://grpc-test.osmosis.zone:443".into(),
-                        rpc_endpoint: "https://rpc-test.osmosis.zone:443".into(),
+                        grpc_endpoint: "https://grpc.osmotest5.osmosis.zone".into(),
+                        rpc_endpoint: "https://rpc.osmotest5.osmosis.zone".into(),
                     }
                 ),
                 (
