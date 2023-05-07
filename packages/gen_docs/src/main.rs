@@ -1,4 +1,4 @@
-use beaker::{Cli, ConsoleConfig, GlobalConfig, WasmConfig, WorkspaceConfig};
+use tesseract::{Cli, ConsoleConfig, GlobalConfig, WasmConfig, WorkspaceConfig};
 use clap::CommandFactory;
 use serde::Serialize;
 use std::io::Write;

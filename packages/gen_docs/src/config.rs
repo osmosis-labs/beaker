@@ -108,8 +108,8 @@ macro_rules! generate_config_doc {
         let default_config = vec![$( gen_docs::default_config!($(#[$attr])? $prefix : $t), ) +].join("\n\n");
 
         let readme = vec![
-        "# Beaker Configuration",
-        "The following list is the configuration references for beaker which can be used in `Beaker.toml`.",
+        "# Tesseract Configuration",
+        "The following list is the configuration references for tesseract which can be used in `Beaker.toml`.",
         "",
         $( format!("- [{}](./{}.md)", stringify!($prefix), stringify!($prefix)).as_str(), ) +
         "---",

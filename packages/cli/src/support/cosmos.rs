@@ -5,12 +5,9 @@ use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
 use cosmrs::abci::GasInfo;
 use cosmrs::crypto::secp256k1::SigningKey;
-
-use cosmos_sdk_proto::traits::Message;
 use cosmrs::tx::{self, SignDoc, SignerInfo};
 use cosmrs::{dev, AccountId, Coin};
 use cosmrs::{rpc, tx::Fee, Any};
-
 use super::gas::Gas;
 
 pub type TxCommitResponse = rpc::endpoint::broadcast::tx_commit::Response;
@@ -58,23 +55,21 @@ impl Client {
     }
 
     pub async fn account(&self, address: &str) -> Result<BaseAccount> {
-        use cosmos_sdk_proto::cosmos::auth::v1beta1::*;
-        let grpc_endpoint = self.network.grpc_endpoint();
-
-        let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
-            .await
-            .context(format!("Unable to connect to {grpc_endpoint}"))?;
-
-        let res = c
-            .account(QueryAccountRequest {
-                address: address.into(),
-            })
+        let url = self.network.rest_endpoint().to_owned();
+        let v = reqwest::get(url + "/cosmos/auth/v1beta1/accounts/" + address)
             .await?
-            .into_inner()
-            .account
-            .context("Account not found")?;
-
-        BaseAccount::decode(res.value.as_slice()).context("Unable to decode BaseAccount")
+            .json::<serde_json::Value>()
+            .await?;
+        let res  = BaseAccount{
+            address: String::from(v["account"]["base_account"]["address"].as_str().unwrap()),
+            pub_key: Some(Any {
+                type_url: String::from(v["account"]["base_account"]["pub_key"]["@type"].as_str().unwrap()),
+                value: v["account"]["base_account"]["pub_key"]["key"].as_str().unwrap().as_bytes().to_vec(),
+            }),
+            account_number: v["account"]["base_account"]["account_number"].as_str().unwrap().parse::<u64>().unwrap(),
+            sequence: v["account"]["base_account"]["sequence"].as_str().unwrap().parse::<u64>().unwrap(),
+        };
+        Ok(res)
     }
 
     #[allow(deprecated)]

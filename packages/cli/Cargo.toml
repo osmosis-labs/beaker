@@ -1,8 +1,8 @@
 [package]
-description = "CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain."
+description = "CosmWasm swiss-army knife configured for Quadrate by default, but trivial to make it work for other CosmWasm enabled chain."
 edition = "2021"
 license = "MIT OR Apache-2.0"
-name = "beaker"
+name = "tesseract"
 version = "0.1.5"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -34,6 +34,7 @@ tendermint-rpc = {version = "0.28.0", features = ["http-client"]}
 textwrap = "0.15.0"
 tokio = {version = "1.18.2", features = ["full"]}
 toml = "0.5.9"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
 
 [dev-dependencies]
 assert_fs = "1.0.7"

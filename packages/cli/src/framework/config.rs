@@ -55,6 +55,9 @@ pub struct Network {
 
     /// Endpoint for rpc
     rpc_endpoint: String,
+
+    /// Endpoint for rest
+    rest_endpoint: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, GetDataDocs)]
@@ -76,38 +79,31 @@ impl Default for GlobalConfig {
     fn default() -> Self {
         Self {
             name: Default::default(),
-            gas_price: "0.025uosmo".to_string(),
-            gas_adjustment: 1.3,
-            account_prefix: "osmo".to_string(),
-            derivation_path: "m/44'/118'/0'/0/0".to_string(),
+            gas_price: "0.0002qube".to_string(),
+            gas_adjustment: 1.0,
+            account_prefix: "qube".to_string(),
+            derivation_path: "m/44'/60'/0'/0/0".to_string(),
             networks: Map::from([
                 (
                     "local".into(),
                     Network {
-                        chain_id: "localosmosis".into(),
+                        chain_id: "quadrate_5120-1".into(),
                         network_variant: NetworkVariant::Local,
                         grpc_endpoint: "http://localhost:9090".into(),
-                        rpc_endpoint: "http://localhost:26657".into()
+                        rpc_endpoint: "http://localhost:26657".into(),
+                        rest_endpoint: "http://localhost:1317".into()
                     }
                 ),
                 (
-                    "testnet".into(),
+                    "devnet".into(),
                     Network {
-                        chain_id: "osmo-test-5".into(),
-                        network_variant: NetworkVariant::Shared,
-                        grpc_endpoint: "https://grpc.osmotest5.osmosis.zone".into(),
-                        rpc_endpoint: "https://rpc.osmotest5.osmosis.zone".into(),
+                        chain_id: "quadrate_5120-1".into(),
+                        network_variant: NetworkVariant::Local,
+                        grpc_endpoint: "http://45.83.123.247:9090".into(),
+                        rpc_endpoint: "http://45.83.123.247:26657".into(),
+                        rest_endpoint: "http://45.83.123.247:1317".into()
                     }
                 ),
-                (
-                    "mainnet".into(),
-                    Network {
-                        chain_id: "osmosis-1".into(),
-                        network_variant: NetworkVariant::Shared,
-                        grpc_endpoint: "https://grpc.osmosis.zone:9090".into(),
-                        rpc_endpoint: "https://rpc.osmosis.zone:443".into(),
-                    }
-                )
             ]),
             accounts: Map::from([
                 ("validator".into(), Account::FromMnemonic { mnemonic: "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort".into() }),

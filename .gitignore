@@ -12,3 +12,4 @@ params
 *.swp
 *.swo
 .vscode
+docs/
