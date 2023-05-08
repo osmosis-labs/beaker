@@ -76,7 +76,7 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("cosmwasm-dapp/Beaker.toml")
+        temp.child("cosmwasm-dapp/Tesseract.toml")
             .assert(predicate::path::exists());
 
         // with custom config file name
@@ -118,7 +118,7 @@ mod tests {
         )
         .unwrap();
 
-        temp.child("custom-path/cosmwasm-dapp/Beaker.toml")
+        temp.child("custom-path/cosmwasm-dapp/Tesseract.toml")
             .assert(predicate::path::exists());
 
         // with custom config file name

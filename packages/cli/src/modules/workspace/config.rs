@@ -15,7 +15,7 @@ impl Default for WorkspaceConfig {
         Self {
             template: Template::new(
                 "workspace-template".to_string(),
-                "https://github.com/osmosis-labs/beaker.git".to_string(),
+                "https://github.com/QuadrateOrg/tesseract.git".to_string(),
                 "main".to_string(),
                 Some("templates/project".to_string()),
                 PathBuf::from("."),

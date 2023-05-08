@@ -109,7 +109,7 @@ macro_rules! generate_config_doc {
 
         let readme = vec![
         "# Tesseract Configuration",
-        "The following list is the configuration references for tesseract which can be used in `Beaker.toml`.",
+        "The following list is the configuration references for tesseract which can be used in `Tesseract.toml`.",
         "",
         $( format!("- [{}](./{}.md)", stringify!($prefix), stringify!($prefix)).as_str(), ) +
         "---",

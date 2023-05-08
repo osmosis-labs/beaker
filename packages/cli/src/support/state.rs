@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::framework::config::{Network, NetworkVariant};
 
-pub const STATE_DIR: &str = ".beaker";
+pub const STATE_DIR: &str = ".tesseract";
 pub const STATE_FILE_LOCAL: &str = "state.local.json";
 pub const STATE_FILE_SHARED: &str = "state.json";
 

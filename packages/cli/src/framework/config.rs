@@ -25,7 +25,7 @@ pub struct GlobalConfig {
     /// BIP-32 derivation path used for creating account from mnemonic
     derivation_path: String,
 
-    /// Map of the available network configuration to interact with via beaker
+    /// Map of the available network configuration to interact with via tesseract
     networks: Map<String, Network>,
 
     /// Predefined account used for interacting with the chain
@@ -34,10 +34,10 @@ pub struct GlobalConfig {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, GetDataDocs)]
 pub enum NetworkVariant {
-    /// Beaker's state of the network will not be shared with collaborator via vcs
+    /// tesseract's state of the network will not be shared with collaborator via vcs
     Local,
 
-    /// Beaker's state of the network will be shared with collaborator via vcs
+    /// tesseract's state of the network will be shared with collaborator via vcs
     Shared,
 }
 
