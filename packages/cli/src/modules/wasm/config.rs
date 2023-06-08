@@ -19,7 +19,7 @@ impl Default for WasmConfig {
         Self {
             contract_dir: "contracts".to_string(),
             template_repo: "https://github.com/osmosis-labs/cw-minimal-template".to_string(),
-            optimizer_version: "0.12.8".to_string(),
+            optimizer_version: "0.12.13".to_string(),
         }
     }
 }
