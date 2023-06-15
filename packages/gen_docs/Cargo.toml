@@ -7,7 +7,7 @@ version = "0.1.0"
 
 [dependencies]
 beaker = {path = "../cli"}
-clap = {version = "3.2.5"}
+clap = {version = "4.2"}
 data_doc = {path = "../data_doc"}
 data_doc_derive = {path = "../data_doc_derive"}
 pulldown-cmark = "0.9.1"

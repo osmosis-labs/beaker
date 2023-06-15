@@ -1,12 +1,8 @@
 # `beaker wasm proposal`
 
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
-
 ## Subcommands
+
+---
 
 ### `beaker wasm proposal store-code`
 
@@ -14,45 +10,37 @@ Proposal for storing .wasm on chain for later initialization
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `--permit-instantiate-only <PERMIT_INSTANTIATE_ONLY>`: Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
 
-* ` <contract-name>`Name of the contract to store
+* `-p / --proposal <PROPOSAL>`: Path to proposal file, could be either yaml / toml format
 
-* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate/migrate only by given address, no restriction by default
+* `--title <TITLE>`: Proposal title (default: ``)
 
-* `-p/--proposal <proposal>`: Path to proposal file, could be either yaml / toml format
+* `--description <DESCRIPTION>`: Proposal decsription (default: ``)
 
-* `--title <title>`: Proposal title (default: ``)
+* `--deposit <DEPOSIT>`: Proposal deposit to activate voting
 
-* `--description <description>`: Proposal decsription (default: ``)
+* `--unpin-code <UNPIN_CODE>`: Unpin code on upload (default: `false`)
 
-* `--deposit <deposit>`: Proposal deposit to activate voting
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `--repo <repo>`: Public repository of the code (default: ``)
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `--rust-flags <rust-flags>`: RUST_FLAGS that passed while compiling to wasm If building with Beaker, it's usually "-C link-arg=-s"
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--optimizer <optimizer>`: Type and version of the [optimizer](https://github.com/CosmWasm/rust-optimizer), either: rust-optimizer:<version> or workspace-optimizer:<version>. Beaker use workspace-optimizer, the version, if not manually configured, can be found in `wasm` config doc
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
-
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
-
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -62,40 +50,30 @@ Vote for proposal
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `-o / --option <OPTION>`: Vote option, one of: yes, no, no_with_veto, abstain
 
-* ` <contract-name>`Name of the contract to store
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-o/--option <option>`: Vote option, one of: yes, no, no_with_veto, abstain
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
 ### `beaker wasm proposal query`
 
 [\> `beaker wasm proposal query`'s subcommands](./beaker_wasm_proposal_query.md)
-
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information

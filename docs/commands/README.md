@@ -2,15 +2,11 @@
 
 CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain.
 
-Version: 0.1.4
-
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
+Version: 0.1.5
 
 ## Subcommands
+
+---
 
 ### `beaker new`
 
@@ -18,15 +14,11 @@ Create new workspace from boilerplate
 
 Arguments:
 
-* `--help`: Print help information
+* `<NAME>` Workspace name
 
-* `--version`: Print version information
+* `-t / --target-dir <TARGET_DIR>`: Path to store generated workspace
 
-* ` <name>`Workspace name
-
-* `-t/--target-dir <target-dir>`: Path to store generated workspace
-
-* `-b/--branch <branch>`: Template's branch, using main if not specified
+* `-b / --branch <BRANCH>`: Template's branch, using main if not specified
 
 ---
 
@@ -36,12 +28,6 @@ Manipulating and interacting with CosmWasm contract
 
 [\> `beaker wasm`'s subcommands](./beaker_wasm.md)
 
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
-
 ---
 
 ### `beaker key`
@@ -49,12 +35,6 @@ Arguments:
 Managing key backed by system's secret store
 
 [\> `beaker key`'s subcommands](./beaker_key.md)
-
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
 
 ---
 
@@ -64,11 +44,7 @@ Launch interactive console for interacting with the project
 
 Arguments:
 
-* `--help`: Print help information
-
-* `--version`: Print version information
-
-* `-n/--network <network>` (default: `local`)
+* `-n / --network <NETWORK>` (default: `local`)
 
 ---
 
@@ -77,9 +53,3 @@ Arguments:
 Managing tasks for the project
 
 [\> `beaker task`'s subcommands](./beaker_task.md)
-
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information

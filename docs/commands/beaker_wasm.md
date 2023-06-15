@@ -2,13 +2,9 @@
 
 Manipulating and interacting with CosmWasm contract
 
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
-
 ## Subcommands
+
+---
 
 ### `beaker wasm new`
 
@@ -16,15 +12,11 @@ Create new CosmWasm contract from boilerplate
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Contract name
 
-* `--version`: Print version information
+* `-t / --target-dir <TARGET_DIR>`: Path to store generated contract
 
-* ` <contract-name>`Contract name
-
-* `-t/--target-dir <target-dir>`: Path to store generated contract
-
-* `-v/--version <version>`: Template's version, using main branch if not specified
+* `-v / --version <VERSION>`: Template's version, using main branch if not specified
 
 ---
 
@@ -34,13 +26,9 @@ Build .wasm for storing contract code on the blockchain
 
 Arguments:
 
-* `--help`: Print help information
+* `--no-wasm-opt <NO_WASM_OPT>`: If set, the contract(s) will not be optimized by wasm-opt after build (only use in dev)
 
-* `--version`: Print version information
-
-* `--no-wasm-opt`: If set, the contract(s) will not be optimized by wasm-opt after build (only use in dev)
-
-* `-a/--aarch64`: Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
+* `-a / --aarch64 <AARCH64>`: Option for m1 user for wasm optimization, FOR TESTING ONLY, PRODUCTION BUILD SHOULD USE INTEL BUILD
 
 ---
 
@@ -50,33 +38,29 @@ Store .wasm on chain for later initialization
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `--no-wasm-opt <NO_WASM_OPT>`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
 
-* ` <contract-name>`Name of the contract to store
+* `--permit-instantiate-only <PERMIT_INSTANTIATE_ONLY>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
-* `--no-wasm-opt`: If set, use non wasm-opt optimized wasm to store code (only use in dev)
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -84,17 +68,13 @@ Arguments:
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `--schema-gen-cmd <SCHEMA_GEN_CMD>`: Sschema generation command, default: `cargo schema`
 
-* ` <contract-name>`Name of the contract to store
+* `--out-dir <OUT_DIR>`: Code output directory, ignore remaining ts build process if custom out_dir is specified
 
-* `--schema-gen-cmd <schema-gen-cmd>`: Sschema generation command, default: `cargo schema`
-
-* `--out-dir <out-dir>`: Code output directory, ignore remaining ts build process if custom out_dir is specified
-
-* `--node-package-manager <node-package-manager>`: Code output directory (default: `yarn`)
+* `--node-package-manager <NODE_PACKAGE_MANAGER>`: Code output directory (default: `yarn`)
 
 ---
 
@@ -104,33 +84,29 @@ Update admin that can migrate contract
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for later reference (default: `default`)
 
-* ` <contract-name>`Name of the contract to store
+* `--new-admin <NEW_ADMIN>`: Address of new admin
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `--new-admin <new-admin>`: Address of new admin
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -140,31 +116,27 @@ Clear admin so no one can migrate contract
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to store
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for later reference (default: `default`)
 
-* ` <contract-name>`Name of the contract to store
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -174,41 +146,37 @@ Instanitate .wasm stored on chain
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to instantiate
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for later reference (default: `default`)
 
-* ` <contract-name>`Name of the contract to instantiate
+* `-r / --raw <RAW>`: Raw json string to use as instantiate msg
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+* `--admin <ADMIN>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
 
-* `-r/--raw <raw>`: Raw json string to use as instantiate msg
+* `-f / --funds <FUNDS>`: Funds to send to instantiated contract
 
-* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+* `--no-proposal-sync <NO_PROPOSAL_SYNC>`: Skip the check for proposal's updated code_id
 
-* `-f/--funds <funds>`: Funds to send to instantiated contract
+* `-y / --yes <YES>`: Agree to all prompts
 
-* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-y/--yes`: Agree to all prompts
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -218,37 +186,33 @@ Migrated instanitate contract to use other code stored on chain
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to instantiate
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for selcting migration target (default: `default`)
 
-* ` <contract-name>`Name of the contract to instantiate
+* `-r / --raw <RAW>`: Raw json string to use as instantiate msg
 
-* `-l/--label <label>`: Label for the instantiated contract for selcting migration target (default: `default`)
+* `--no-proposal-sync <NO_PROPOSAL_SYNC>`: Skip the check for proposal's updated code_id
 
-* `-r/--raw <raw>`: Raw json string to use as instantiate msg
+* `-y / --yes <YES>`: Agree to all prompts
 
-* `--no-proposal-sync`: Skip the check for proposal's updated code_id
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-y/--yes`: Agree to all prompts
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -258,43 +222,39 @@ Build, Optimize, Store code, and instantiate contract
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to deploy
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for later reference (default: `default`)
 
-* ` <contract-name>`Name of the contract to deploy
+* `-r / --raw <RAW>`: Raw json string to use as instantiate msg
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+* `--permit-instantiate-only <PERMIT_INSTANTIATE_ONLY>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
-* `-r/--raw <raw>`: Raw json string to use as instantiate msg
+* `--admin <ADMIN>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
 
-* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `-f / --funds <FUNDS>`: Funds to send to instantiated contract
 
-* `--admin <admin>`: Specifying admin required for contract migration. Use "signer" for setting tx signer as admin. Use bech32 address (eg. "osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks") for custom admin
+* `--no-rebuild <NO_REBUILD>`: Use existing .wasm file to deploy if set to true
 
-* `-f/--funds <funds>`: Funds to send to instantiated contract
+* `--no-wasm-opt <NO_WASM_OPT>`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
 
-* `--no-rebuild`: Use existing .wasm file to deploy if set to true
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -304,51 +264,41 @@ Build, Optimize, Store code, and migrate contract
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>` Name of the contract to deploy
 
-* `--version`: Print version information
+* `-l / --label <LABEL>`: Label for the instantiated contract for later reference (default: `default`)
 
-* ` <contract-name>`Name of the contract to deploy
+* `-r / --raw <RAW>`: Raw json string to use as instantiate msg
 
-* `-l/--label <label>`: Label for the instantiated contract for later reference (default: `default`)
+* `--no-rebuild <NO_REBUILD>`: Use existing .wasm file to deploy if set to true
 
-* `-r/--raw <raw>`: Raw json string to use as instantiate msg
+* `--no-wasm-opt <NO_WASM_OPT>`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
 
-* `--no-rebuild`: Use existing .wasm file to deploy if set to true
+* `--permit-instantiate-only <PERMIT_INSTANTIATE_ONLY>`: Restricting the code to be able to instantiate only by given address, no restriction by default
 
-* `--no-wasm-opt`: If set, skip wasm-opt and store the unoptimized code (only use in dev)
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `--permit-instantiate-only <permit-instantiate-only>`: Restricting the code to be able to instantiate only by given address, no restriction by default
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
 ### `beaker wasm proposal`
 
 [\> `beaker wasm proposal`'s subcommands](./beaker_wasm_proposal.md)
-
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
 
 ---
 
@@ -358,35 +308,31 @@ Execute contract messages
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>`
 
-* `--version`: Print version information
+* `-l / --label <LABEL>` (default: `default`)
 
-* ` <contract-name>`
+* `-r / --raw <RAW>`
 
-* `-l/--label <label>` (default: `default`)
+* `-f / --funds <FUNDS>`
 
-* `-r/--raw <raw>`
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-f/--funds <funds>`
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
 
 ---
 
@@ -396,30 +342,26 @@ Query contract state
 
 Arguments:
 
-* `--help`: Print help information
+* `<CONTRACT_NAME>`
 
-* `--version`: Print version information
+* `-l / --label <LABEL>` (default: `default`)
 
-* ` <contract-name>`
+* `-r / --raw <RAW>`
 
-* `-l/--label <label>` (default: `default`)
+* `-n / --network <NETWORK>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
 
-* `-r/--raw <raw>`
+* `--gas <GAS>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
 
-* `-n/--network <network>`: Name of the network to broadcast transaction to, the actual endpoint / chain-id are defined in config (default: `local`)
+* `--gas-limit <GAS_LIMIT>`: Limit to how much gas amount allowed to be consumed
 
-* `--gas <gas>`: Coin (amount and denom) you are willing to pay as gas eg. `1000uosmo`
+* `--signer-account <SIGNER_ACCOUNT>`: Specifies predefined account as a tx signer
 
-* `--gas-limit <gas-limit>`: Limit to how much gas amount allowed to be consumed
+* `--signer-keyring <SIGNER_KEYRING>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
 
-* `--signer-account <signer-account>`: Specifies predefined account as a tx signer
+* `--signer-mnemonic <SIGNER_MNEMONIC>`: Specifies mnemonic as a tx signer
 
-* `--signer-keyring <signer-keyring>`: Use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](docs/commands/beaker_key.md)
+* `--signer-private-key <SIGNER_PRIVATE_KEY>`: Specifies private_key as a tx signer (base64 encoded string)
 
-* `--signer-mnemonic <signer-mnemonic>`: Specifies mnemonic as a tx signer
+* `-t / --timeout-height <TIMEOUT_HEIGHT>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
 
-* `--signer-private-key <signer-private-key>`: Specifies private_key as a tx signer (base64 encoded string)
-
-* `-t/--timeout-height <timeout-height>`: Specifies a block timeout height to prevent the tx from being committed past a certain height (default: `0`)
-
-* `-a/--account-sequence <account-sequence>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch
+* `-a / --account-sequence <ACCOUNT_SEQUENCE>`: Account sequence number to use for the transaction, if not provided, sequence will be fetched from the chain. This is useful if there is an account sequence mismatch

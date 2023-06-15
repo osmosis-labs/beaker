@@ -2,13 +2,9 @@
 
 Managing key backed by system's secret store
 
-Arguments:
-
-* `--help`: Print help information
-
-* `--version`: Print version information
-
 ## Subcommands
+
+---
 
 ### `beaker key set`
 
@@ -16,15 +12,11 @@ Create new key or update existing key
 
 Arguments:
 
-* `--help`: Print help information
+* `<NAME>` Name of the key to create or update
 
-* `--version`: Print version information
+* `<MNEMONIC>` Mnemonic string to store as an entry
 
-* ` <name>`Name of the key to create or update
-
-* ` <mnemonic>`Mnemonic string to store as an entry
-
-* `-y/--yes`: Agree to all prompts
+* `-y / --yes <YES>`: Agree to all prompts
 
 ---
 
@@ -34,13 +26,9 @@ Delete existing key
 
 Arguments:
 
-* `--help`: Print help information
+* `<NAME>` Name of the key to create or update
 
-* `--version`: Print version information
-
-* ` <name>`Name of the key to create or update
-
-* `-y/--yes`: Agree to all prompts
+* `-y / --yes <YES>`: Agree to all prompts
 
 ---
 
@@ -50,11 +38,7 @@ Get address from keyring's stored key
 
 Arguments:
 
-* `--help`: Print help information
-
-* `--version`: Print version information
-
-* ` <name>`Name of the key to create or update
+* `<NAME>` Name of the key to create or update
 
 ---
 
@@ -64,12 +48,8 @@ Generate new mnemonic
 
 Arguments:
 
-* `--help`: Print help information
+* `<NAME>` Name of the key to create or update
 
-* `--version`: Print version information
+* `--show <SHOW>`: Show mnemonic in the console if set, keep it secret otherwise
 
-* ` <name>`Name of the key to create or update
-
-* `--show`: Show mnemonic in the console if set, keep it secret otherwise
-
-* `-y/--yes`: Agree to all prompts
+* `-y / --yes <YES>`: Agree to all prompts
