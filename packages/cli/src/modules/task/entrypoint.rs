@@ -12,12 +12,12 @@ use crate::framework::{Context, Module};
 use anyhow::{Context as _, Result};
 use clap::{Arg, Command, Subcommand};
 use regex::Regex;
-use rhai::packages::Package;
 use rhai::{
     exported_module,
     serde::{from_dynamic, to_dynamic},
     Dynamic, Engine, EvalAltResult, Map,
 };
+use rhai::{module_resolvers::FileModuleResolver, packages::Package};
 use rhai_fs::FilesystemPackage;
 
 #[derive(Subcommand, Debug)]
@@ -45,10 +45,14 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
         let root = ctx.root()?;
         let config = ctx.config()?;
         let global_config = ctx.global_config()?;
+        let task_path = root.join(config.tasks_path.clone());
 
         match cmd {
             TaskCmd::Run { script, args } => {
                 let mut engine = Engine::new();
+
+                // register file module resolver
+                engine.set_module_resolver(FileModuleResolver::new_with_path(task_path.clone()));
 
                 // register filesystem package
                 let package = FilesystemPackage::new();
@@ -61,9 +65,7 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                 engine.register_static_module("wasm", wasm.into());
                 engine.register_static_module("wasm::proposal", wasm_proposal.into());
 
-                let script_path = root
-                    .join(config.tasks_path)
-                    .join(format!("{}.rhai", script));
+                let script_path = task_path.join(format!("{}.rhai", script));
 
                 let moved_script = script.to_owned();
                 let args = args.to_owned();
