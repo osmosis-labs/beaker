@@ -33,7 +33,7 @@ pub enum TaskCmd {
         /// Name of the task
         script: String,
 
-        #[clap(multiple_values = true, allow_hyphen_values = true)]
+        #[clap(num_args = 0.., allow_hyphen_values = true)]
         args: Vec<String>,
     },
 }
@@ -90,24 +90,25 @@ impl<'a> Module<'a, TaskConfig, TaskCmd, anyhow::Error> for TaskModule {
                 engine.register_fn(
                     "match_args",
                     move |arg_defs: Dynamic| -> Result<Map, Box<EvalAltResult>> {
-                        let arg_defs = from_dynamic::<Vec<&str>>(&arg_defs)?;
+                        let arg_defs = from_dynamic::<Vec<String>>(&arg_defs)?;
 
                         let prog_name = format!("beaker task run {}", moved_script);
 
-                        let matches = Command::new(prog_name.clone())
-                            .args(arg_defs.clone().into_iter().map(|arg| {
-                                Arg::new(arg).long(arg).required(true).takes_value(true)
-                            }))
-                            .try_get_matches_from(
-                                // emulate calling cli command with args
-                                vec![prog_name].iter().chain(args.to_owned().iter()),
-                            )
-                            .map_err(|e| <Box<EvalAltResult>>::from(e.to_string()))?;
+                        let matches =
+                            Command::new(prog_name.clone())
+                                .args(arg_defs.clone().into_iter().map(|arg| {
+                                    Arg::new(&arg).long(&arg).required(true).num_args(1..)
+                                }))
+                                .try_get_matches_from(
+                                    // emulate calling cli command with args
+                                    vec![prog_name].iter().chain(args.to_owned().iter()),
+                                )
+                                .map_err(|e| <Box<EvalAltResult>>::from(e.to_string()))?;
 
                         arg_defs
                             .into_iter()
                             .map(|arg| -> Result<_, Box<EvalAltResult>> {
-                                let matched = matches.value_of(arg).unwrap_or("");
+                                let matched: &String = matches.get_one(arg.as_ref()).unwrap();
                                 Ok((arg.into(), to_dynamic(matched)?))
                             })
                             .collect::<Result<Map, _>>()

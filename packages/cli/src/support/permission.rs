@@ -33,7 +33,7 @@ pub fn compute_instantiate_permission(
 
             anyhow::Ok(AccessConfig {
                 permission: cosmrs::cosmwasm::AccessType::OnlyAddress,
-                address,
+                addresses: vec![address],
             })
         })
         .transpose()?;

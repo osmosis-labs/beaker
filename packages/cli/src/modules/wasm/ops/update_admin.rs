@@ -4,7 +4,7 @@ use crate::support::future::block;
 use crate::support::gas::Gas;
 use crate::support::ops_response::OpResponseDisplay;
 use anyhow::Context as _;
-use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgUpdateAdmin;
+use cosmrs::proto::cosmwasm::wasm::v1::MsgUpdateAdmin;
 use serde::Serialize;
 
 use crate::support::state::State;

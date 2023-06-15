@@ -28,7 +28,7 @@ mod modules;
 mod support;
 
 use anyhow::{Context as _, Result};
-use clap::{AppSettings, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 use config::Config;
 use data_doc_derive::GetDataDocs;
 use modules::{
@@ -55,7 +55,6 @@ use crate::modules::{key::config::KeyConfig, task::config::TaskConfig};
 #[derive(Parser)]
 #[clap(author, version,about, long_about = None)]
 #[clap(propagate_version = true)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub struct Cli {
     // config: Option<PathBuf>,
     #[clap(subcommand)]

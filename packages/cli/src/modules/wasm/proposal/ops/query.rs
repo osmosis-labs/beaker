@@ -3,9 +3,9 @@ use crate::support::state::State;
 use crate::vars_format;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::{Context as _, Result};
-use cosmos_sdk_proto::cosmos::gov::v1beta1::{Proposal, ProposalStatus, TallyResult};
-use cosmos_sdk_proto::traits::Message;
 use cosmrs::bip32::secp256k1::pkcs8::der::DateTime;
+use cosmrs::proto::cosmos::gov::v1beta1::{Proposal, ProposalStatus, TallyResult};
+use cosmrs::proto::traits::Message;
 use serde::Serialize;
 use std::time::Duration;
 use std::vec;
@@ -37,7 +37,7 @@ pub fn query_proposal<'a, Ctx: Context<'a, WasmConfig>>(
             })?)
             .await?;
 
-        use cosmos_sdk_proto::cosmwasm::wasm::v1::StoreCodeProposal;
+        use cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal;
 
         let Proposal {
             proposal_id,

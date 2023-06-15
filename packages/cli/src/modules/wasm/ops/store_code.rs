@@ -69,7 +69,7 @@ pub fn store_code<'a, Ctx: Context<'a, WasmConfig>>(
         let store_code_response = StoreCodeResponse {
             code_id,
             instantiate_permission: instantiate_permission
-                .map(|p| format!("only_address | {}", p.address))
+                .map(|p| format!("only_addresses | {:?}", p.addresses))
                 .unwrap_or_else(|| "–".to_string()),
         };
 

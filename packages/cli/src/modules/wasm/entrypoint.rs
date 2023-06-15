@@ -23,7 +23,7 @@ use super::ops::update_admin::UpdateAdminResponse;
 use super::{args::BaseTxArgs, config::WasmConfig, proposal::entrypoint::ProposalCmd};
 use super::{ops, proposal};
 
-#[derive(clap::ArgEnum, Clone, Debug, Deserialize)]
+#[derive(clap::ValueEnum, Clone, Debug, Deserialize)]
 pub enum NodePackageManager {
     Npm,
     Yarn,

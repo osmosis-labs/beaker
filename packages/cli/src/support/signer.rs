@@ -51,7 +51,7 @@ impl SignerArgs {
                     SigningKey::from_mnemonic(mnemonic.as_str(), derivation_path)
                 }
                 Some(Account::FromPrivateKey { private_key }) => {
-                    Ok(SigningKey::from_bytes(&base64::decode(private_key)?).unwrap())
+                    Ok(SigningKey::from_slice(&base64::decode(private_key)?).unwrap())
                 }
             }
         } else if let Some(signer_keyring) = signer_keyring {
@@ -60,7 +60,7 @@ impl SignerArgs {
         } else if let Some(signer_mnemonic) = signer_mnemonic {
             SigningKey::from_mnemonic(signer_mnemonic, derivation_path)
         } else if let Some(signer_private_key) = signer_private_key {
-            Ok(SigningKey::from_bytes(&base64::decode(signer_private_key)?).unwrap())
+            Ok(SigningKey::from_slice(&base64::decode(signer_private_key)?).unwrap())
         } else {
             bail!("Unable to retrive signer private key")
         }?;

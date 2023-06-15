@@ -9,9 +9,9 @@ use crate::support::state::State;
 use crate::support::wasm::read_wasm;
 use crate::{framework::Context, modules::wasm::WasmConfig, support::cosmos::Client};
 use anyhow::{Context as _, Result};
-use cosmos_sdk_proto::cosmos::gov::v1beta1::MsgSubmitProposal;
-use cosmos_sdk_proto::cosmwasm::wasm::v1::StoreCodeProposal;
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::proto::cosmos::gov::v1beta1::MsgSubmitProposal;
+use cosmrs::proto::cosmwasm::wasm::v1::StoreCodeProposal;
 use cosmrs::tx::MessageExt;
 use cosmrs::Any;
 use serde::Serialize;
@@ -57,10 +57,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
         run_as: client.signer_account_id().to_string(),
         wasm_byte_code: wasm,
         instantiate_permission: instantiate_permission.clone().map(|ac| ac.into()),
-        // unpin_code: false,
-        // source: "".to_string(),
-        // builder: "".to_string(),
-        // code_hash: vec![],
+        unpin_code: false,
     };
 
     let msg_submit_proposal = MsgSubmitProposal {
@@ -102,7 +99,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
             proposal_id,
             deposit_amount,
             instantiate_permission: instantiate_permission
-                .map(|p| format!("only_address | {}", p.address))
+                .map(|p| format!("only_addresss | {:?}", p.addresses))
                 .unwrap_or_else(|| "–".to_string()),
         };
 
