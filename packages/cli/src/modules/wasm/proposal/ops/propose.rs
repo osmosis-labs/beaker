@@ -24,6 +24,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
     title: &str,
     description: &str,
     deposit: Coins,
+    unpin_code: bool,
     network: &str,
     gas: &Gas,
     permit_instantiate_only: &Option<String>,
@@ -57,7 +58,7 @@ pub fn propose_store_code<'a, Ctx: Context<'a, WasmConfig>>(
         run_as: client.signer_account_id().to_string(),
         wasm_byte_code: wasm,
         instantiate_permission: instantiate_permission.clone().map(|ac| ac.into()),
-        unpin_code: false,
+        unpin_code,
     };
 
     let msg_submit_proposal = MsgSubmitProposal {

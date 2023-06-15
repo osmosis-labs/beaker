@@ -5,26 +5,6 @@ use serde::{Deserialize, Serialize};
 const PROPOSAL_GROUP: &str = "detailed-proposal";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Parser)]
-pub struct Code {
-    /// Public repository of the code
-    #[clap(long, group = PROPOSAL_GROUP, default_value="")]
-    #[serde(default)]
-    pub repo: String,
-
-    /// RUST_FLAGS that passed while compiling to wasm
-    /// If building with Beaker, it's usually "-C link-arg=-s"
-    #[clap(long, group = PROPOSAL_GROUP)]
-    pub rust_flags: Option<String>,
-
-    /// Type and version of the [optimizer](https://github.com/CosmWasm/rust-optimizer), either:
-    /// rust-optimizer:<version> or
-    /// workspace-optimizer:<version>.
-    /// Beaker use workspace-optimizer, the version, if not manually configured, can be found in `wasm` config doc.
-    #[clap(long, group = PROPOSAL_GROUP)]
-    pub optimizer: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Parser)]
 #[clap(group = clap::ArgGroup::new(PROPOSAL_GROUP)
     .multiple(true)
     .conflicts_with("proposal"))]
@@ -43,23 +23,15 @@ pub struct StoreCodeProposal {
     #[clap(long, group = PROPOSAL_GROUP)]
     pub deposit: Option<String>,
 
-    /// Metadata of the wasm to store
-    #[clap(flatten)]
-    #[serde(flatten)]
-    pub code: Code,
+    /// Unpin code on upload
+    #[clap(long, group = PROPOSAL_GROUP, default_value="false")]
+    #[serde(default)]
+    pub unpin_code: bool,
 }
 
 impl StoreCodeProposal {
     pub fn description_with_metadata(&self) -> Result<String> {
-        Ok(vec![
-            self.description.trim(),
-            "",
-            "---",
-            "",
-            "[metadata]",
-            toml::to_string::<Code>(&self.code)?.as_str().trim(),
-        ]
-        .join("\n"))
+        Ok(vec![self.description.trim()].join("\n"))
     }
 }
 
@@ -81,11 +53,7 @@ mod tests {
             "#,
             ),
             deposit: Some("1000uosmo".to_string()),
-            code: Code {
-                repo: "https://github.com/osmosis-labs/beaker/templates/project".to_string(),
-                rust_flags: Some("-C link-arg=-s".to_string()),
-                optimizer: Some("workspace-optimizer:0.12.6".to_string()),
-            },
+            unpin_code: true,
         }
     }
 
@@ -99,10 +67,7 @@ mod tests {
                             goes here
                             we expect this to be many lines...
                 deposit: 1000uosmo
-                code:
-                    repo: https://github.com/osmosis-labs/beaker/templates/project
-                    rust_flags: -C link-arg=-s
-                    optimizer: workspace-optimizer:0.12.6
+                unpin_code: true
             "#,
         );
 
@@ -124,11 +89,7 @@ mod tests {
                 '''
 
                 deposit = "1000uosmo"
-
-                [code]
-                repo = "https://github.com/osmosis-labs/beaker/templates/project"
-                rust_flags = "-C link-arg=-s"
-                optimizer = "workspace-optimizer:0.12.6"
+                unpin_code = true
             "#,
         );
 

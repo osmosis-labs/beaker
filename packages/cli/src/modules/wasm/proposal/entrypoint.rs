@@ -114,8 +114,12 @@ pub(crate) fn store_code<'a>(
                 None
             };
 
-            let store_code_proposal @ StoreCodeProposal { title, deposit, .. } =
-                proposal.as_ref().unwrap_or(store_code_proposal);
+            let StoreCodeProposal {
+                title,
+                deposit,
+                unpin_code,
+                description,
+            } = proposal.as_ref().unwrap_or(store_code_proposal);
 
             let BaseTxArgs {
                 network,
@@ -129,8 +133,9 @@ pub(crate) fn store_code<'a>(
                 &ctx,
                 contract_name,
                 title.as_str(),
-                store_code_proposal.description_with_metadata()?.as_str(),
+                description.as_str(),
                 deposit.as_ref().map(|s| s.as_str()).try_into()?,
+                *unpin_code,
                 network,
                 {
                     let global_conf = ctx.global_config()?;
