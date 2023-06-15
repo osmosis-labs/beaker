@@ -21,17 +21,21 @@ pub trait ResponseValuePicker {
 
 impl ResponseValuePicker for TxCommitResponse {
     fn pick(&self, event: &str, attribute: &str) -> String {
-        self.deliver_tx
+        let value = self
+            .deliver_tx
             .events
             .iter()
             .find(|e| e.kind == event)
             .unwrap()
             .attributes
             .iter()
-            .find(|a| a.key == attribute)
+            .find(|a| a.key == base64::encode(attribute))
             .unwrap()
             .value
-            .clone()
+            .clone();
+
+        let value_bytes = base64::decode(value).unwrap();
+        String::from_utf8(value_bytes).unwrap()
     }
 }
 
