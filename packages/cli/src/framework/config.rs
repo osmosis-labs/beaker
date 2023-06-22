@@ -79,7 +79,7 @@ impl Default for GlobalConfig {
     fn default() -> Self {
         Self {
             name: Default::default(),
-            gas_price: "0.0002qube".to_string(),
+            gas_price: "0.0002uqube".to_string(),
             gas_adjustment: 1.0,
             account_prefix: "qube".to_string(),
             derivation_path: "m/44'/60'/0'/0/0".to_string(),
