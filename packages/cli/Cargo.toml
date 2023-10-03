@@ -3,7 +3,7 @@ description = "CosmWasm swiss-army knife configured for Osmosis by default, but 
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "beaker"
-version = "0.1.6"
+version = "0.1.7"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -34,7 +34,7 @@ tendermint-rpc = {version = "0.32.0", features = ["http-client"]}
 textwrap = "0.15.0"
 tokio = {version = "1.18.2", features = ["full"]}
 toml = "0.5.9"
-tonic = {version = "*", features = ["tls", "tls-roots"]}
+tonic = {version = "0.9", features = ["tls", "tls-roots"]}
 
 [dev-dependencies]
 assert_fs = "1.0.7"
