@@ -10,8 +10,8 @@ use crate::{framework::Context, support::cosmos::Client};
 
 use anyhow::Context as _;
 use anyhow::Result;
+use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgMigrateContract;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::proto::cosmwasm::wasm::v1::MsgMigrateContract;
 use cosmrs::tx::MessageExt;
 use serde::Serialize;
 use std::fs;

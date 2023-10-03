@@ -75,7 +75,7 @@ impl From<Coins> for Vec<Coin> {
     }
 }
 
-impl From<Coins> for Vec<cosmrs::proto::cosmos::base::v1beta1::Coin> {
+impl From<Coins> for Vec<cosmos_sdk_proto::cosmos::base::v1beta1::Coin> {
     fn from(coins: Coins) -> Self {
         let Coins(v) = coins;
         v.iter().map(|c| c.into()).collect()

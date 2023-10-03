@@ -1,12 +1,12 @@
 use crate::framework::config::Network;
 use anyhow::{anyhow, Ok};
 use anyhow::{Context, Result};
+use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
+use cosmos_sdk_proto::cosmos::gov::v1beta1::Proposal;
 use cosmrs::abci::GasInfo;
 use cosmrs::crypto::secp256k1::SigningKey;
-use cosmrs::proto::cosmos::auth::v1beta1::BaseAccount;
-use cosmrs::proto::cosmos::gov::v1beta1::Proposal;
 
-use cosmrs::proto::traits::Message;
+use cosmos_sdk_proto::traits::Message;
 use cosmrs::tx::{self, SignDoc, SignerInfo};
 use cosmrs::{dev, AccountId, Coin};
 use cosmrs::{rpc, tx::Fee, Any};
@@ -62,7 +62,7 @@ impl Client {
     }
 
     pub async fn account(&self, address: &str) -> Result<BaseAccount> {
-        use cosmrs::proto::cosmos::auth::v1beta1::*;
+        use cosmos_sdk_proto::cosmos::auth::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
 
         let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
@@ -83,7 +83,7 @@ impl Client {
 
     #[allow(deprecated)]
     pub async fn simulate(&self, tx_bytes: Vec<u8>) -> Result<GasInfo> {
-        use cosmrs::proto::cosmos::tx::v1beta1::*;
+        use cosmos_sdk_proto::cosmos::tx::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
 
         let mut c = service_client::ServiceClient::connect(self.network.grpc_endpoint().clone())
@@ -104,7 +104,7 @@ impl Client {
     }
 
     pub async fn query_smart(&self, address: String, query_data: Vec<u8>) -> Result<Vec<u8>> {
-        use cosmrs::proto::cosmwasm::wasm::v1::*;
+        use cosmos_sdk_proto::cosmwasm::wasm::v1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
 
         let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
@@ -124,7 +124,7 @@ impl Client {
     }
 
     pub async fn proposal(&self, proposal_id: &u64) -> Result<Proposal> {
-        use cosmrs::proto::cosmos::gov::v1beta1::*;
+        use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
 
         let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
@@ -145,8 +145,8 @@ impl Client {
     async fn gov_params(
         &self,
         params_type: &str,
-    ) -> Result<cosmrs::proto::cosmos::gov::v1beta1::QueryParamsResponse> {
-        use cosmrs::proto::cosmos::gov::v1beta1::*;
+    ) -> Result<cosmos_sdk_proto::cosmos::gov::v1beta1::QueryParamsResponse> {
+        use cosmos_sdk_proto::cosmos::gov::v1beta1::*;
         let grpc_endpoint = self.network.grpc_endpoint();
 
         let mut c = query_client::QueryClient::connect(self.network.grpc_endpoint().clone())
@@ -164,7 +164,7 @@ impl Client {
     }
     pub async fn gov_params_deposit(
         &self,
-    ) -> Result<cosmrs::proto::cosmos::gov::v1beta1::DepositParams> {
+    ) -> Result<cosmos_sdk_proto::cosmos::gov::v1beta1::DepositParams> {
         self.gov_params("deposit")
             .await?
             .deposit_params

@@ -44,9 +44,9 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
         .with_context(|| format!("Unable to retrieve proposal_id for {contract_name}"))?;
 
     let option = option.parse::<VoteOptionImpl>()?;
-    let option = cosmrs::proto::cosmos::gov::v1beta1::VoteOption::from(option);
+    let option = cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption::from(option);
 
-    let msg_vote = cosmrs::proto::cosmos::gov::v1beta1::MsgVote {
+    let msg_vote = cosmos_sdk_proto::cosmos::gov::v1beta1::MsgVote {
         proposal_id,
         voter: client.signer_account_id().to_string(),
         option: option.into(),
@@ -72,15 +72,15 @@ pub fn vote<'a, Ctx: Context<'a, WasmConfig>>(
     })
 }
 
-struct VoteOptionImpl(cosmrs::proto::cosmos::gov::v1beta1::VoteOption);
+struct VoteOptionImpl(cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption);
 
-impl From<cosmrs::proto::cosmos::gov::v1beta1::VoteOption> for VoteOptionImpl {
-    fn from(v: cosmrs::proto::cosmos::gov::v1beta1::VoteOption) -> Self {
+impl From<cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption> for VoteOptionImpl {
+    fn from(v: cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption) -> Self {
         VoteOptionImpl(v)
     }
 }
 
-impl From<VoteOptionImpl> for cosmrs::proto::cosmos::gov::v1beta1::VoteOption {
+impl From<VoteOptionImpl> for cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption {
     fn from(v: VoteOptionImpl) -> Self {
         let VoteOptionImpl(vo) = v;
         vo
@@ -91,7 +91,7 @@ impl FromStr for VoteOptionImpl {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use cosmrs::proto::cosmos::gov::v1beta1::VoteOption;
+        use cosmos_sdk_proto::cosmos::gov::v1beta1::VoteOption;
 
         match s {
             "yes" => Ok(VoteOption::Yes.into()),

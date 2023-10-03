@@ -11,10 +11,10 @@ version = "0.1.6"
 anyhow = "1.0.57"
 base64 = "0.13.0"
 cargo-generate = {version = "0.18.3", features = ["vendored-openssl"]}
-clap = {version = "4.2.7", features = ["derive","string"]}
+clap = {version = "4.2.7", features = ["derive", "string"]}
 config = {version = "0.13.1", features = ["preserve_order"]}
 console = "0.15.0"
-cosmos-sdk-proto = {version = "0.16", features = ["cosmwasm"]}
+cosmos-sdk-proto = {version = "0.19", features = ["cosmwasm"]}
 cosmrs = {version = "0.14.0", features = ["dev", "cosmwasm", "grpc"]}
 data_doc = {version = "0.1.0", path = "../data_doc"}
 data_doc_derive = {version = "0.1.0", path = "../data_doc_derive"}
@@ -34,6 +34,7 @@ tendermint-rpc = {version = "0.32.0", features = ["http-client"]}
 textwrap = "0.15.0"
 tokio = {version = "1.18.2", features = ["full"]}
 toml = "0.5.9"
+tonic = {version = "*", features = ["tls", "tls-roots"]}
 
 [dev-dependencies]
 assert_fs = "1.0.7"

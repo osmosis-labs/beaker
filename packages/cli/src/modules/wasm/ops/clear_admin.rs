@@ -6,7 +6,7 @@ use crate::support::ops_response::OpResponseDisplay;
 
 use anyhow::Context as _;
 
-use cosmrs::proto::cosmwasm::wasm::v1::MsgClearAdmin;
+use cosmos_sdk_proto::cosmwasm::wasm::v1::MsgClearAdmin;
 use cosmrs::tx::MessageExt;
 use serde::Serialize;
 
