@@ -31,6 +31,8 @@ overflow-checks = true
 backtraces = ["cosmwasm-std/backtraces"]
 # use library feature to disable all instantiate/execute/query exports
 library = []
+# use interface feature to expose structure for contract orchestration
+interface = ["dep:cw-orch"]
 
 [package.metadata.scripts]
 optimize = """docker run --rm -v "$(pwd)":/code \
@@ -49,5 +51,8 @@ schemars = "0.8.8"
 serde = { version = "1.0.137", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.31" }
 
+cw-orch = { version = "0.18.1", optional = true }
+
 [dev-dependencies]
 cw-multi-test = "0.13.2"
+counter = {path = ".", features=["interface"]}
