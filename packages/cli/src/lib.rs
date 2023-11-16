@@ -203,6 +203,7 @@ contract_dir = "whatever""#;
                 contract_name: "counter".to_string(),
                 target_dir: None,
                 version: None,
+                template: Some("classic".into()),
             },
         })
         .unwrap();

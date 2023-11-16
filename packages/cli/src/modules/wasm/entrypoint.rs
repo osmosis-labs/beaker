@@ -68,6 +68,10 @@ pub enum WasmCmd {
         /// Template's version, using main branch if not specified
         #[clap(short, long)]
         version: Option<String>,
+
+        /// Template name, prompt for template if not specified
+        #[clap(short, long)]
+        template: Option<String>,
     },
     /// Build .wasm for storing contract code on the blockchain
     Build {
@@ -367,7 +371,14 @@ impl<'a> Module<'a, WasmConfig, WasmCmd, anyhow::Error> for WasmModule {
                 contract_name: name,
                 target_dir, // TODO: Rremove this
                 version,
-            } => ops::new(&ctx, name, version.to_owned(), target_dir.to_owned()),
+                template,
+            } => ops::new(
+                &ctx,
+                name,
+                version.to_owned(),
+                target_dir.to_owned(),
+                template.to_owned(),
+            ),
             cmd @ WasmCmd::Build { .. } => build(ctx, cmd),
             cmd @ WasmCmd::StoreCode { .. } => store_code(ctx, cmd).map(|_| ()),
             cmd @ WasmCmd::UpdateAdmin { .. } => update_admin(ctx, cmd).map(|_| ()),
@@ -816,7 +827,7 @@ pub(crate) fn execute<'a>(
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs, path::Path};
+    use std::{collections::HashMap, env, fs, path::Path};
 
     use assert_fs::{prelude::*, TempDir};
     use cargo_toml::{Dependency, DependencyDetail, Manifest};
@@ -845,6 +856,7 @@ mod tests {
                 contract_name: "counter-1".to_string(),
                 version: None,
                 target_dir: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -860,6 +872,7 @@ mod tests {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -886,6 +899,7 @@ mod tests {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -898,6 +912,7 @@ mod tests {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -921,8 +936,15 @@ mod tests {
         struct WasmContext {}
         impl<'a> Context<'a, WasmConfig> for WasmContext {
             fn config(&self) -> Result<WasmConfig> {
+                let mut template_repos = HashMap::new();
+
+                template_repos.insert(
+                    "classic".to_string(),
+                    "https://github.com/CosmWasm/cw-template.git".to_string(),
+                );
+
                 Ok(WasmConfig {
-                    template_repo: "https://github.com/CosmWasm/cw-template.git".to_string(),
+                    template_repos,
                     ..Default::default()
                 })
             }
@@ -934,6 +956,7 @@ mod tests {
                 contract_name: "counter-1".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -947,6 +970,7 @@ mod tests {
                 contract_name: "counter-2".to_string(),
                 target_dir: None,
                 version: Some("0.16".into()),
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -975,6 +999,7 @@ mod tests {
                 contract_name: "counter-1".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
@@ -987,6 +1012,7 @@ mod tests {
                 contract_name: "counter-2".to_string(),
                 target_dir: Some("custom-path".into()),
                 version: None,
+                template: Some("classic".into()),
             },
         )
         .unwrap();
