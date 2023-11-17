@@ -18,6 +18,8 @@ Arguments:
 
 * `-v / --version <VERSION>`: Template's version, using main branch if not specified
 
+* `--template <TEMPLATE>`: Template name, prompt for template if not specified
+
 ---
 
 ### `beaker wasm build`

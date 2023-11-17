@@ -70,7 +70,7 @@ pub enum WasmCmd {
         version: Option<String>,
 
         /// Template name, prompt for template if not specified
-        #[clap(short, long)]
+        #[clap(long)]
         template: Option<String>,
     },
     /// Build .wasm for storing contract code on the blockchain

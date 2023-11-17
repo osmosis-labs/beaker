@@ -9,11 +9,11 @@ pub struct WasmConfig {
     /// Directory for storing contracts
     pub contract_dir: String,
 
-    /// Reference to contract template repository
-    pub template_repos: HashMap<String, String>,
-
     /// Version of rust-optimizer
     pub optimizer_version: String,
+
+    /// Reference to contract template repository
+    pub template_repos: HashMap<String, String>,
 }
 
 impl Default for WasmConfig {

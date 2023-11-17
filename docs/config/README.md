@@ -79,8 +79,11 @@ target_dir = '.'
 
 [wasm]
 contract_dir = 'contracts'
-template_repo = 'https://github.com/osmosis-labs/cw-minimal-template'
-optimizer_version = '0.12.8'
+optimizer_version = '0.14.0'
+
+[wasm.template_repos]
+classic = 'https://github.com/osmosis-labs/cw-minimal-template'
+sylvia = 'https://github.com/osmosis-labs/cw-sylvia-template'
 
 
 # console

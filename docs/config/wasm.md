@@ -12,18 +12,18 @@
     
     
   
-  * **`template_repo`** : String  
-    
-     > 
-     > Reference to contract template repository  
-     > 
-    
-    
-  
   * **`optimizer_version`** : String  
     
      > 
      > Version of rust-optimizer  
+     > 
+    
+    
+  
+  * **`template_repos`** : HashMap < String, String >  
+    
+     > 
+     > Reference to contract template repository  
      > 
     
     
@@ -35,6 +35,9 @@
 ```toml
 [wasm]
 contract_dir = 'contracts'
-template_repo = 'https://github.com/osmosis-labs/cw-minimal-template'
-optimizer_version = '0.12.8'
+optimizer_version = '0.14.0'
+
+[wasm.template_repos]
+sylvia = 'https://github.com/osmosis-labs/cw-sylvia-template'
+classic = 'https://github.com/osmosis-labs/cw-minimal-template'
 ```

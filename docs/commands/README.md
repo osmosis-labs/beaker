@@ -2,7 +2,7 @@
 
 CosmWasm swiss-army knife configured for Osmosis by default, but trivial to make it work for other CosmWasm enabled chain.
 
-Version: 0.1.5
+Version: 0.1.8
 
 ## Subcommands
 
