@@ -20,7 +20,7 @@
     ]
   },
   "devDependencies": {
-    "@cosmwasm/ts-codegen": "^0.16.5",
+    "@cosmwasm/ts-codegen": "^0.35.3",
     "@swc/core": "^1.2.198",
     "@swc/helpers": "^0.3.17",
     "@types/eslint": "^8.4.1",
