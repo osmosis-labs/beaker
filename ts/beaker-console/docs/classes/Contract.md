@@ -37,7 +37,7 @@ Contract instance with baked-in client
 
 #### Defined in
 
-[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L20)
+[src/contract.ts:20](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L20)
 
 ## Properties
 
@@ -47,7 +47,7 @@ Contract instance with baked-in client
 
 #### Defined in
 
-[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L17)
+[src/contract.ts:17](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L17)
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L18)
+[src/contract.ts:18](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L18)
 
 ## Methods
 
@@ -86,7 +86,7 @@ example usage: `contract.execute(xmsg).by(signerAccount)`
 
 #### Defined in
 
-[src/contract.ts:51](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L51)
+[src/contract.ts:51](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L51)
 
 ___
 
@@ -102,7 +102,7 @@ Get code details
 
 #### Defined in
 
-[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L35)
+[src/contract.ts:35](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L35)
 
 ___
 
@@ -118,7 +118,7 @@ Get contract info
 
 #### Defined in
 
-[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L28)
+[src/contract.ts:28](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L28)
 
 ___
 
@@ -142,4 +142,4 @@ query result
 
 #### Defined in
 
-[src/contract.ts:43](https://github.com/osmosis-labs/beaker/blob/2746bd2/ts/beaker-console/src/contract.ts#L43)
+[src/contract.ts:43](https://github.com/osmosis-labs/beaker/blob/3416886/ts/beaker-console/src/contract.ts#L43)
