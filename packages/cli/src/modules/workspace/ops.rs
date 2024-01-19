@@ -41,8 +41,9 @@ pub fn new<'a, Ctx: Context<'a, WorkspaceConfig>>(
 
         // symlink .beaker to frontend
         std::env::set_current_dir(root_dir.join("frontend"))?;
-        std::os::unix::fs::symlink("../.beaker", ".beaker")
-        .with_context(|| "Currently not support symbolic link on non-unix system, if you are on windows, please consider using wsl.")?;
+        // std::os::unix::fs::symlink("../.beaker", ".beaker")
+        // .with_context(|| "Currently not support symbolic link on non-unix system, if you are on windows, please consider using wsl.")?;
+        std::os::windows::fs::symlink_dir("../.beaker", ".beaker");
     }
     Ok(())
 }
