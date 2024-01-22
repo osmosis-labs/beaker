@@ -148,7 +148,7 @@ These 2 files has similar functionality, which are containing beaker related sta
 
 While `state.json` is there for mainnet and testnet state. `state.local.json` is intended to use locally and _being gitignored_ since its state will not make any sense on other's machine.
 
-And I don't think we have to explain about `.gitignore` don't we?
+And I don't think we have to explain about `.gitignore` do we?
 
 ---
 
@@ -348,6 +348,7 @@ Whenever you run command that requires signing transactions, there are 3 options
 - `--signer-keyring` use the OS secure store as backend to securely store your key. To manage them, you can find more information [here](./docs/commands/beaker_key.md).
 
 ### Tasks
+
 Sometimes you want to run a series of commands in a single command. For example, you want to deploy a set of contracts that one contract instantiation depends on another contract. You can do this by defining a task in the `tasks` directory.
 
 ```sh
@@ -388,6 +389,7 @@ Note that additional feature here is that `msg` can also be passed as an object 
 There are also some additional helper function and macros that are exposed to the task script.
 
 #### `fs` module
+
 This module provides access to the file system. It is similar to the `std::fs` module in Rust. Morre information about the module can be found [here](https://github.com/rhaiscript/rhai-fs#rhai-script). This is how it can be used in the task script:
 
 ```rhai
@@ -406,6 +408,7 @@ print(cli_args) // => #{ signer: "test1", "build_flags": "no_wasm_opt" }
 ```
 
 #### `merge`
+
 Merges 2 objects together. If there are duplicate keys, the value from the second object will be used.
 
 ```rhai
@@ -418,6 +421,7 @@ print(merged) // => #{ a: 1, b: 3, c: 4 }
 ```
 
 #### `@assert`
+
 Perform assertion on the given condition. If the condition is false, the script will exit with an error.
 This is useful for ensuring that the script is running as expected.
 
